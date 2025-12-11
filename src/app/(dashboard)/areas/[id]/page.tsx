@@ -4,18 +4,20 @@ import { ItemClassification, ItemType } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function AreaDetailPage({ params }: { params: { id: string } }) {
+export default async function AreaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
 
   const area = await prisma.area.findUnique({
-    where: { id: params.id, userId },
+    where: { id, userId },
     include: {
       items: { where: { classification: ItemClassification.AREA }, orderBy: { createdAt: "desc" } },
     },
   });
   if (!area) redirect("/areas");
+  const areaId = area.id;
 
   const [projects, collections] = await Promise.all([
     prisma.project.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
@@ -27,8 +29,8 @@ export default async function AreaDetailPage({ params }: { params: { id: string 
     const name = String(formData.get("name") ?? "").trim();
     const standard = String(formData.get("standard") ?? "").trim();
     if (!name || !standard) return;
-    await prisma.area.update({ where: { id: area.id, userId }, data: { name, standard } });
-    redirect(`/areas/${area.id}`);
+    await prisma.area.update({ where: { id: areaId, userId }, data: { name, standard } });
+    redirect(`/areas/${areaId}`);
   }
 
   async function updateReview(formData: FormData) {
@@ -37,10 +39,10 @@ export default async function AreaDetailPage({ params }: { params: { id: string 
     const dateRaw = String(formData.get("date") ?? "").trim();
     if (!score || score < 1 || score > 5) return;
     await prisma.area.update({
-      where: { id: area.id, userId },
+      where: { id: areaId, userId },
       data: { lastHealthScore: score, lastReviewDate: dateRaw ? new Date(dateRaw) : new Date() },
     });
-    redirect(`/areas/${area.id}`);
+    redirect(`/areas/${areaId}`);
   }
 
   async function addItem(formData: FormData) {
@@ -58,10 +60,10 @@ export default async function AreaDetailPage({ params }: { params: { id: string 
         url,
         type,
         classification: ItemClassification.AREA,
-        areaId: area.id,
+        areaId,
       },
     });
-    redirect(`/areas/${area.id}`);
+    redirect(`/areas/${areaId}`);
   }
 
   async function updateItem(formData: FormData) {
@@ -73,7 +75,7 @@ export default async function AreaDetailPage({ params }: { params: { id: string 
     const type = String(formData.get("type") ?? ItemType.NOTE) as ItemType;
     if (!itemId || !title) return;
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
-    redirect(`/areas/${area.id}`);
+    redirect(`/areas/${areaId}`);
   }
 
   async function moveItem(formData: FormData) {
@@ -93,7 +95,7 @@ export default async function AreaDetailPage({ params }: { params: { id: string 
     } else if (target === "archive") {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), areaId: null, projectId: null, resourceCollectionId: null } });
     }
-    redirect(`/areas/${area.id}`);
+    redirect(`/areas/${areaId}`);
   }
 
   return (

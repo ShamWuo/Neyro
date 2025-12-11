@@ -5,12 +5,13 @@ import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
   const project = await prisma.project.findUnique({
-    where: { id: params.id, userId },
+    where: { id, userId },
     include: {
       items: {
         where: { classification: ItemClassification.PROJECT },
@@ -19,6 +20,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     },
   });
   if (!project) redirect("/projects");
+  const projectId = project.id;
 
   const [activeCount, areas, collections] = await Promise.all([
     getActiveProjectCount(userId),
@@ -33,10 +35,10 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     const deadlineRaw = String(formData.get("deadline") ?? "").trim();
     if (!name || !outcome) return;
     await prisma.project.update({
-      where: { id: project.id, userId },
+      where: { id: projectId, userId },
       data: { name, outcome, deadline: deadlineRaw ? new Date(deadlineRaw) : null },
     });
-    redirect(`/projects/${project.id}`);
+    redirect(`/projects/${projectId}`);
   }
 
   async function changeStatus(status: ProjectStatus) {
@@ -44,13 +46,13 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     if (status === ProjectStatus.ACTIVE) {
       await ensureProjectLimit(userId);
     }
-    await prisma.project.update({ where: { id: project.id, userId }, data: { status } });
-    redirect(`/projects/${project.id}`);
+    await prisma.project.update({ where: { id: projectId, userId }, data: { status } });
+    redirect(`/projects/${projectId}`);
   }
 
   async function archiveProject() {
     "use server";
-    await prisma.project.update({ where: { id: project.id, userId }, data: { archivedAt: new Date(), status: ProjectStatus.COMPLETED } });
+    await prisma.project.update({ where: { id: projectId, userId }, data: { archivedAt: new Date(), status: ProjectStatus.COMPLETED } });
     redirect("/projects");
   }
 
@@ -69,16 +71,16 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         url,
         type,
         classification: ItemClassification.PROJECT,
-        projectId: project.id,
+        projectId,
       },
     });
-    redirect(`/projects/${project.id}`);
+    redirect(`/projects/${projectId}`);
   }
 
   async function toggleDone(itemId: string, done: boolean) {
     "use server";
     await prisma.item.update({ where: { id: itemId, userId }, data: { isDone: done } });
-    redirect(`/projects/${project.id}`);
+    redirect(`/projects/${projectId}`);
   }
 
   async function updateItem(formData: FormData) {
@@ -93,7 +95,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       where: { id: itemId, userId },
       data: { title, details, url, type },
     });
-    redirect(`/projects/${project.id}`);
+    redirect(`/projects/${projectId}`);
   }
 
   async function moveItem(formData: FormData) {
@@ -125,7 +127,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), projectId: null, areaId: null, resourceCollectionId: null },
       });
     }
-    redirect(`/projects/${project.id}`);
+    redirect(`/projects/${projectId}`);
   }
 
   return (

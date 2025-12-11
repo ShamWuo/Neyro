@@ -4,16 +4,18 @@ import { ItemClassification, ItemType } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function ResourceDetailPage({ params }: { params: { id: string } }) {
+export default async function ResourceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
 
   const collection = await prisma.resourceCollection.findUnique({
-    where: { id: params.id, userId },
+    where: { id, userId },
     include: { items: { where: { classification: ItemClassification.RESOURCE }, orderBy: { createdAt: "desc" } } },
   });
   if (!collection) redirect("/resources");
+  const collectionId = collection.id;
 
   const [projects, areas, collections] = await Promise.all([
     prisma.project.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
@@ -26,13 +28,13 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
     const name = String(formData.get("name") ?? "").trim();
     const description = String(formData.get("description") ?? "").trim() || null;
     if (!name) return;
-    await prisma.resourceCollection.update({ where: { id: collection.id, userId }, data: { name, description } });
-    redirect(`/resources/${collection.id}`);
+    await prisma.resourceCollection.update({ where: { id: collectionId, userId }, data: { name, description } });
+    redirect(`/resources/${collectionId}`);
   }
 
   async function deleteCollection() {
     "use server";
-    await prisma.resourceCollection.delete({ where: { id: collection.id, userId } });
+    await prisma.resourceCollection.delete({ where: { id: collectionId, userId } });
     redirect("/resources");
   }
 
@@ -51,10 +53,10 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
         url,
         type,
         classification: ItemClassification.RESOURCE,
-        resourceCollectionId: collection.id,
+        resourceCollectionId: collectionId,
       },
     });
-    redirect(`/resources/${collection.id}`);
+    redirect(`/resources/${collectionId}`);
   }
 
   async function updateItem(formData: FormData) {
@@ -66,7 +68,7 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
     const type = String(formData.get("type") ?? ItemType.NOTE) as ItemType;
     if (!itemId || !title) return;
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
-    redirect(`/resources/${collection.id}`);
+    redirect(`/resources/${collectionId}`);
   }
 
   async function moveItem(formData: FormData) {
@@ -87,7 +89,7 @@ export default async function ResourceDetailPage({ params }: { params: { id: str
     } else if (target === "archive") {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), resourceCollectionId: null, projectId: null, areaId: null } });
     }
-    redirect(`/resources/${collection.id}`);
+    redirect(`/resources/${collectionId}`);
   }
 
   return (

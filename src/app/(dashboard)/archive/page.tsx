@@ -3,11 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-export default async function ArchivePage({ searchParams }: { searchParams: { q?: string } }) {
+export default async function ArchivePage({ searchParams }: { searchParams?: Promise<{ q?: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
-  const q = searchParams.q ?? "";
+  const { q = "" } = (await searchParams) ?? {};
 
   const [items, projects, areas, collections, activeProjects, activeAreas] = await Promise.all([
     prisma.item.findMany({

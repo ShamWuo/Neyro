@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { ItemClassification } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 export default async function ResourcesPage() {

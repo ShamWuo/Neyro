@@ -5,9 +5,9 @@ import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function ReviewPage({ searchParams }: { searchParams: { step?: string; scores?: string; avg?: string } }) {
-  const step = searchParams.step ?? "1";
-  const scoresParam = searchParams.scores ?? "";
+export default async function ReviewPage({ searchParams }: { searchParams?: Promise<{ step?: string; scores?: string; avg?: string }> }) {
+  const { step = "1", scores = "", avg } = (await searchParams) ?? {};
+  const scoresParam = scores;
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
@@ -258,7 +258,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: { ste
           <div className="space-y-1 text-sm text-zinc-700">
             <div>Inbox now: {inboxCount}</div>
             <div>Active projects now: {activeCount}</div>
-            <div>Average area score: {searchParams.avg ?? "n/a"}</div>
+            <div>Average area score: {avg ?? "n/a"}</div>
           </div>
           <div className="space-y-1 text-xs text-zinc-500">
             {decodedScores.map((pair) => {
