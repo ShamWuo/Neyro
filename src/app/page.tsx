@@ -51,6 +51,9 @@ const whyMetrics = [
 
 const flow = ["Inbox", "Projects", "Areas", "Resources"];
 
+const primaryCta = "inline-flex items-center justify-center gap-2 rounded-md border border-[#0f172a] bg-[#0f172a] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md";
+const secondaryCta = "inline-flex items-center justify-center gap-2 rounded-md border border-[rgba(0,0,0,0.14)] bg-white px-5 py-3 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]";
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#f8f9fa] text-[#0b0d0f]">
@@ -58,10 +61,10 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 text-sm">
           <div className="font-semibold tracking-tight">Neyro - PARA enforced</div>
           <div className="flex gap-2">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-3 py-2 font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Build my PARA workspace
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               View a live demo
             </Link>
           </div>
@@ -80,10 +83,10 @@ export default function LandingPage() {
             </p>
             <p className="text-sm text-[#555]">PARA in one line: Inbox to Projects to Areas to Resources. Neyro automates the discipline so you do not have to.</p>
             <div className="flex flex-wrap gap-3 pt-1">
-              <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md">
+              <Link href="/auth/register" className={primaryCta}>
                 Build my PARA workspace
               </Link>
-              <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-5 py-3 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+              <Link href="/auth/login" className={secondaryCta}>
                 Watch a 90s demo
               </Link>
               <div className="flex items-center gap-2 text-sm text-[#555]">
@@ -111,10 +114,10 @@ export default function LandingPage() {
           </div>
         </header>
         <div className="flex flex-wrap gap-3">
-          <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+          <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
             Start your 7-day clarity trial
           </Link>
-          <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+          <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
             View a live demo
           </Link>
         </div>
@@ -148,10 +151,10 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Build my PARA workspace
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               See it in action
             </Link>
           </div>
@@ -178,10 +181,10 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Start enforcing PARA
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               View the weekly wizard
             </Link>
           </div>
@@ -203,10 +206,10 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Build with guardrails
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               See the guardrails
             </Link>
           </div>
@@ -258,10 +261,10 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               See the flow in-app
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               View demo screens
             </Link>
           </div>
@@ -298,10 +301,10 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Insert real screenshots
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               Preview the UI
             </Link>
           </div>
@@ -331,10 +334,10 @@ export default function LandingPage() {
             </ul>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Try the enforced PARA
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               See the speed
             </Link>
           </div>
@@ -368,10 +371,10 @@ export default function LandingPage() {
             <span className="rounded-full border border-[rgba(0,0,0,0.08)] bg-white px-3 py-1">Onboarding preview included</span>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
               Start in two minutes
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
               Preview onboarding
             </Link>
           </div>
@@ -386,10 +389,10 @@ export default function LandingPage() {
             <div className="pill">Decide now</div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/auth/register" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md">
+            <Link href="/auth/register" className={primaryCta}>
               Build my PARA workspace
             </Link>
-            <Link href="/auth/login" className="rounded-md border border-[rgba(0,0,0,0.12)] px-5 py-3 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+            <Link href="/auth/login" className={secondaryCta}>
               View a live demo
             </Link>
           </div>
