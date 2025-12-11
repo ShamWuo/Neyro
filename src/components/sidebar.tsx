@@ -9,7 +9,7 @@ const links = [
   { href: "/areas", label: "Areas" },
   { href: "/resources", label: "Resources" },
   { href: "/archive", label: "Archive" },
-  { href: "/weekly-review", label: "Weekly Review" },
+  { href: "/review", label: "Review" },
 ];
 
 export async function Sidebar() {
@@ -20,8 +20,9 @@ export async function Sidebar() {
 
   return (
     <aside className="w-64 border-r border-zinc-200 bg-white px-4 py-6 space-y-6">
-      <div>
-        <div className="text-sm text-zinc-500">Signed in</div>
+      <div className="space-y-1">
+        <div className="text-xs font-semibold uppercase text-zinc-500">Neyro</div>
+        <div className="text-sm text-zinc-500">Signed in as</div>
         <div className="font-semibold">{session.user.email}</div>
       </div>
       <nav className="space-y-2">
@@ -31,16 +32,20 @@ export async function Sidebar() {
           </Link>
         ))}
       </nav>
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-        }}
-      >
-        <button type="submit" className="text-sm text-red-600 hover:underline">
-          Sign out
-        </button>
-      </form>
+      <div className="space-y-2">
+        <div className="text-xs text-zinc-500">Account</div>
+        <a href="/profile" className="text-sm text-blue-600 underline">Profile</a>
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
+          <button type="submit" className="text-sm text-red-600 hover:underline">
+            Sign out
+          </button>
+        </form>
+      </div>
     </aside>
   );
 }

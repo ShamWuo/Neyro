@@ -1,10 +1,11 @@
 import { signIn } from "@/auth";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 p-6">
       <div className="max-w-sm w-full rounded border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
-        <h1 className="text-xl font-semibold">Sign in</h1>
+        <h1 className="text-xl font-semibold">Create your account</h1>
+        <p className="text-sm text-zinc-600">Use Google to sign up and sign in.</p>
         <form
           className="space-y-3"
           action={async () => {
@@ -20,7 +21,7 @@ export default function LoginPage() {
           </button>
         </form>
         <div className="text-sm text-zinc-600">
-          Don&apos;t have access yet? <a href="/auth/register" className="text-blue-600 underline">Register</a>
+          Already have an account? <a href="/auth/login" className="text-blue-600 underline">Sign in</a>
         </div>
       </div>
     </div>

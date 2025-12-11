@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -17,11 +18,6 @@ export default async function AreasPage() {
     await prisma.area.create({ data: { userId, name, standard } });
   }
 
-  async function updateHealth(areaId: string, score: number) {
-    "use server";
-    await prisma.area.update({ where: { id: areaId, userId }, data: { lastHealthScore: score, lastReviewDate: new Date() } });
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -37,18 +33,12 @@ export default async function AreasPage() {
 
       <div className="space-y-3">
         {areas.map((a) => (
-          <div key={a.id} className="rounded border border-zinc-200 bg-white p-3 shadow-sm">
+          <Link key={a.id} href={`/areas/${a.id}`} className="block rounded border border-zinc-200 bg-white p-3 shadow-sm">
             <div className="font-semibold">{a.name}</div>
-            <div className="text-sm text-zinc-600">{a.standard}</div>
+            <div className="text-sm text-zinc-600 line-clamp-2">{a.standard}</div>
             <div className="text-xs text-zinc-500">Last health: {a.lastHealthScore ?? "n/a"}</div>
-            <div className="mt-2 flex gap-2 text-sm">
-              {[1, 2, 3, 4, 5].map((score) => (
-                <form key={score} action={() => updateHealth(a.id, score)}>
-                  <button className="rounded border px-2 py-1">Set {score}</button>
-                </form>
-              ))}
-            </div>
-          </div>
+            <div className="text-xs text-zinc-500">Last reviewed: {a.lastReviewDate ? a.lastReviewDate.toISOString().slice(0, 10) : "n/a"}</div>
+          </Link>
         ))}
         {areas.length === 0 && <div className="text-sm text-zinc-600">No areas yet.</div>}
       </div>

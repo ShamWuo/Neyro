@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification } from "@prisma/client";
@@ -10,7 +11,7 @@ export default async function ResourcesPage() {
 
   const collections = await prisma.resourceCollection.findMany({
     where: { userId, archivedAt: null },
-    include: { items: { where: { classification: ItemClassification.RESOURCE }, orderBy: { createdAt: "desc" } } },
+    include: { _count: { select: { items: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -37,25 +38,11 @@ export default async function ResourcesPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {collections.map((c) => (
-          <div key={c.id} className="rounded border border-zinc-200 bg-white p-3 shadow-sm space-y-2">
+          <Link key={c.id} href={`/resources/${c.id}`} className="rounded border border-zinc-200 bg-white p-3 shadow-sm space-y-2 block">
             <div className="font-semibold">{c.name}</div>
-            {c.description && <div className="text-sm text-zinc-600">{c.description}</div>}
-            <div className="text-xs text-zinc-500">{c.items.length} items</div>
-            <div className="space-y-1">
-              {c.items.map((item) => (
-                <div key={item.id} className="rounded border border-zinc-200 px-2 py-1 text-sm">
-                  <div className="font-medium">{item.title}</div>
-                  {item.url && (
-                    <a className="text-xs text-blue-600 underline" href={item.url} target="_blank" rel="noreferrer">
-                      {item.url}
-                    </a>
-                  )}
-                  {item.details && <div className="text-xs text-zinc-600">{item.details}</div>}
-                </div>
-              ))}
-              {c.items.length === 0 && <div className="text-xs text-zinc-500">Empty collection.</div>}
-            </div>
-          </div>
+            {c.description && <div className="text-sm text-zinc-600 line-clamp-2">{c.description}</div>}
+            <div className="text-xs text-zinc-500">{c._count.items} items</div>
+          </Link>
         ))}
       </div>
     </div>

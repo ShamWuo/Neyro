@@ -1,4 +1,4 @@
-# PARA Productivity App (V1)
+# Neyro – PARA Productivity App
 
 Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with inbox-first capture and weekly review.
 
@@ -15,20 +15,21 @@ Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with 
 4. Start dev server: `npm run dev`
 
 ## PARA rules enforced
-- Inbox-first capture; classify to Project/Area/Resource/Archive.
+- Inbox-first capture; classify to Project/Area/Resource/Archive with per-item and bulk actions.
+- Item types (note/task/link) and done flag tracked on items.
 - Max 7 active projects enforced on create/activate.
-- Weekly review logs inbox count, active projects, average area health.
-- Bulk inbox classification supports moving many items at once.
-- Dashboard shows inbox count, active project count, areas, latest review snapshot.
+- Weekly review wizard (/review) logs inbox count, active projects, average area health, and updates areas.
+- Dashboard shows inbox count, active project count, areas, latest review snapshot, and upcoming project deadlines.
 
 ## Routes
-- `/auth/login` – Google sign-in
+- `/auth/login` + `/auth/register` – Google auth
+- `/` – dashboard snapshot
 - `/inbox` – capture and classify
-- `/projects` – CRUD with status + limit
-- `/areas` – CRUD + health scores
-- `/resources` – collections + reference items
-- `/archive` – restore archived items/projects/areas
-- `/weekly-review` – guided check-in
+- `/projects` – CRUD with status + limit, `/projects/[id]` detail workspace
+- `/areas` – CRUD + health scores, `/areas/[id]` detail workspace
+- `/resources` – collections + reference items, `/resources/[id]` detail workspace
+- `/archive` – restore archived items/projects/areas/resources
+- `/review` – weekly review wizard
 
 ## Scripts
 - `npm run dev` – start dev server
