@@ -3,7 +3,7 @@ import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 
 const links = [
-  { href: "/", label: "Home" },
+  { href: "/home", label: "Home" },
   { href: "/inbox", label: "Inbox" },
   { href: "/projects", label: "Projects" },
   { href: "/areas", label: "Areas" },
