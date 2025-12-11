@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PARA Productivity App (V1)
 
-## Getting Started
+Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with inbox-first capture and weekly review.
 
-First, run the development server:
+## Stack
+- Next.js 16 (App Router) + TypeScript
+- NextAuth (Google)
+- Prisma + PostgreSQL
+- Tailwind CSS
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup
+1. Copy `.env.example` to `.env` and fill values.
+2. Install deps: `npm install --legacy-peer-deps`
+3. Run migrations & generate client: `npx prisma generate && npx prisma migrate dev --name init`
+4. Start dev server: `npm run dev`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## PARA rules enforced
+- Inbox-first capture; classify to Project/Area/Resource/Archive.
+- Max 7 active projects enforced on create/activate.
+- Weekly review logs inbox count, active projects, average area health.
+- Bulk inbox classification supports moving many items at once.
+- Dashboard shows inbox count, active project count, areas, latest review snapshot.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Routes
+- `/auth/login` – Google sign-in
+- `/inbox` – capture and classify
+- `/projects` – CRUD with status + limit
+- `/areas` – CRUD + health scores
+- `/resources` – collections + reference items
+- `/archive` – restore archived items/projects/areas
+- `/weekly-review` – guided check-in
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
+- `npm run dev` – start dev server
+- `npm run build` – build
+- `npm run start` – prod start
+- `npm run lint` – ESLint
+- `npm run prisma:generate` – Prisma client
+- `npm run prisma:migrate` – create migration
+- `npm run prisma:studio` – Prisma Studio
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notes
+- All protected routes redirect to login if unauthenticated via middleware.
+- Tailwind v4 inline usage in globals.
