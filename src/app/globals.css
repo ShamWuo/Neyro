@@ -57,7 +57,7 @@ p {
   color: var(--text-secondary);
 }
 
-button {
+:where(button) {
   border-radius: var(--radius);
   border: 1px solid var(--border-subtle);
   background: #ffffff;
@@ -67,7 +67,7 @@ button {
   transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
 
-button:hover {
+:where(button:hover) {
   transform: translateY(-1px);
   border-color: rgba(0, 0, 0, 0.14);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
