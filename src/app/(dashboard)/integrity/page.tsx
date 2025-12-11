@@ -5,6 +5,8 @@ import { ProjectStatus } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+const REVIEW_LOOKBACK_DAYS = 12;
+
 export default async function IntegrityPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
@@ -20,7 +22,9 @@ export default async function IntegrityPage() {
   ]);
 
   const activeCount = activeProjects.filter((p) => p.status === ProjectStatus.ACTIVE).length;
-  const overdueAreas = areas.filter((a) => !a.lastReviewDate || a.lastReviewDate < new Date(Date.now() - 12 * 24 * 60 * 60 * 1000));
+  const reviewThreshold = new Date();
+  reviewThreshold.setDate(reviewThreshold.getDate() - REVIEW_LOOKBACK_DAYS);
+  const overdueAreas = areas.filter((a) => !a.lastReviewDate || a.lastReviewDate < reviewThreshold);
 
   return (
     <div className="space-y-6">

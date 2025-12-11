@@ -19,7 +19,11 @@ export default async function AssistPage() {
     prisma.item.findMany({ where: { userId, classification: ItemClassification.INBOX, archivedAt: null, createdAt: { gte: daysAgo(7) } }, orderBy: { createdAt: "desc" } }),
     prisma.project.findMany({ where: { userId, archivedAt: null, status: ProjectStatus.ACTIVE, lastActivityAt: { lt: daysAgo(7) } } }),
     prisma.area.findMany({ where: { userId, archivedAt: null, lastActivityAt: { lt: daysAgo(14) } }, orderBy: { lastActivityAt: "asc" } }),
-    prisma.resourceCollection.findMany({ where: { userId, archivedAt: null }, include: { _count: { select: { items: true } } }, orderBy: { _count: { items: "desc" } } }),
+    prisma.resourceCollection.findMany({
+      where: { userId, archivedAt: null },
+      include: { _count: { select: { items: true } } },
+      orderBy: { items: { _count: "desc" } },
+    }),
   ]);
 
   const duplicateGroups = Object.values(
@@ -34,10 +38,13 @@ export default async function AssistPage() {
   async function mergeDuplicates(title: string) {
     "use server";
     const items = await prisma.item.findMany({ where: { userId, classification: ItemClassification.INBOX, title: { equals: title, mode: "insensitive" }, archivedAt: null }, orderBy: { createdAt: "desc" } });
-    if (items.length <= 1) return;
-    const keep = items[0];
-    const rest = items.slice(1).map((i) => i.id);
-    await prisma.item.updateMany({ where: { id: { in: rest }, userId }, data: { archivedAt: new Date(), classification: ItemClassification.ARCHIVE } });
+    const [, ...duplicates] = items;
+    if (duplicates.length === 0) return;
+    const duplicateIds = duplicates.map((i) => i.id);
+    await prisma.item.updateMany({
+      where: { id: { in: duplicateIds }, userId },
+      data: { archivedAt: new Date(), classification: ItemClassification.ARCHIVE },
+    });
     redirect("/assist");
   }
 

@@ -81,15 +81,18 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
     const target = String(formData.get("target") ?? "");
     const projectId = String(formData.get("projectId") ?? "").trim() || null;
     const areaId = String(formData.get("areaId") ?? "").trim() || null;
-    const collectionId = String(formData.get("collectionId") ?? "").trim() || null;
+    const destinationCollectionId = String(formData.get("collectionId") ?? "").trim() || null;
     if (!itemId) return;
 
     if (target === "project" && projectId) {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.PROJECT, projectId, resourceCollectionId: null, areaId: null, archivedAt: null } });
     } else if (target === "area" && areaId) {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.AREA, areaId, projectId: null, resourceCollectionId: null, archivedAt: null } });
-    } else if (target === "collection" && collectionId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.RESOURCE, resourceCollectionId: collectionId, projectId: null, areaId: null, archivedAt: null } });
+    } else if (target === "collection" && destinationCollectionId) {
+      await prisma.item.update({
+        where: { id: itemId, userId },
+        data: { classification: ItemClassification.RESOURCE, resourceCollectionId: destinationCollectionId, projectId: null, areaId: null, archivedAt: null },
+      });
     } else if (target === "archive") {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), resourceCollectionId: null, projectId: null, areaId: null } });
     }

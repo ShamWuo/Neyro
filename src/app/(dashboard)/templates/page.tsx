@@ -4,6 +4,29 @@ import { prisma } from "@/lib/prisma";
 import { TemplateType, ProjectStatus, ItemClassification, ItemType } from "@prisma/client";
 import { redirect } from "next/navigation";
 
+type TemplateData = {
+  name?: string;
+  outcome?: string;
+  standard?: string;
+  area?: string;
+  items?: string[];
+};
+
+const toTemplateData = (value: unknown): TemplateData => {
+  if (!value || typeof value !== "object" || value === null) return {};
+  const record = value as Record<string, unknown>;
+  const itemsValue = record.items;
+  const items = Array.isArray(itemsValue) ? itemsValue.filter((entry): entry is string => typeof entry === "string") : undefined;
+
+  return {
+    name: typeof record.name === "string" ? record.name : undefined,
+    outcome: typeof record.outcome === "string" ? record.outcome : undefined,
+    standard: typeof record.standard === "string" ? record.standard : undefined,
+    area: typeof record.area === "string" ? record.area : undefined,
+    items,
+  };
+};
+
 export default async function TemplatesPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
@@ -18,9 +41,9 @@ export default async function TemplatesPage() {
     const description = String(formData.get("description") ?? "").trim() || null;
     const dataRaw = String(formData.get("data") ?? "").trim();
     if (!name) return;
-    let data: any = {};
+    let data: TemplateData = {};
     try {
-      data = dataRaw ? JSON.parse(dataRaw) : {};
+      data = dataRaw ? toTemplateData(JSON.parse(dataRaw)) : {};
     } catch {
       data = {};
     }
@@ -34,25 +57,26 @@ export default async function TemplatesPage() {
     if (!templateId) return;
     const template = await prisma.template.findUnique({ where: { id: templateId, userId } });
     if (!template) return;
+    const templateData = toTemplateData(template.data);
     if (template.type === TemplateType.PROJECT) {
       await ensureProjectLimit(userId);
-      const name = (template.data as any).name ?? template.name;
-      const outcome = (template.data as any).outcome ?? template.description ?? "Outcome";
+      const name = templateData.name ?? template.name;
+      const outcome = templateData.outcome ?? template.description ?? "Outcome";
       await prisma.project.create({ data: { userId, name, outcome, status: ProjectStatus.ACTIVE } });
       redirect("/projects");
       return;
     }
     if (template.type === TemplateType.AREA) {
-      const name = (template.data as any).name ?? template.name;
-      const standard = (template.data as any).standard ?? template.description ?? "Standard";
+      const name = templateData.name ?? template.name;
+      const standard = templateData.standard ?? template.description ?? "Standard";
       await prisma.area.create({ data: { userId, name, standard } });
       redirect("/areas");
       return;
     }
     if (template.type === TemplateType.CHECKLIST) {
-      const areaName = (template.data as any).area ?? "Checklist";
+      const areaName = templateData.area ?? "Checklist";
       const area = await prisma.area.create({ data: { userId, name: areaName, standard: "Checklist" } });
-      const items = Array.isArray((template.data as any).items) ? (template.data as any).items : [];
+      const items = templateData.items ?? [];
       if (items.length) {
         await prisma.item.createMany({
           data: items.map((title: string) => ({ userId, title, classification: ItemClassification.AREA, areaId: area.id, type: ItemType.TASK })),
