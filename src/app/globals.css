@@ -33,12 +33,12 @@ body {
   line-height: 1.5;
 }
 
-a {
+:where(a) {
   color: inherit;
   text-decoration: none;
 }
 
-a:hover {
+:where(a:hover) {
   color: var(--slate);
 }
 
