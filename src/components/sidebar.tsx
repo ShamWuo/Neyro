@@ -4,12 +4,19 @@ import { redirect } from "next/navigation";
 
 const links = [
   { href: "/home", label: "Home" },
+  { href: "/focus", label: "Today" },
   { href: "/inbox", label: "Inbox" },
   { href: "/projects", label: "Projects" },
   { href: "/areas", label: "Areas" },
   { href: "/resources", label: "Resources" },
+  { href: "/backlog", label: "Backlog" },
   { href: "/archive", label: "Archive" },
   { href: "/review", label: "Review" },
+  { href: "/assist", label: "Smart Assist" },
+  { href: "/integrity", label: "Integrity" },
+  { href: "/timeline", label: "Timeline" },
+  { href: "/activity", label: "Activity" },
+  { href: "/templates", label: "Templates" },
 ];
 
 export async function Sidebar() {

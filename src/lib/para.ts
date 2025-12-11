@@ -14,6 +14,27 @@ export async function ensureProjectLimit(userId: string) {
   }
 }
 
+export async function touchProject(userId: string, projectId: string) {
+  await prisma.project.update({ where: { id: projectId, userId }, data: { lastActivityAt: new Date() } });
+}
+
+export async function touchArea(userId: string, areaId: string) {
+  await prisma.area.update({ where: { id: areaId, userId }, data: { lastActivityAt: new Date() } });
+}
+
+export async function touchCollection(userId: string, collectionId: string) {
+  await prisma.resourceCollection.update({ where: { id: collectionId, userId }, data: { lastActivityAt: new Date() } });
+}
+
+export function projectHealth(lastActivityAt: Date | null): "GREEN" | "YELLOW" | "RED" {
+  if (!lastActivityAt) return "RED";
+  const now = Date.now();
+  const diffDays = (now - lastActivityAt.getTime()) / (1000 * 60 * 60 * 24);
+  if (diffDays <= 2) return "GREEN";
+  if (diffDays <= 7) return "YELLOW";
+  return "RED";
+}
+
 export async function classifyItem({
   itemId,
   userId,

@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ensureProjectLimit } from "@/lib/para";
+import { ensureProjectLimit, touchArea, touchCollection, touchProject } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
@@ -73,6 +73,7 @@ export default async function InboxPage() {
       where: { id: itemId, userId },
       data: { classification: ItemClassification.PROJECT, projectId, areaId: null, resourceCollectionId: null, archivedAt: null },
     });
+    await touchProject(userId, projectId);
     redirect("/inbox");
   }
 
@@ -94,6 +95,7 @@ export default async function InboxPage() {
       where: { id: itemId, userId },
       data: { classification: ItemClassification.AREA, areaId, projectId: null, resourceCollectionId: null, archivedAt: null },
     });
+    await touchArea(userId, areaId);
     redirect("/inbox");
   }
 
@@ -112,6 +114,7 @@ export default async function InboxPage() {
       where: { id: itemId, userId },
       data: { classification: ItemClassification.RESOURCE, resourceCollectionId: collectionId, projectId: null, areaId: null, archivedAt: null },
     });
+    await touchCollection(userId, collectionId);
     redirect("/inbox");
   }
 

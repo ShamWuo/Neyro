@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { touchCollection } from "@/lib/para";
 import { ItemClassification, ItemType } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -29,6 +30,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
     const description = String(formData.get("description") ?? "").trim() || null;
     if (!name) return;
     await prisma.resourceCollection.update({ where: { id: collectionId, userId }, data: { name, description } });
+    await touchCollection(userId, collectionId);
     redirect(`/resources/${collectionId}`);
   }
 
@@ -56,6 +58,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
         resourceCollectionId: collectionId,
       },
     });
+    await touchCollection(userId, collectionId);
     redirect(`/resources/${collectionId}`);
   }
 
@@ -68,6 +71,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
     const type = String(formData.get("type") ?? ItemType.NOTE) as ItemType;
     if (!itemId || !title) return;
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
+    await touchCollection(userId, collectionId);
     redirect(`/resources/${collectionId}`);
   }
 
@@ -89,6 +93,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
     } else if (target === "archive") {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), resourceCollectionId: null, projectId: null, areaId: null } });
     }
+    await touchCollection(userId, collectionId);
     redirect(`/resources/${collectionId}`);
   }
 

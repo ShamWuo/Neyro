@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { touchArea } from "@/lib/para";
 import { ItemClassification, ItemType } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -14,6 +15,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
     where: { id, userId },
     include: {
       items: { where: { classification: ItemClassification.AREA }, orderBy: { createdAt: "desc" } },
+      shares: true,
     },
   });
   if (!area) redirect("/areas");
@@ -24,12 +26,21 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
     prisma.resourceCollection.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
   ]);
 
+  async function addShare(formData: FormData) {
+    "use server";
+    const email = String(formData.get("email") ?? "").trim();
+    if (!email) return;
+    await prisma.shareAccess.create({ data: { ownerId: userId, areaId, email, permission: "VIEW" } });
+    redirect(`/areas/${areaId}`);
+  }
+
   async function updateArea(formData: FormData) {
     "use server";
     const name = String(formData.get("name") ?? "").trim();
     const standard = String(formData.get("standard") ?? "").trim();
     if (!name || !standard) return;
     await prisma.area.update({ where: { id: areaId, userId }, data: { name, standard } });
+    await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
   }
 
@@ -42,6 +53,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
       where: { id: areaId, userId },
       data: { lastHealthScore: score, lastReviewDate: dateRaw ? new Date(dateRaw) : new Date() },
     });
+    await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
   }
 
@@ -63,6 +75,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
         areaId,
       },
     });
+    await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
   }
 
@@ -75,6 +88,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
     const type = String(formData.get("type") ?? ItemType.NOTE) as ItemType;
     if (!itemId || !title) return;
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
+    await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
   }
 
@@ -95,6 +109,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
     } else if (target === "archive") {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), areaId: null, projectId: null, resourceCollectionId: null } });
     }
+    await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
   }
 
@@ -110,6 +125,14 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             <div className="text-xs text-zinc-500">Last reviewed: {area.lastReviewDate ? area.lastReviewDate.toISOString().slice(0, 10) : "n/a"}</div>
           </div>
         </div>
+        <div className="flex items-center justify-between text-xs text-zinc-600">
+          <span>Share with a partner</span>
+          <form action={addShare} className="flex gap-2 items-center">
+            <input name="email" placeholder="email" className="rounded border border-zinc-300 px-2 py-1" />
+            <button className="rounded border px-2 py-1">Share</button>
+          </form>
+        </div>
+        {area.shares.length > 0 && <div className="text-xs text-zinc-500">Shared with: {area.shares.map((s) => s.email).join(", ")}</div>}
         <form action={updateArea} className="space-y-2">
           <input name="name" defaultValue={area.name} className="w-full rounded border border-zinc-300 px-3 py-2" required />
           <textarea name="standard" defaultValue={area.standard} className="w-full rounded border border-zinc-300 px-3 py-2" rows={3} required />

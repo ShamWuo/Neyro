@@ -27,6 +27,18 @@ enum ItemType {
   LINK
 }
 
+enum TemplateType {
+  PROJECT
+  AREA
+  REVIEW
+  CHECKLIST
+}
+
+enum SharePermission {
+  VIEW
+  COMMENT
+}
+
 model User {
   id                  String                @id @default(cuid())
   name                String?
@@ -40,6 +52,12 @@ model User {
   areas               Area[]
   resourceCollections ResourceCollection[]
   weeklyReviews       WeeklyReview[]
+  dailyFocuses        DailyFocus[]
+  focusPins           FocusPin[]
+  focusSessions       FocusSession[]
+  templates           Template[]
+  shareAccesses       ShareAccess[]        @relation("OwnerShares")
+  activityLogs        ActivityLog[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 }
@@ -86,12 +104,16 @@ model Project {
   status     ProjectStatus  @default(ACTIVE)
   deadline   DateTime?
   archivedAt DateTime?
+  lastActivityAt DateTime   @default(now())
   items      Item[]
+  shares     ShareAccess[]       @relation("ProjectShares")
+  dailyFocus DailyFocus[]
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
   @@index([userId, status])
+  @@index([userId, lastActivityAt])
 }
 
 model Area {
@@ -102,12 +124,15 @@ model Area {
   lastReviewDate  DateTime?
   lastHealthScore Int?
   archivedAt      DateTime?
+  lastActivityAt  DateTime  @default(now())
   items           Item[]
+  shares          ShareAccess[]    @relation("AreaShares")
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   @@index([userId])
+  @@index([userId, lastActivityAt])
 }
 
 model ResourceCollection {
@@ -116,6 +141,7 @@ model ResourceCollection {
   name        String
   description String?
   archivedAt  DateTime?
+  lastActivityAt DateTime @default(now())
   items       Item[]
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
@@ -140,6 +166,7 @@ model Item {
   project               Project?            @relation(fields: [projectId], references: [id])
   area                  Area?               @relation(fields: [areaId], references: [id])
   resourceCollection    ResourceCollection? @relation(fields: [resourceCollectionId], references: [id])
+  focusPins             FocusPin[]
   user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -148,6 +175,84 @@ model Item {
   @@index([projectId])
   @@index([areaId])
   @@index([resourceCollectionId])
+}
+
+model DailyFocus {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  projectId String?
+  note      String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project? @relation(fields: [projectId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model FocusPin {
+  id     String   @id @default(cuid())
+  userId String
+  itemId String
+  date   DateTime @default(now())
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item   Item     @relation(fields: [itemId], references: [id])
+
+  @@unique([userId, itemId, date])
+  @@index([userId, date])
+}
+
+model FocusSession {
+  id       String   @id @default(cuid())
+  userId   String
+  date     DateTime @default(now())
+  label    String
+  minutes  Int
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model Template {
+  id          String        @id @default(cuid())
+  userId      String
+  type        TemplateType
+  name        String
+  description String?
+  data        Json
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+model ShareAccess {
+  id           String          @id @default(cuid())
+  ownerId      String
+  projectId    String?
+  areaId       String?
+  email        String
+  permission   SharePermission @default(VIEW)
+  owner        User            @relation("OwnerShares", fields: [ownerId], references: [id], onDelete: Cascade)
+  project      Project?        @relation("ProjectShares", fields: [projectId], references: [id])
+  area         Area?           @relation("AreaShares", fields: [areaId], references: [id])
+  createdAt    DateTime        @default(now())
+
+  @@index([email])
+  @@index([projectId])
+  @@index([areaId])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  meta      Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model WeeklyReview {

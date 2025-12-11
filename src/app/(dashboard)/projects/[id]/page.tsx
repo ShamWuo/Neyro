@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ensureProjectLimit, getActiveProjectCount } from "@/lib/para";
+import { ensureProjectLimit, getActiveProjectCount, touchProject } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
@@ -17,6 +17,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         where: { classification: ItemClassification.PROJECT },
         orderBy: { createdAt: "desc" },
       },
+      shares: true,
     },
   });
   if (!project) redirect("/projects");
@@ -28,6 +29,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     prisma.resourceCollection.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
   ]);
 
+  async function addShare(formData: FormData) {
+    "use server";
+    const email = String(formData.get("email") ?? "").trim();
+    if (!email) return;
+    await prisma.shareAccess.create({ data: { ownerId: userId, projectId, email, permission: "VIEW" } });
+    redirect(`/projects/${projectId}`);
+  }
+
   async function updateProject(formData: FormData) {
     "use server";
     const name = String(formData.get("name") ?? "").trim();
@@ -38,6 +47,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       where: { id: projectId, userId },
       data: { name, outcome, deadline: deadlineRaw ? new Date(deadlineRaw) : null },
     });
+    await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
 
@@ -47,6 +57,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       await ensureProjectLimit(userId);
     }
     await prisma.project.update({ where: { id: projectId, userId }, data: { status } });
+    await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
 
@@ -74,12 +85,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         projectId,
       },
     });
+    await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
 
   async function toggleDone(itemId: string, done: boolean) {
     "use server";
     await prisma.item.update({ where: { id: itemId, userId }, data: { isDone: done } });
+    await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
 
@@ -95,6 +108,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       where: { id: itemId, userId },
       data: { title, details, url, type },
     });
+    await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
 
@@ -127,6 +141,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), projectId: null, areaId: null, resourceCollectionId: null },
       });
     }
+    await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
 
@@ -166,6 +181,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <h2 className="text-sm font-semibold text-zinc-700">Items in this project</h2>
           <span className="text-xs text-zinc-500">{project.items.length} items</span>
         </div>
+        <div className="flex items-center justify-between text-xs text-zinc-600">
+          <span>Share with a partner</span>
+          <form action={addShare} className="flex gap-2 items-center">
+            <input name="email" placeholder="email" className="rounded border border-zinc-300 px-2 py-1" />
+            <button className="rounded border px-2 py-1">Share</button>
+          </form>
+        </div>
+        {project.shares.length > 0 && (
+          <div className="text-xs text-zinc-500">Shared with: {project.shares.map((s) => s.email).join(", ")}</div>
+        )}
         <div className="space-y-3">
           {project.items.map((item) => (
             <div key={item.id} className="rounded border border-zinc-200 p-3 space-y-2">

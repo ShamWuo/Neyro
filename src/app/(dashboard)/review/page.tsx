@@ -128,7 +128,7 @@ export default async function ReviewPage({ searchParams }: { searchParams?: Prom
         areaHealthAverage,
       },
     });
-    redirect("/");
+    redirect("/home");
   }
 
   const decodedScores = scoresParam ? decodeURIComponent(scoresParam).split(",").filter(Boolean) : [];

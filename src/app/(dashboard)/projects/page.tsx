@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { ensureProjectLimit, MAX_ACTIVE_PROJECTS } from "@/lib/para";
+import { ensureProjectLimit, MAX_ACTIVE_PROJECTS, projectHealth } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -88,6 +88,7 @@ export default async function ProjectsPage() {
                         <div className="text-sm text-zinc-600">Outcome: {p.outcome}</div>
                         {p.deadline && <div className="text-sm text-zinc-600">Deadline: {p.deadline.toISOString().slice(0, 10)}</div>}
                         <div className="text-xs text-zinc-500">Items: {p._count.items}</div>
+                        <div className="text-xs text-zinc-500">Health: {projectHealth(p.lastActivityAt)}</div>
                       </Link>
                       <div className="flex gap-2 text-sm ml-3">
                         {status !== ProjectStatus.ACTIVE && (

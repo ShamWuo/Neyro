@@ -185,7 +185,7 @@ export default async function WeeklyReviewPage({ searchParams }: WeeklyReviewPag
             <form action={() => goToStep("1")}>
               <button className="rounded border px-3 py-2">Restart review</button>
             </form>
-            <Link className="rounded bg-black px-3 py-2 text-white" href="/">
+            <Link className="rounded bg-black px-3 py-2 text-white" href="/home">
               Back to dashboard
             </Link>
           </div>
