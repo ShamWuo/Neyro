@@ -15,11 +15,14 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
     where: { id, userId },
     include: {
       items: { where: { classification: ItemClassification.AREA }, orderBy: { createdAt: "desc" } },
-      shares: true,
     },
   });
   if (!area) redirect("/areas");
   const areaId = area.id;
+  const shares = await prisma.shareAccess.findMany({
+    where: { ownerId: userId, areaId },
+    orderBy: { createdAt: "asc" },
+  });
 
   const [projects, collections] = await Promise.all([
     prisma.project.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
@@ -132,7 +135,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             <button className="rounded border px-2 py-1">Share</button>
           </form>
         </div>
-        {area.shares.length > 0 && <div className="text-xs text-zinc-500">Shared with: {area.shares.map((s) => s.email).join(", ")}</div>}
+        {shares.length > 0 && <div className="text-xs text-zinc-500">Shared with: {shares.map((s) => s.email).join(", ")}</div>}
         <form action={updateArea} className="space-y-2">
           <input name="name" defaultValue={area.name} className="w-full rounded border border-zinc-300 px-3 py-2" required />
           <textarea name="standard" defaultValue={area.standard} className="w-full rounded border border-zinc-300 px-3 py-2" rows={3} required />
