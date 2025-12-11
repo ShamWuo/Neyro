@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { Sidebar } from "@/components/sidebar";
 
 export const metadata: Metadata = {
   title: "PARA",
@@ -13,10 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-zinc-50 text-zinc-900">
         <Providers>
-          <div className="min-h-screen flex">
-            <Sidebar />
-            <main className="flex-1 p-6">{children}</main>
-          </div>
+          {children}
         </Providers>
       </body>
     </html>
