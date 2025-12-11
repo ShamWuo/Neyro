@@ -59,8 +59,6 @@ p {
 :where(button) {
   border-radius: var(--radius);
   border: 1px solid var(--border-subtle);
-  background: #ffffff;
-  color: var(--text-primary);
   font-weight: 600;
   padding: 0.55rem 0.9rem;
   transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background-color 120ms ease;
