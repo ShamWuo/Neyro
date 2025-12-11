@@ -38,7 +38,7 @@ body {
 }
 
 :where(a:hover) {
-  color: var(--slate);
+  text-decoration: none;
 }
 
 ::selection {

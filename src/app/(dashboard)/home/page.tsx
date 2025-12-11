@@ -10,11 +10,14 @@ export default async function Home() {
   const userId = session.user.id;
   const name = session.user.name ?? session.user.email ?? "there";
 
-  const [inboxCount, activeProjects, areasCount, lastReview, activeProjectsList] = await Promise.all([
+  const [inboxCount, activeProjects, areasCount, resourcesCount, archiveCount, lastReview, recentReviews, activeProjectsList] = await Promise.all([
     prisma.item.count({ where: { userId, classification: ItemClassification.INBOX, archivedAt: null } }),
     prisma.project.count({ where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null } }),
     prisma.area.count({ where: { userId, archivedAt: null } }),
+    prisma.resourceCollection.count({ where: { userId, archivedAt: null } }),
+    prisma.item.count({ where: { userId, classification: ItemClassification.ARCHIVE } }),
     prisma.weeklyReview.findFirst({ where: { userId }, orderBy: { completedAt: "desc" } }),
+    prisma.weeklyReview.findMany({ where: { userId }, orderBy: { completedAt: "desc" }, take: 6 }),
     prisma.project.findMany({
       where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null },
       orderBy: [{ deadline: "asc" }, { createdAt: "asc" }],
@@ -41,56 +44,79 @@ export default async function Home() {
 
   const projectLoad = Math.min(activeProjects / 7, 1);
   const lastReviewDate = lastReview ? lastReview.completedAt.toISOString().slice(0, 10) : null;
+  const projectsRemaining = Math.max(7 - activeProjects, 0);
+  const now = new Date();
+  const daysSinceReview = lastReview ? Math.floor((now.getTime() - lastReview.completedAt.getTime()) / 86400000) : null;
+  const reviewStatus = !lastReview ? "No review yet" : daysSinceReview !== null && daysSinceReview <= 7 ? "On cadence" : `${daysSinceReview ? daysSinceReview - 7 : 0} days overdue`;
+
+  function weekStart(date: Date) {
+    const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    const day = d.getUTCDay();
+    const diff = (day + 6) % 7; // Monday start
+    d.setUTCDate(d.getUTCDate() - diff);
+    return d;
+  }
+
+  const expectedWeek = weekStart(now);
+  let streak = 0;
+  for (const review of recentReviews) {
+    const reviewWeek = weekStart(review.completedAt);
+    const weeksDiff = Math.round((expectedWeek.getTime() - reviewWeek.getTime()) / (7 * 86400000));
+    if (weeksDiff === streak) {
+      streak += 1;
+    } else if (weeksDiff > streak) {
+      break;
+    }
+  }
+  const nextReviewDue = lastReview ? new Date(lastReview.completedAt.getTime() + 7 * 86400000) : null;
+  const nextReviewLabel = nextReviewDue ? nextReviewDue.toISOString().slice(0, 10) : "Schedule now";
 
   return (
     <div className="space-y-8">
-      <div className="panel space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1e293b]">Today</p>
+      <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-gradient-to-r from-[#0b1224] via-[#0f172a] to-[#0b0d0f] p-6 text-white shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/70">Today</p>
             <h1 className="text-3xl font-semibold tracking-tight">Welcome back, {name}</h1>
-            <p className="text-sm text-[#555]">Capture, sort, file into PARA, then review. Stay under seven projects and ship a weekly summary.</p>
+            <p className="text-sm text-white/80">Neyro PARA pulse: capture, sort into Projects / Areas / Resources / Archive, stay under seven projects, publish a weekly review.</p>
+            <div className="flex flex-wrap gap-2 text-sm font-semibold">
+              <Link href="/inbox" className="rounded-md border border-white/40 bg-white/10 px-4 py-2 text-white hover:border-white">Capture now</Link>
+              <Link href="/projects" className="rounded-md border border-white/20 bg-white/0 px-4 py-2 text-white hover:border-white/50">Add a project</Link>
+              <Link href="/review" className="rounded-md border border-white/20 bg-white/0 px-4 py-2 text-white hover:border-white/50">Start weekly review</Link>
+              <Link href="/focus" className="rounded-md border border-white/20 bg-white/0 px-4 py-2 text-white hover:border-white/50">Enter focus mode</Link>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 text-sm font-semibold">
-            <Link href="/inbox" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-white">Capture now</Link>
-            <Link href="/projects" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-[#0b0d0f] hover:border-[#0b0d0f]">Add a project</Link>
-            <Link href="/review" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-[#0b0d0f] hover:border-[#0b0d0f]">Start weekly review</Link>
+          <div className="rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/90">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">What to do now</div>
+            <ul className="mt-2 space-y-1">
+              <li>- Capture 1 thing and classify it</li>
+              <li>- {activeProjects >= 7 ? "Close or archive a project" : "Keep projects under 7"}</li>
+              <li>- {lastReview ? "Log your weekly review" : "Run your first review"}</li>
+            </ul>
           </div>
         </div>
-
-        <div className="grid gap-3 md:grid-cols-4">
-          <div className="panel space-y-2">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Inbox</div>
-            <div className="text-3xl font-semibold">{inboxCount}</div>
-            <div className="text-xs text-[#555]">Everything starts here. {inboxCount === 0 ? "Drop something now." : "Process once per day."}</div>
-            <Link href="/inbox" className="text-xs font-semibold text-[#1e293b] underline">Open inbox</Link>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Capture queue</div>
+            <div className="text-2xl font-semibold">{inboxCount}</div>
+            <p className="text-xs text-white/70">Empty inbox daily. <Link href="/inbox" className="underline">Open inbox</Link></p>
           </div>
-
-          <div className={`panel space-y-2 ${activeProjects >= 7 ? "border-[#d14343]" : ""}`}>
-            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">
-              <span>Active Projects</span>
-              <span className="text-[10px] text-[#555]">Cap 7</span>
+          <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
+              <span>Project cap</span>
+              <span className="text-[11px]">Cap 7</span>
             </div>
-            <div className="text-3xl font-semibold">{activeProjects}/7</div>
-            <div className="h-2 overflow-hidden rounded-full bg-[rgba(0,0,0,0.05)]">
-              <div className={`${activeProjects >= 7 ? "bg-[#d14343]" : "bg-[#0b0d0f]"} h-full`} style={{ width: `${projectLoad * 100}%` }} />
+            <div className="text-2xl font-semibold">{activeProjects}/7</div>
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div className={`${activeProjects >= 7 ? "bg-[#fca5a5]" : "bg-white"} h-full`} style={{ width: `${projectLoad * 100}%` }} />
             </div>
-            <div className="text-xs text-[#555]">{activeProjects >= 7 ? "Over cap - pause one before adding." : "Stay below the redline."}</div>
-            <Link href="/projects" className="text-xs font-semibold text-[#1e293b] underline">Manage projects</Link>
+            <p className="text-xs text-white/70">{activeProjects >= 7 ? "Over cap - pause one before adding" : `${projectsRemaining} slots left`} - <Link href="/projects" className="underline">Manage</Link></p>
           </div>
-
-          <div className="panel space-y-2">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Areas</div>
-            <div className="text-3xl font-semibold">{areasCount}</div>
-            <div className="text-xs text-[#555]">Keep standards healthy. {areasCount === 0 ? "Define your core areas." : "Touch each weekly."}</div>
-            <Link href="/areas" className="text-xs font-semibold text-[#1e293b] underline">Open areas</Link>
-          </div>
-
-          <div className="panel space-y-2">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Last Review</div>
+          <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Review cadence</div>
             <div className="text-2xl font-semibold">{lastReviewDate ?? "Not yet"}</div>
-            <div className="text-xs text-[#555]">Ship one summary every week.</div>
-            <Link href="/review" className="text-xs font-semibold text-[#1e293b] underline">Run weekly review</Link>
+            <p className="text-xs text-white/70">{reviewStatus} - <Link href="/review" className="underline">Run review</Link></p>
+            <p className="text-xs text-white/60">Streak: {streak} weeks | Next due: {nextReviewLabel}</p>
           </div>
         </div>
       </div>
@@ -98,21 +124,114 @@ export default async function Home() {
       <div className="grid gap-4 md:grid-cols-[1.2fr_1fr]">
         <div className="panel space-y-3">
           <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[#0b0d0f]">Review tracker</h2>
+            <Link href="/review" className="text-xs font-semibold text-[#1e293b] underline">Open weekly review</Link>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Streak</div>
+              <div className="text-2xl font-semibold text-[#0b0d0f]">{streak} weeks</div>
+              <div className="text-xs text-[#555]">Log a review this week to keep the streak alive.</div>
+            </div>
+            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Last review</div>
+              <div className="text-2xl font-semibold text-[#0b0d0f]">{lastReviewDate ?? "Not yet"}</div>
+              <div className="text-xs text-[#555]">Next due: {nextReviewLabel}</div>
+            </div>
+            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Prompts</div>
+              <div className="text-xs text-[#555]">Run the weekly wizard, capture wins, prune projects, refresh areas.</div>
+              <div className="mt-2 flex gap-2 text-xs font-semibold">
+                <Link href="/weekly-review" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Wizard</Link>
+                <Link href="/review" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Manual</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[#0b0d0f]">Focus streak</h2>
+            <Link href="/focus" className="text-xs font-semibold text-[#1e293b] underline">Enter focus</Link>
+          </div>
+          <div className="space-y-2 text-sm text-[#0b0d0f]">
+            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3">
+              <div className="font-semibold">Define today</div>
+              <p className="text-xs text-[#555]">Pick one project, pin three tasks, log one time box. This keeps PARA in motion.</p>
+            </div>
+            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3">
+              <div className="font-semibold">Rapid start</div>
+              <p className="text-xs text-[#555]">Go to Focus, set a daily project, then log a 25-minute block.</p>
+              <div className="mt-2 flex gap-2 text-xs font-semibold">
+                <Link href="/focus" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Open Focus</Link>
+                <Link href="/inbox" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Grab tasks</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-5">
+        <div className="panel space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Inbox</div>
+          <div className="text-3xl font-semibold">{inboxCount}</div>
+          <div className="text-xs text-[#555]">Everything starts here. {inboxCount === 0 ? "Drop something now." : "Process once per day."}</div>
+          <Link href="/inbox" className="text-xs font-semibold text-[#1e293b] underline">Open inbox</Link>
+        </div>
+
+        <div className={`panel space-y-2 ${activeProjects >= 7 ? "border-[#d14343]" : ""}`}>
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">
+            <span>Projects</span>
+            <span className="text-[10px] text-[#555]">Cap 7</span>
+          </div>
+          <div className="text-3xl font-semibold">{activeProjects}/7</div>
+          <div className="h-2 overflow-hidden rounded-full bg-[rgba(0,0,0,0.05)]">
+            <div className={`${activeProjects >= 7 ? "bg-[#d14343]" : "bg-[#0b0d0f]"} h-full`} style={{ width: `${projectLoad * 100}%` }} />
+          </div>
+          <div className="text-xs text-[#555]">{activeProjects >= 7 ? "Over cap - pause one before adding." : `${projectsRemaining} slots left.`}</div>
+          <Link href="/projects" className="text-xs font-semibold text-[#1e293b] underline">Manage projects</Link>
+        </div>
+
+        <div className="panel space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Areas</div>
+          <div className="text-3xl font-semibold">{areasCount}</div>
+          <div className="text-xs text-[#555]">Keep standards healthy. {areasCount === 0 ? "Define your core areas." : "Touch each weekly."}</div>
+          <Link href="/areas" className="text-xs font-semibold text-[#1e293b] underline">Open areas</Link>
+        </div>
+
+        <div className="panel space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Resources</div>
+          <div className="text-3xl font-semibold">{resourcesCount}</div>
+          <div className="text-xs text-[#555]">Tag references so projects stay lean. {resourcesCount === 0 ? "Create your first collection." : "Keep adding references."}</div>
+          <Link href="/resources" className="text-xs font-semibold text-[#1e293b] underline">Open resources</Link>
+        </div>
+
+        <div className="panel space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Archive</div>
+          <div className="text-3xl font-semibold">{archiveCount}</div>
+          <div className="text-xs text-[#555]">Close loops weekly. Move done items here.</div>
+          <Link href="/archive" className="text-xs font-semibold text-[#1e293b] underline">Go to archive</Link>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[1.2fr_1fr]">
+        <div className="panel space-y-3">
+          <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-[#0b0d0f]">Guided PARA flow</h2>
-            <span className="text-xs text-[#555]">Capture, sort, archive</span>
+            <span className="text-xs text-[#555]">Capture, classify into Projects/Areas/Resources/Archive, then Review</span>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2 rounded border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="font-semibold text-[#0b0d0f]">Capture & Sort</div>
-              <p className="text-xs text-[#555]">Drop tasks/notes, batch classify to Project, Area, Resource, or Archive.</p>
+              <div className="font-semibold text-[#0b0d0f]">Capture and sort</div>
+              <p className="text-xs text-[#555]">Drop tasks and notes, then batch classify to Project, Area, Resource, or Archive.</p>
               <div className="flex gap-2 text-xs">
                 <Link href="/inbox" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Inbox</Link>
                 <Link href="/archive" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Archive</Link>
               </div>
             </div>
             <div className="space-y-2 rounded border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="font-semibold text-[#0b0d0f]">Work & Review</div>
-              <p className="text-xs text-[#555]">Stay under seven projects, keep areas touched, and publish a weekly review.</p>
+              <div className="font-semibold text-[#0b0d0f]">Work and review</div>
+              <p className="text-xs text-[#555]">Stay under seven projects, touch areas weekly, and publish a weekly review.</p>
               <div className="flex gap-2 text-xs">
                 <Link href="/projects" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Projects</Link>
                 <Link href="/areas" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Areas</Link>
@@ -143,6 +262,10 @@ export default async function Home() {
             <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
               <span>Run your first weekly review</span>
               <Link href="/review" className="text-xs font-semibold text-[#1e293b] underline">Run</Link>
+            </li>
+            <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
+              <span>Take the 60s PARA tour</span>
+              <Link href="/assist" className="text-xs font-semibold text-[#1e293b] underline">Start</Link>
             </li>
           </ul>
         </div>
@@ -200,7 +323,7 @@ export default async function Home() {
             />
             <button type="submit" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold md:col-span-1">Capture to inbox</button>
           </form>
-          <p className="text-xs text-[#555]">Tip: Capture first, classify once per day.</p>
+          <p className="text-xs text-[#555]">Tip: Capture first, classify once per day. Keyboard hint: press Ctrl/Cmd+K in your browser to jump to the address bar and type /home quickly.</p>
         </div>
       </div>
     </div>
