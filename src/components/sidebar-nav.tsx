@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export type NavItem = {
   label: string;
@@ -151,6 +152,15 @@ function Icon({ name, active }: { name: IconName; active: boolean }) {
 
 export function SidebarNav({ sections }: { sections: NavSection[] }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    sections.forEach((section) => {
+      section.items.forEach((item) => {
+        router.prefetch(item.href);
+      });
+    });
+  }, [router, sections]);
 
   return (
     <nav className="space-y-6">
