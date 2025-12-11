@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { ensureProjectLimit, getActiveProjectCount, touchProject } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
-import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
+import { ItemClassification, ItemType, ProjectStatus, SharePermission } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -10,32 +10,22 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
+
   const project = await prisma.project.findUnique({
     where: { id, userId },
     include: {
-      items: {
-        where: { classification: ItemClassification.PROJECT },
-        orderBy: { createdAt: "desc" },
-      },
+      items: { where: { classification: ItemClassification.PROJECT }, orderBy: { createdAt: "desc" } },
       shares: true,
     },
   });
   if (!project) redirect("/projects");
   const projectId = project.id;
 
-  const [activeCount, areas, collections] = await Promise.all([
-    getActiveProjectCount(userId),
+  const [areas, collections, activeCount] = await Promise.all([
     prisma.area.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.resourceCollection.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
+    getActiveProjectCount(userId),
   ]);
-
-  async function addShare(formData: FormData) {
-    "use server";
-    const email = String(formData.get("email") ?? "").trim();
-    if (!email) return;
-    await prisma.shareAccess.create({ data: { ownerId: userId, projectId, email, permission: "VIEW" } });
-    redirect(`/projects/${projectId}`);
-  }
 
   async function updateProject(formData: FormData) {
     "use server";
@@ -67,6 +57,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     redirect("/projects");
   }
 
+  async function addShare(formData: FormData) {
+    "use server";
+    const email = String(formData.get("email") ?? "").trim();
+    if (!email) return;
+    await prisma.shareAccess.create({
+      data: { ownerId: userId, projectId, email, permission: SharePermission.VIEW },
+    });
+    redirect(`/projects/${projectId}`);
+  }
+
   async function addItem(formData: FormData) {
     "use server";
     const title = String(formData.get("title") ?? "").trim();
@@ -89,25 +89,23 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     redirect(`/projects/${projectId}`);
   }
 
-  async function toggleDone(itemId: string, done: boolean) {
-    "use server";
-    await prisma.item.update({ where: { id: itemId, userId }, data: { isDone: done } });
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
-  }
-
   async function updateItem(formData: FormData) {
     "use server";
     const itemId = String(formData.get("itemId") ?? "");
     const title = String(formData.get("title") ?? "").trim();
     const details = String(formData.get("details") ?? "").trim() || null;
     const url = String(formData.get("url") ?? "").trim() || null;
-    const type = String(formData.get("type") ?? ItemType.NOTE) as ItemType;
+    const type = (String(formData.get("type") ?? ItemType.NOTE) as ItemType) || ItemType.NOTE;
     if (!itemId || !title) return;
-    await prisma.item.update({
-      where: { id: itemId, userId },
-      data: { title, details, url, type },
-    });
+    await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
+    await touchProject(userId, projectId);
+    redirect(`/projects/${projectId}`);
+  }
+
+  async function toggleDone(itemId: string, isDone: boolean) {
+    "use server";
+    if (!itemId) return;
+    await prisma.item.update({ where: { id: itemId, userId }, data: { isDone } });
     await touchProject(userId, projectId);
     redirect(`/projects/${projectId}`);
   }
@@ -156,12 +154,20 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <div className="text-xs text-zinc-500">Status: {project.status}</div>
             <div className="text-xs text-zinc-500">Active projects: {activeCount}/7</div>
           </div>
-          <div className="flex gap-2 text-sm">
-            <form action={() => changeStatus(ProjectStatus.ACTIVE)}><button className="rounded border px-3 py-2">Set active</button></form>
-            <form action={() => changeStatus(ProjectStatus.PAUSED)}><button className="rounded border px-3 py-2">Pause</button></form>
-            <form action={() => changeStatus(ProjectStatus.COMPLETED)}><button className="rounded border px-3 py-2">Complete</button></form>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <form action={() => changeStatus(ProjectStatus.ACTIVE)}>
+              <button className="rounded border px-3 py-2">Set active</button>
+            </form>
+            <form action={() => changeStatus(ProjectStatus.PAUSED)}>
+              <button className="rounded border px-3 py-2">Pause</button>
+            </form>
+            <form action={() => changeStatus(ProjectStatus.COMPLETED)}>
+              <button className="rounded border px-3 py-2">Complete</button>
+            </form>
             {project.status === ProjectStatus.COMPLETED && (
-              <form action={archiveProject}><button className="rounded border px-3 py-2 text-red-600">Move to archive</button></form>
+              <form action={archiveProject}>
+                <button className="rounded border px-3 py-2 text-red-600">Move to archive</button>
+              </form>
             )}
           </div>
         </div>
@@ -188,9 +194,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <button className="rounded border px-2 py-1">Share</button>
           </form>
         </div>
-        {project.shares.length > 0 && (
-          <div className="text-xs text-zinc-500">Shared with: {project.shares.map((s) => s.email).join(", ")}</div>
-        )}
+        {project.shares.length > 0 && <div className="text-xs text-zinc-500">Shared with: {project.shares.map((s) => s.email).join(", ")}</div>}
         <div className="space-y-3">
           {project.items.map((item) => (
             <div key={item.id} className="rounded border border-zinc-200 p-3 space-y-2">
@@ -198,7 +202,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <div>
                   <div className="font-semibold">{item.title}</div>
                   {item.details && <div className="text-sm text-zinc-600">{item.details}</div>}
-                  {item.url && <a href={item.url} className="text-xs text-blue-600 underline" target="_blank" rel="noreferrer">{item.url}</a>}
+                  {item.url && (
+                    <a href={item.url} className="text-xs text-blue-600 underline" target="_blank" rel="noreferrer">
+                      {item.url}
+                    </a>
+                  )}
                   <div className="text-xs text-zinc-500">Type: {item.type}</div>
                 </div>
                 <form action={() => toggleDone(item.id, !item.isDone)}>
@@ -210,12 +218,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <input name="title" defaultValue={item.title} className="rounded border border-zinc-300 px-2 py-1" required />
                 <select name="type" defaultValue={item.type} className="rounded border border-zinc-300 px-2 py-1">
                   {Object.values(ItemType).map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
                   ))}
                 </select>
                 <textarea name="details" defaultValue={item.details ?? ""} rows={2} className="rounded border border-zinc-300 px-2 py-1 md:col-span-2" />
                 <input name="url" defaultValue={item.url ?? ""} placeholder="URL" className="rounded border border-zinc-300 px-2 py-1 md:col-span-2" />
-                <button type="submit" className="rounded bg-black px-3 py-2 text-white md:col-span-2 text-sm">Save item</button>
+                <button type="submit" className="rounded bg-black px-3 py-2 text-white md:col-span-2 text-sm">
+                  Save item
+                </button>
               </form>
               <form action={moveItem} className="flex flex-wrap gap-2 text-sm">
                 <input type="hidden" name="itemId" value={item.id} />
@@ -229,16 +241,22 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <select name="areaId" className="rounded border border-zinc-300 px-2 py-1">
                   <option value="">Area target</option>
                   {areas.map((a) => (
-                    <option key={a.id} value={a.id}>{a.name}</option>
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
                   ))}
                 </select>
                 <select name="collectionId" className="rounded border border-zinc-300 px-2 py-1">
                   <option value="">Resource target</option>
                   {collections.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
-                <button type="submit" className="rounded border px-3 py-2">Apply</button>
+                <button type="submit" className="rounded border px-3 py-2">
+                  Apply
+                </button>
               </form>
             </div>
           ))}
@@ -254,14 +272,22 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <input name="url" placeholder="URL (optional)" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" />
           <select name="type" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
             {Object.values(ItemType).map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white md:col-span-2">Add item</button>
+          <button type="submit" className="rounded bg-black px-4 py-2 text-white md:col-span-2">
+            Add item
+          </button>
         </form>
       </div>
 
-      <div className="text-sm text-zinc-500"><Link href="/projects" className="underline">Back to projects</Link></div>
+      <div className="text-sm text-zinc-500">
+        <Link href="/projects" className="underline">
+          Back to projects
+        </Link>
+      </div>
     </div>
   );
 }

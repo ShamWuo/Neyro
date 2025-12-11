@@ -82,86 +82,86 @@ export default async function AssistPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Smart Assist</h1>
-        <p className="text-sm text-zinc-600">Prompts based on your activity—not chatty AI.</p>
+    <div className="space-y-10">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Smart Assist</h1>
+        <p className="text-sm text-[#555]">Prompts based on your activity—not chatty AI.</p>
       </div>
 
-      <section className="space-y-3 rounded border border-zinc-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-700">Duplicates</h2>
+      <section className="panel space-y-3">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Duplicates</h2>
         <div className="space-y-2">
           {duplicateGroups.map((g) => (
-            <div key={g.title} className="flex items-center justify-between rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={g.title} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold">{g.title}</div>
-                <div className="text-xs text-zinc-500">{g.ids.length} inbox items</div>
+                <div className="font-semibold text-[#0b0d0f]">{g.title}</div>
+                <div className="text-xs text-[#555]">{g.ids.length} inbox items</div>
               </div>
               <form action={() => mergeDuplicates(g.title)}>
-                <button className="rounded border px-3 py-1 text-xs">Archive duplicates</button>
+                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Archive duplicates</button>
               </form>
             </div>
           ))}
-          {duplicateGroups.length === 0 && <div className="text-sm text-zinc-500">No duplicates detected this week.</div>}
+          {duplicateGroups.length === 0 && <div className="text-sm text-[#555]">No duplicates detected this week.</div>}
         </div>
       </section>
 
-      <section className="space-y-3 rounded border border-zinc-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-700">Stale projects</h2>
+      <section className="panel space-y-3">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Stale projects</h2>
         <div className="space-y-2">
           {staleProjects.map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={p.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold">{p.name}</div>
-                <div className="text-xs text-zinc-500">No movement since {p.lastActivityAt.toISOString().slice(0,10)}</div>
+                <div className="font-semibold text-[#0b0d0f]">{p.name}</div>
+                <div className="text-xs text-[#555]">No movement since {p.lastActivityAt.toISOString().slice(0,10)}</div>
               </div>
               <form action={() => pauseProject(p.id)}>
-                <button className="rounded border px-3 py-1 text-xs">Pause</button>
+                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Pause</button>
               </form>
             </div>
           ))}
-          {staleProjects.length === 0 && <div className="text-sm text-zinc-500">All active projects moved in the last 7 days.</div>}
+          {staleProjects.length === 0 && <div className="text-sm text-[#555]">All active projects moved in the last 7 days.</div>}
         </div>
       </section>
 
-      <section className="space-y-3 rounded border border-zinc-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-700">Neglected areas</h2>
+      <section className="panel space-y-3">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Neglected areas</h2>
         <div className="space-y-2">
           {neglectedAreas.map((a) => (
-            <div key={a.id} className="space-y-2 rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={a.id} className="space-y-2 rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">{a.name}</div>
-                  <div className="text-xs text-zinc-500">No new activity since {a.lastActivityAt.toISOString().slice(0,10)}</div>
+                  <div className="font-semibold text-[#0b0d0f]">{a.name}</div>
+                  <div className="text-xs text-[#555]">No new activity since {a.lastActivityAt.toISOString().slice(0,10)}</div>
                 </div>
               </div>
               <form action={addAreaAction} className="flex flex-wrap gap-2">
                 <input type="hidden" name="areaId" value={a.id} />
-                <input name="title" placeholder="Add one action" className="rounded border border-zinc-300 px-2 py-1 flex-1" />
-                <button className="rounded border px-3 py-1 text-xs">Add</button>
+                <input name="title" placeholder="Add one action" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1 flex-1" />
+                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Add</button>
               </form>
             </div>
           ))}
-          {neglectedAreas.length === 0 && <div className="text-sm text-zinc-500">Areas look good.</div>}
+          {neglectedAreas.length === 0 && <div className="text-sm text-[#555]">Areas look good.</div>}
         </div>
       </section>
 
-      <section className="space-y-3 rounded border border-zinc-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-700">Resource → Project?</h2>
+      <section className="panel space-y-3">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Resource → Project?</h2>
         <div className="space-y-2">
           {resourceCandidates.filter((c) => c._count.items >= 8).map((c) => (
-            <div key={c.id} className="flex items-center justify-between rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={c.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold">{c.name}</div>
-                <div className="text-xs text-zinc-500">{c._count.items} items</div>
+                <div className="font-semibold text-[#0b0d0f]">{c.name}</div>
+                <div className="text-xs text-[#555]">{c._count.items} items</div>
               </div>
               <form action={convertCollection} className="flex gap-2 items-center">
                 <input type="hidden" name="collectionId" value={c.id} />
-                <button className="rounded border px-3 py-1 text-xs">Convert to project</button>
+                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Convert to project</button>
               </form>
             </div>
           ))}
-          {resourceCandidates.filter((c) => c._count.items >= 8).length === 0 && <div className="text-sm text-zinc-500">No resource collections look like projects yet.</div>}
+          {resourceCandidates.filter((c) => c._count.items >= 8).length === 0 && <div className="text-sm text-[#555]">No resource collections look like projects yet.</div>}
         </div>
       </section>
     </div>

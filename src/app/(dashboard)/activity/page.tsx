@@ -40,31 +40,31 @@ export default async function ActivityPage() {
     .sort((a, b) => new Date(a.week).getTime() - new Date(b.week).getTime());
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Activity</h1>
-        <p className="text-sm text-zinc-600">Volume over the last 8 weeks.</p>
+    <div className="space-y-10">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
+        <p className="text-sm text-[#555]">Volume over the last 8 weeks.</p>
       </div>
 
-      <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-2">
+      <div className="panel space-y-3">
         {rows.map((r) => (
           <div key={r.week} className="space-y-1 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-500">Week of {r.week.slice(0,10)}</span>
-              <span className="text-xs text-zinc-500">Created {r.created} · Archived {r.archived}</span>
+              <span className="text-xs text-[#555]">Week of {r.week.slice(0,10)}</span>
+              <span className="text-xs text-[#555]">Created {r.created} · Archived {r.archived}</span>
             </div>
-            <div className="flex h-2 w-full overflow-hidden rounded bg-zinc-100">
-              <div className="bg-green-500" style={{ width: `${Math.min(100, r.created * 5)}%` }} />
-              <div className="bg-amber-500" style={{ width: `${Math.min(100, r.archived * 5)}%` }} />
+            <div className="flex h-2 w-full overflow-hidden rounded bg-[#eef1f5]">
+              <div className="bg-[#0f172a]" style={{ width: `${Math.min(100, r.created * 5)}%` }} />
+              <div className="bg-[#3b82f6]" style={{ width: `${Math.min(100, r.archived * 5)}%` }} />
             </div>
           </div>
         ))}
-        {rows.length === 0 && <div className="text-sm text-zinc-500">Not enough data yet.</div>}
+        {rows.length === 0 && <div className="text-sm text-[#555]">Not enough data yet.</div>}
       </div>
 
-      <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
-        <div className="text-sm font-semibold text-zinc-700">Active project count</div>
-        <div className="text-2xl font-semibold mt-1">{activeProjects.filter((p) => p.status === "ACTIVE").length}</div>
+      <div className="panel">
+        <div className="text-sm font-semibold text-[#0b0d0f]">Active project count</div>
+        <div className="text-2xl font-semibold mt-1 text-[#0b0d0f]">{activeProjects.filter((p) => p.status === "ACTIVE").length}</div>
       </div>
     </div>
   );

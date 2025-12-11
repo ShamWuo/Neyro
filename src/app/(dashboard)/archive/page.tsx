@@ -64,102 +64,111 @@ export default async function ArchivePage({ searchParams }: { searchParams?: Pro
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-xl font-semibold">Archive</h1>
-        <p className="text-sm text-zinc-600">Find and restore archived items. Use filters to target quickly.</p>
+    <div className="space-y-10">
+      <div className="space-y-3">
+        <h1 className="text-2xl font-semibold tracking-tight">Archive</h1>
+        <p className="text-sm text-[#555]">Find and restore archived items quickly with filters.</p>
         <form className="flex gap-2" method="get">
-          <input name="q" defaultValue={q} placeholder="Search archived titles" className="rounded border border-zinc-300 px-3 py-2 flex-1" />
-          <button className="rounded border px-3 py-2">Search</button>
+          <input name="q" defaultValue={q} placeholder="Search archived titles" className="flex-1 border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" />
+          <button className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-3 py-2 text-sm font-semibold text-white">Search</button>
         </form>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-700">Items</h2>
+      <section className="panel space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[#0b0d0f]">Items</h2>
+          <span className="text-xs text-[#555]">{items.length} archived</span>
+        </div>
         <div className="space-y-2">
           {items.map((item) => (
-            <div key={item.id} className="rounded border border-zinc-200 bg-white p-3 shadow-sm space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{item.title}</div>
-                  {item.details && <div className="text-sm text-zinc-600">{item.details}</div>}
-                  {item.url && <a className="text-xs text-blue-600 underline" href={item.url} target="_blank" rel="noreferrer">{item.url}</a>}
-                  <div className="text-xs text-zinc-500">Type: {item.classification}</div>
+            <div key={item.id} className="rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] p-4 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="font-medium text-[#0b0d0f]">{item.title}</div>
+                  {item.details && <div className="text-sm text-[#555]">{item.details}</div>}
+                  {item.url && <a className="text-xs font-semibold text-[#0f172a] underline" href={item.url} target="_blank" rel="noreferrer">{item.url}</a>}
+                  <div className="text-xs text-[#555]">Type: {item.classification}</div>
                 </div>
                 <form action={() => deleteItem(item.id)}>
-                  <button className="text-xs text-red-600">Delete permanently</button>
+                  <button className="text-xs font-semibold text-red-600">Delete permanently</button>
                 </form>
               </div>
               <form action={restoreItem} className="flex flex-wrap gap-2 text-sm items-center">
                 <input type="hidden" name="itemId" value={item.id} />
                 <label className="flex items-center gap-2">
                   <span>Restore to</span>
-                  <select name="target" className="rounded border border-zinc-300 px-2 py-1">
+                  <select name="target" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
                     <option value="inbox">Inbox</option>
                     <option value="project">Project</option>
                     <option value="area">Area</option>
                     <option value="resource">Resource</option>
                   </select>
                 </label>
-                <select name="projectId" className="rounded border border-zinc-300 px-2 py-1">
+                <select name="projectId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
                   <option value="">Project target</option>
                   {activeProjects.map((p) => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
-                <select name="areaId" className="rounded border border-zinc-300 px-2 py-1">
+                <select name="areaId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
                   <option value="">Area target</option>
                   {activeAreas.map((a) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </select>
-                <select name="collectionId" className="rounded border border-zinc-300 px-2 py-1">
+                <select name="collectionId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
                   <option value="">Resource target</option>
                   {collections.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
-                <button className="rounded border px-3 py-2">Restore</button>
+                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 text-sm font-semibold">Restore</button>
               </form>
             </div>
           ))}
-          {items.length === 0 && <div className="text-sm text-zinc-500">No archived items.</div>}
+          {items.length === 0 && <div className="text-sm text-[#555]">No archived items.</div>}
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-700">Projects</h2>
+      <section className="panel space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[#0b0d0f]">Projects</h2>
+          <span className="text-xs text-[#555]">{projects.length} archived</span>
+        </div>
         <div className="space-y-2">
           {projects.map((p) => (
-            <div key={p.id} className="rounded border border-zinc-200 bg-white p-3 shadow-sm flex items-center justify-between">
-              <div>
-                <div className="font-medium">{p.name}</div>
-                <div className="text-sm text-zinc-600">Outcome: {p.outcome}</div>
+            <div key={p.id} className="rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] p-4 flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-medium text-[#0b0d0f]">{p.name}</div>
+                <div className="text-sm text-[#555]">Outcome: {p.outcome}</div>
               </div>
               <form action={() => restoreProject(p.id)}>
-                <button className="text-sm text-blue-600">Restore</button>
+                <button className="text-sm font-semibold text-[#0f172a]">Restore</button>
               </form>
             </div>
           ))}
-          {projects.length === 0 && <div className="text-sm text-zinc-500">No archived projects.</div>}
+          {projects.length === 0 && <div className="text-sm text-[#555]">No archived projects.</div>}
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-700">Areas</h2>
+      <section className="panel space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[#0b0d0f]">Areas</h2>
+          <span className="text-xs text-[#555]">{areas.length} archived</span>
+        </div>
         <div className="space-y-2">
           {areas.map((a) => (
-            <div key={a.id} className="rounded border border-zinc-200 bg-white p-3 shadow-sm flex items-center justify-between">
-              <div>
-                <div className="font-medium">{a.name}</div>
-                <div className="text-sm text-zinc-600">{a.standard}</div>
+            <div key={a.id} className="rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] p-4 flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-medium text-[#0b0d0f]">{a.name}</div>
+                <div className="text-sm text-[#555]">{a.standard}</div>
               </div>
               <form action={() => restoreArea(a.id)}>
-                <button className="text-sm text-blue-600">Restore</button>
+                <button className="text-sm font-semibold text-[#0f172a]">Restore</button>
               </form>
             </div>
           ))}
-          {areas.length === 0 && <div className="text-sm text-zinc-500">No archived areas.</div>}
+          {areas.length === 0 && <div className="text-sm text-[#555]">No archived areas.</div>}
         </div>
       </section>
     </div>

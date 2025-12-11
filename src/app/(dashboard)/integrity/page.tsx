@@ -27,82 +27,82 @@ export default async function IntegrityPage() {
   const overdueAreas = areas.filter((a) => !a.lastReviewDate || a.lastReviewDate < reviewThreshold);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">PARA Integrity</h1>
-        <p className="text-sm text-zinc-600">One glance system health.</p>
+    <div className="space-y-10">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">PARA Integrity</h1>
+        <p className="text-sm text-[#555]">One glance system health.</p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="text-xs text-zinc-500">Inbox</div>
-          <div className="text-2xl font-semibold">{inboxCount}</div>
-          <div className="text-xs text-zinc-500">{inboxCount > 20 ? "Needs review" : "Manageable"}</div>
+        <div className="panel">
+          <div className="text-xs text-[#555]">Inbox</div>
+          <div className="text-2xl font-semibold text-[#0b0d0f]">{inboxCount}</div>
+          <div className="text-xs text-[#555]">{inboxCount > 20 ? "Needs review" : "Manageable"}</div>
         </div>
-        <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="text-xs text-zinc-500">Projects</div>
-          <div className="text-2xl font-semibold">{activeCount}/{MAX_ACTIVE_PROJECTS}</div>
-          <div className="text-xs text-zinc-500">{activeCount >= MAX_ACTIVE_PROJECTS ? "At limit" : "Within limit"}</div>
+        <div className="panel">
+          <div className="text-xs text-[#555]">Projects</div>
+          <div className="text-2xl font-semibold text-[#0b0d0f]">{activeCount}/{MAX_ACTIVE_PROJECTS}</div>
+          <div className="text-xs text-[#555]">{activeCount >= MAX_ACTIVE_PROJECTS ? "At limit" : "Within limit"}</div>
         </div>
-        <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="text-xs text-zinc-500">Last review</div>
-          <div className="text-2xl font-semibold">{lastReview ? lastReview.completedAt.toISOString().slice(0,10) : "Not yet"}</div>
-          <div className="text-xs text-zinc-500">Stay weekly</div>
+        <div className="panel">
+          <div className="text-xs text-[#555]">Last review</div>
+          <div className="text-2xl font-semibold text-[#0b0d0f]">{lastReview ? lastReview.completedAt.toISOString().slice(0,10) : "Not yet"}</div>
+          <div className="text-xs text-[#555]">Stay weekly</div>
         </div>
       </div>
 
-      <section className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-700">Projects health</h2>
+      <section className="panel space-y-2">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Projects health</h2>
         <div className="space-y-2">
           {activeProjects.filter((p) => p.status === ProjectStatus.ACTIVE).map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={p.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold">{p.name}</div>
-                <div className="text-xs text-zinc-500">{projectHealth(p.lastActivityAt)}</div>
+                <div className="font-semibold text-[#0b0d0f]">{p.name}</div>
+                <div className="text-xs text-[#555]">{projectHealth(p.lastActivityAt)}</div>
               </div>
-              <Link href={`/projects/${p.id}`} className="text-xs text-blue-600 underline">Open</Link>
+              <Link href={`/projects/${p.id}`} className="text-xs font-semibold text-[#0f172a]">Open</Link>
             </div>
           ))}
-          {activeCount === 0 && <div className="text-sm text-zinc-500">No active projects.</div>}
+          {activeCount === 0 && <div className="text-sm text-[#555]">No active projects.</div>}
         </div>
       </section>
 
-      <section className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-700">Areas needing attention</h2>
+      <section className="panel space-y-2">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Areas needing attention</h2>
         <div className="space-y-2">
           {overdueAreas.map((a) => (
-            <div key={a.id} className="flex items-center justify-between rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={a.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold">{a.name}</div>
-                <div className="text-xs text-zinc-500">Last review: {a.lastReviewDate ? a.lastReviewDate.toISOString().slice(0,10) : "Never"}</div>
+                <div className="font-semibold text-[#0b0d0f]">{a.name}</div>
+                <div className="text-xs text-[#555]">Last review: {a.lastReviewDate ? a.lastReviewDate.toISOString().slice(0,10) : "Never"}</div>
               </div>
-              <Link href={`/areas/${a.id}`} className="text-xs text-blue-600 underline">Review</Link>
+              <Link href={`/areas/${a.id}`} className="text-xs font-semibold text-[#0f172a]">Review</Link>
             </div>
           ))}
-          {overdueAreas.length === 0 && <div className="text-sm text-zinc-500">All areas reviewed recently.</div>}
+          {overdueAreas.length === 0 && <div className="text-sm text-[#555]">All areas reviewed recently.</div>}
         </div>
       </section>
 
-      <section className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-700">Resources growth</h2>
+      <section className="panel space-y-2">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Resources growth</h2>
         <div className="space-y-2">
           {resources.map((r) => (
-            <div key={r.id} className="flex items-center justify-between rounded border border-zinc-200 px-3 py-2 text-sm">
+            <div key={r.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold">{r.name}</div>
-                <div className="text-xs text-zinc-500">{r._count.items} items</div>
+                <div className="font-semibold text-[#0b0d0f]">{r.name}</div>
+                <div className="text-xs text-[#555]">{r._count.items} items</div>
               </div>
-              <Link href={`/resources/${r.id}`} className="text-xs text-blue-600 underline">Open</Link>
+              <Link href={`/resources/${r.id}`} className="text-xs font-semibold text-[#0f172a]">Open</Link>
             </div>
           ))}
-          {resources.length === 0 && <div className="text-sm text-zinc-500">No collections yet.</div>}
+          {resources.length === 0 && <div className="text-sm text-[#555]">No collections yet.</div>}
         </div>
       </section>
 
-      <section className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-700">Archive load</h2>
-        <p className="text-sm text-zinc-600">Items in archive: {archiveCount}. Periodically clean or restore what matters.</p>
-        <Link href="/archive" className="text-xs text-blue-600 underline">Go to archive</Link>
+      <section className="panel space-y-2">
+        <h2 className="text-sm font-semibold text-[#0b0d0f]">Archive load</h2>
+        <p className="text-sm text-[#555]">Items in archive: {archiveCount}. Periodically clean or restore what matters.</p>
+        <Link href="/archive" className="text-xs font-semibold text-[#0f172a]">Go to archive</Link>
       </section>
     </div>
   );

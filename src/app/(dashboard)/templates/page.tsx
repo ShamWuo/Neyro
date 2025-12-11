@@ -89,43 +89,43 @@ export default async function TemplatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Templates</h1>
-        <p className="text-sm text-zinc-600">Create and apply your rituals quickly.</p>
+    <div className="space-y-10">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Templates</h1>
+        <p className="text-sm text-[#555]">Create and apply your rituals quickly.</p>
       </div>
 
-      <form action={createTemplate} className="space-y-3 rounded border border-zinc-200 bg-white p-4 shadow-sm">
+      <form action={createTemplate} className="panel space-y-3">
         <div className="grid gap-3 md:grid-cols-2">
-          <input name="name" placeholder="Template name" className="rounded border border-zinc-300 px-3 py-2" required />
-          <select name="type" className="rounded border border-zinc-300 px-3 py-2">
+          <input name="name" placeholder="Template name" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" required />
+          <select name="type" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2">
             {Object.values(TemplateType).map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
         </div>
-        <input name="description" placeholder="Description" className="rounded border border-zinc-300 px-3 py-2" />
-        <textarea name="data" placeholder='Optional JSON e.g. {"outcome":"Ship feature"}' className="w-full rounded border border-zinc-300 px-3 py-2" rows={4} />
-        <button className="rounded bg-black px-4 py-2 text-white">Save template</button>
+        <input name="description" placeholder="Description" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" />
+        <textarea name="data" placeholder='Optional JSON e.g. {"outcome":"Ship feature"}' className="w-full border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" rows={4} />
+        <button className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">Save template</button>
       </form>
 
       <div className="space-y-3">
         {templates.map((t) => (
-          <div key={t.id} className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-2">
+          <div key={t.id} className="panel space-y-2">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold">{t.name}</div>
-                <div className="text-xs text-zinc-500">{t.type}</div>
-                {t.description && <div className="text-sm text-zinc-600">{t.description}</div>}
+              <div className="space-y-1">
+                <div className="font-semibold text-[#0b0d0f]">{t.name}</div>
+                <div className="text-xs text-[#555]">{t.type}</div>
+                {t.description && <div className="text-sm text-[#555]">{t.description}</div>}
               </div>
               <form action={applyTemplate}>
                 <input type="hidden" name="templateId" value={t.id} />
-                <button className="rounded border px-3 py-1 text-sm">Apply</button>
+                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-sm font-semibold">Apply</button>
               </form>
             </div>
           </div>
         ))}
-        {templates.length === 0 && <div className="text-sm text-zinc-500">No templates yet.</div>}
+        {templates.length === 0 && <div className="text-sm text-[#555]">No templates yet.</div>}
       </div>
     </div>
   );
