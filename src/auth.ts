@@ -3,9 +3,13 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
+const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+
 export const authConfig = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" },
+  secret,
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",

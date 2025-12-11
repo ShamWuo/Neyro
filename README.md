@@ -9,7 +9,7 @@ Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with 
 - Tailwind CSS
 
 ## Setup
-1. Copy `.env.example` to `.env` and fill values.
+1. Copy `.env.example` to `.env`, set `DATABASE_URL`, and generate a stable `AUTH_SECRET` (keep this identical in every environment). Update `AUTH_URL` per environment (`http://localhost:3000` in dev, your Vercel domain in prod).
 2. Install deps: `npm install --legacy-peer-deps`
 3. Run migrations & generate client: `npx prisma generate && npx prisma migrate dev --name init`
 4. Start dev server: `npm run dev`
@@ -40,5 +40,5 @@ Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with 
 - `npm run prisma:studio` – Prisma Studio
 
 ## Notes
-- All protected routes redirect to login if unauthenticated via middleware.
+- Signed-in pages live under the `(dashboard)` route group and redirect to `/auth/login` when `auth()` has no user.
 - Tailwind v4 inline usage in globals.
