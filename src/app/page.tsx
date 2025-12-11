@@ -51,8 +51,8 @@ const whyMetrics = [
 
 const flow = ["Inbox", "Projects", "Areas", "Resources"];
 
-const primaryCta = "inline-flex items-center justify-center gap-2 rounded-md border border-[#0f172a] bg-[#0f172a] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md";
-const secondaryCta = "inline-flex items-center justify-center gap-2 rounded-md border border-[rgba(0,0,0,0.14)] bg-white px-5 py-3 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]";
+const primaryCta = "inline-flex items-center justify-center gap-2 rounded-md border border-[#0f172a] bg-[#0f172a] px-5 py-3 text-sm font-semibold text-white visited:text-white hover:text-white focus:text-white focus-visible:text-white active:text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md";
+const secondaryCta = "inline-flex items-center justify-center gap-2 rounded-md border border-[rgba(0,0,0,0.14)] bg-white px-5 py-3 text-sm font-semibold text-[#0b0d0f] visited:text-[#0b0d0f] hover:border-[#0b0d0f]";
 
 export default function LandingPage() {
   return (
@@ -71,7 +71,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-14 px-6 py-16 md:gap-16 md:py-24">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 md:gap-14 md:py-20">
         <div className="flex flex-wrap gap-2 rounded-md border border-[rgba(0,0,0,0.08)] bg-white/70 px-4 py-3 text-xs font-semibold text-[#0b0d0f] shadow-sm backdrop-blur">
           <span className="rounded-full bg-[#0f172a] px-3 py-1 text-white">Speed: capture → classify in under 1s</span>
           <span className="rounded-full border border-[rgba(0,0,0,0.08)] px-3 py-1">Guardrail: max 7 active projects</span>
@@ -79,7 +79,7 @@ export default function LandingPage() {
         </div>
 
         <header className="grid gap-10 md:grid-cols-[1.25fr_1fr] md:items-center">
-          <div className="space-y-4">
+          <div className="space-y-3">
             <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1e293b]">Problem to Solution to Proof</p>
             <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] md:text-5xl">
               Neyro enforces PARA for you: one inbox, seven active projects max, weekly review done for you.
@@ -101,7 +101,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="panel space-y-4 shadow-lg ring-1 ring-[rgba(0,0,0,0.06)]">
+          <div className="panel space-y-3 shadow-lg ring-1 ring-[rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">Precision overview</span>
               <span className="badge">PARA enforced</span>
