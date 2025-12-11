@@ -4,11 +4,17 @@ import { ItemClassification, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function WeeklyReviewPage({ searchParams }: { searchParams: { step?: string } }) {
+type WeeklyReviewPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function WeeklyReviewPage({ searchParams }: WeeklyReviewPageProps) {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
-  const step = searchParams.step ?? "1";
+  const resolvedParams = (searchParams ? await searchParams : null) ?? {};
+  const rawStep = resolvedParams.step;
+  const step = Array.isArray(rawStep) ? rawStep[0] ?? "1" : rawStep ?? "1";
 
   const [inbox, projects, areas, reviews] = await Promise.all([
     prisma.item.findMany({ where: { userId, classification: ItemClassification.INBOX }, orderBy: { createdAt: "desc" } }),
