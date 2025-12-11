@@ -53,6 +53,33 @@ const primaryCta =
 const secondaryCta =
   "inline-flex items-center justify-center gap-2 rounded-md border border-[rgba(0,0,0,0.14)] bg-white px-5 py-3 text-sm font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]";
 
+const pricing = [
+  {
+    name: "Capture",
+    price: "$0",
+    blurb: "Personal PARA starter",
+    cta: { label: "Start free", href: "/auth/register" },
+    features: ["Unlimited inbox capture", "7 project cap dashboard", "Area health scores", "Weekly review wizard preview"],
+  },
+  {
+    name: "Focus",
+    price: "$18",
+    cadence: "per month",
+    blurb: "Full PARA enforcement",
+    highlighted: true,
+    cta: { label: "Upgrade to Focus", href: "/auth/register" },
+    features: ["Everything in Capture", "Smart Assist & Integrity views", "Timeline + Activity trail", "Templates & sharing"],
+  },
+  {
+    name: "Brain Trust",
+    price: "$29",
+    cadence: "per month",
+    blurb: "For teams enforcing PARA",
+    cta: { label: "Book a walkthrough", href: "/auth/login" },
+    features: ["Everything in Focus", "Shared PARA workspaces", "Team streak & accountability", "Priority support"],
+  },
+];
+
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#f7f5ff] text-[#0b0d0f]">
@@ -177,6 +204,51 @@ export default function LandingPage() {
               <p className="mt-3 text-sm text-[#6c7280]">{t.author}</p>
             </div>
           ))}
+        </section>
+
+        <section className="space-y-6 rounded-2xl border border-white/50 bg-white/70 p-6 shadow-[0_25px_60px_rgba(15,23,42,0.1)]">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#768198]">Pricing</p>
+              <h2 className="text-2xl font-semibold text-[#0f172a]">Install PARA discipline at any stage.</h2>
+              <p className="text-sm text-[#536072]">Every plan enforces Inbox → Projects → Areas → Resources and the weekly review loop.</p>
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5b4bff]">Cancel anytime</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {pricing.map((tier) => (
+              <div
+                key={tier.name}
+                className={`rounded-2xl border px-5 py-6 shadow-sm ${
+                  tier.highlighted ? "border-[#0f172a] bg-[#0f172a] text-white shadow-[0_20px_50px_rgba(15,23,42,0.35)]" : "border-white/60 bg-white text-[#0f172a]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold uppercase tracking-[0.2em]">{tier.name}</div>
+                  {tier.highlighted && <span className="rounded-full border border-white/50 px-2 py-1 text-[11px]">Most popular</span>}
+                </div>
+                <div className="mt-3 text-3xl font-semibold">{tier.price}</div>
+                {tier.cadence && <div className="text-xs text-current/70">{tier.cadence}</div>}
+                <p className={`mt-2 text-sm ${tier.highlighted ? "text-white/80" : "text-[#536072]"}`}>{tier.blurb}</p>
+                <ul className={`mt-4 space-y-2 text-sm ${tier.highlighted ? "text-white/90" : "text-[#4a5364]"}`}>
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={tier.cta.href}
+                  className={`mt-6 inline-flex w-full items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold ${
+                    tier.highlighted ? "border-white bg-white text-[#0f172a]" : "border-[#0f172a] text-[#0f172a]"
+                  }`}
+                >
+                  {tier.cta.label}
+                </Link>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="rounded-2xl border border-[#0f172a]/10 bg-[#0f172a] p-6 text-white shadow-[0_25px_60px_rgba(15,23,42,0.35)]">

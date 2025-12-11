@@ -33,7 +33,7 @@ type IconName =
   | "search";
 
 function Icon({ name, active }: { name: IconName; active: boolean }) {
-  const stroke = active ? "#0b0d0f" : "#556070";
+  const stroke = active ? "#0f172a" : "#7b839a";
   const common = { stroke, strokeWidth: 1.6, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
   switch (name) {
@@ -174,15 +174,15 @@ export function SidebarNav({ sections }: { sections: NavSection[] }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`group flex items-center gap-3 rounded-md border border-transparent border-l-4 px-3 py-2 text-sm transition ${
+                  className={`group flex items-center gap-3 rounded-lg border border-transparent border-l-4 px-3 py-2 text-sm transition ${
                     active
-                      ? "border-l-[#3b82f6] bg-white text-[#0b0d0f] shadow-sm"
-                      : "border-l-transparent text-[#4b5563] hover:border-[rgba(0,0,0,0.08)] hover:bg-white"
+                      ? "border-l-[#5b4bff] bg-white/95 text-[#0f172a] shadow-[0_10px_25px_rgba(15,23,42,0.08)]"
+                      : "border-l-transparent text-[#6b7280] hover:border-white/70 hover:bg-white/80"
                   }`}
                 >
                   <span
                     className={`flex h-9 w-9 items-center justify-center rounded-md border text-xs ${
-                      active ? "border-[#0b0d0f] bg-white" : "border-[rgba(0,0,0,0.08)] bg-white"
+                      active ? "border-[#5b4bff] bg-white" : "border-white/70 bg-white"
                     }`}
                   >
                     <Icon name={item.icon} active={active} />

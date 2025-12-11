@@ -46,25 +46,32 @@ export async function Sidebar() {
   const email = session.user.email ?? "Account";
 
   return (
-    <aside className="hidden h-screen w-72 flex-none border-r border-[rgba(0,0,0,0.08)] bg-white/90 backdrop-blur-sm md:flex">
+    <aside className="hidden h-screen w-72 flex-none border-r border-white/40 bg-white/80 backdrop-blur-xl md:flex">
       <div className="flex h-full w-full flex-col gap-8 px-5 py-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#0f172a] via-[#0b0d0f] to-[#111827] text-sm font-bold uppercase text-white shadow-sm">np</div>
-          <div className="space-y-0.5">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1e293b]">Neyro PARA</div>
-            <div className="text-xs text-[#555]">Capture, PARA, Review</div>
+        <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-[#0f172a] via-[#1b1f3a] to-[#0b0d0f] p-4 text-white shadow-[0_15px_45px_rgba(11,13,15,0.4)]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-base font-semibold uppercase">np</div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">Neyro PARA</p>
+              <p className="text-sm font-semibold">Second brain cockpit</p>
+            </div>
           </div>
+          <p className="mt-3 text-xs text-white/75">Capture → Projects → Areas → Resources → Weekly review. Same loop, enforced daily.</p>
         </div>
 
         <SidebarNav sections={navSections} />
 
-        <div className="mt-auto space-y-3 border-t border-[rgba(0,0,0,0.08)] pt-4 text-sm">
+        <div className="mt-auto space-y-4 rounded-2xl border border-white/60 bg-white/80 p-4 text-sm text-[#4f586d] shadow-inner">
           <div>
-            <div className="text-xs text-[#555]">Signed in</div>
-            <div className="font-semibold text-[#0b0d0f]">{email}</div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#7c8498]">Signed in</p>
+            <p className="text-base font-semibold text-[#0f172a]">{email}</p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/profile" className="flex-1 rounded-md border border-[rgba(0,0,0,0.1)] px-3 py-2 text-center text-xs font-semibold text-[#0b0d0f] hover:border-[#0b0d0f]">
+          <div className="rounded-lg border border-[#e1e5f4] bg-[#f8f9ff] px-3 py-2 text-xs text-[#61677c]">
+            <p className="font-semibold text-[#0f172a]">Try this</p>
+            <p>Run the weekly wizard, log streaks, and archive anything done.</p>
+          </div>
+          <div className="flex gap-2 text-xs font-semibold">
+            <Link href="/profile" className="flex-1 rounded-md border border-[#d6dbf0] bg-white px-3 py-2 text-center text-[#0f172a] hover:border-[#0f172a]">
               Profile
             </Link>
             <form
@@ -74,7 +81,7 @@ export async function Sidebar() {
                 await signOut();
               }}
             >
-              <button type="submit" className="w-full rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-3 py-2 text-xs font-semibold text-white hover:shadow-sm">
+              <button type="submit" className="w-full rounded-md border border-[#0f172a] bg-[#0f172a] px-3 py-2 text-white shadow-sm hover:-translate-y-[1px]">
                 Sign out
               </button>
             </form>
