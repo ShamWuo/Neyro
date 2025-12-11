@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
@@ -68,9 +69,18 @@ export default async function FocusPage() {
 
   return (
     <div className="space-y-10">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Focus</h1>
-        <p className="text-sm text-[#555]">One thing at a time, time-boxed.</p>
+      <header className="space-y-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1e293b]">Today</p>
+            <h1 className="text-2xl font-semibold tracking-tight">Focus</h1>
+            <p className="text-sm text-[#555]">Pick one project, pin three tasks, box the time. This is the PARA execution lane.</p>
+          </div>
+          <div className="rounded-md border border-[rgba(0,0,0,0.08)] bg-white px-4 py-2 text-xs text-[#555]">
+            <div className="font-semibold text-[#0b0d0f]">How to use focus</div>
+            <div>1) Commit a project for today. 2) Pin up to 3 tasks. 3) Log time boxes. Clear pins before new ones.</div>
+          </div>
+        </div>
       </header>
 
       <section className="panel space-y-4">
@@ -105,7 +115,16 @@ export default async function FocusPage() {
                 <form action={() => unpin(item.id)}><button className="text-xs font-semibold text-[#0b0d0f]">Unpin</button></form>
               </div>
             ))}
-            {pinnedItems.length === 0 && <div className="text-sm text-[#555]">Nothing pinned yet.</div>}
+            {pinnedItems.length === 0 && (
+              <div className="rounded-md border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] px-3 py-3 text-sm text-[#555]">
+                <div className="font-semibold text-[#0b0d0f]">Nothing pinned yet.</div>
+                <div>Grab tasks from suggestions or inbox, then pin the top three for today.</div>
+                <div className="mt-2 flex gap-2 text-xs font-semibold">
+                  <Link href="/inbox" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Open inbox</Link>
+                  <Link href="/projects" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Open projects</Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -129,7 +148,16 @@ export default async function FocusPage() {
                 )}
               </div>
             ))}
-            {unpinnedSuggestions.length === 0 && <div className="text-sm text-[#555]">No active tasks found.</div>}
+            {unpinnedSuggestions.length === 0 && (
+              <div className="rounded-md border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] px-3 py-3 text-sm text-[#555]">
+                <div className="font-semibold text-[#0b0d0f]">No suggestions yet.</div>
+                <div>Create a project task or classify inbox items into a project to surface here.</div>
+                <div className="mt-2 flex gap-2 text-xs font-semibold">
+                  <Link href="/projects" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Projects</Link>
+                  <Link href="/inbox" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Inbox</Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -151,7 +179,12 @@ export default async function FocusPage() {
               <div className="text-xs text-[#555]">{s.minutes} min</div>
             </div>
           ))}
-          {sessions.length === 0 && <div className="text-sm text-[#555]">No sessions logged yet.</div>}
+          {sessions.length === 0 && (
+            <div className="rounded-md border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] px-3 py-3 text-sm text-[#555]">
+              <div className="font-semibold text-[#0b0d0f]">No sessions logged yet.</div>
+              <div>Plan one 25-50 minute block per pinned task. Log it here when you start.</div>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -5,7 +5,7 @@
 [x] Install Required Extensions (none needed)
 [x] Compile the Project
 [x] Create and Run Task (not needed)
-[ ] Launch the Project
+[ ] Launch the Project (pending deployment/env review)
 [x] Ensure Documentation is Complete
 	 -->
 

@@ -13,24 +13,24 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: "System",
+    title: "PARA",
     items: [
       { href: "/projects", label: "Projects", icon: "projects" },
       { href: "/areas", label: "Areas", icon: "areas" },
       { href: "/resources", label: "Resources", icon: "resources" },
+      { href: "/archive", label: "Archive", icon: "archive" },
       { href: "/backlog", label: "Backlog", icon: "backlog" },
       { href: "/templates", label: "Templates", icon: "templates" },
     ],
   },
   {
-    title: "Reviews",
+    title: "Review",
     items: [
       { href: "/review", label: "Weekly Review", icon: "review" },
       { href: "/weekly-review", label: "Wizard", icon: "review" },
       { href: "/integrity", label: "Integrity", icon: "integrity" },
       { href: "/timeline", label: "Timeline", icon: "timeline" },
       { href: "/activity", label: "Activity", icon: "activity" },
-      { href: "/archive", label: "Archive", icon: "archive" },
       { href: "/assist", label: "Smart Assist", icon: "assist" },
       { href: "/search", label: "Search", icon: "search" },
     ],
@@ -48,9 +48,12 @@ export async function Sidebar() {
   return (
     <aside className="hidden h-screen w-72 flex-none border-r border-[rgba(0,0,0,0.08)] bg-white/90 backdrop-blur-sm md:flex">
       <div className="flex h-full w-full flex-col gap-8 px-5 py-8">
-        <div className="space-y-1">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1e293b]">Neyro PARA</div>
-          <div className="text-sm text-[#555]">Clean, focused workspace</div>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#0f172a] via-[#0b0d0f] to-[#111827] text-sm font-bold uppercase text-white shadow-sm">np</div>
+          <div className="space-y-0.5">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1e293b]">Neyro PARA</div>
+            <div className="text-xs text-[#555]">Capture, PARA, Review</div>
+          </div>
         </div>
 
         <SidebarNav sections={navSections} />
