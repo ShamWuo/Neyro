@@ -56,7 +56,7 @@ const secondaryCta = "inline-flex items-center justify-center gap-2 rounded-md b
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#f8f9fa] text-[#0b0d0f]">
+    <main className="min-h-screen bg-[#f8f9fa] bg-[radial-gradient(circle_at_20%_20%,#e8edff_0,transparent_32%),radial-gradient(circle_at_80%_0,#ffe8d9_0,transparent_28%)] text-[#0b0d0f]">
       <div className="sticky top-0 z-20 border-b border-[rgba(0,0,0,0.08)] bg-[rgba(248,249,250,0.8)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 text-sm">
           <div className="font-semibold tracking-tight">Neyro - PARA enforced</div>
@@ -72,6 +72,12 @@ export default function LandingPage() {
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-col gap-14 px-6 py-16 md:gap-16 md:py-24">
+        <div className="flex flex-wrap gap-2 rounded-md border border-[rgba(0,0,0,0.08)] bg-white/70 px-4 py-3 text-xs font-semibold text-[#0b0d0f] shadow-sm backdrop-blur">
+          <span className="rounded-full bg-[#0f172a] px-3 py-1 text-white">Speed: capture → classify in under 1s</span>
+          <span className="rounded-full border border-[rgba(0,0,0,0.08)] px-3 py-1">Guardrail: max 7 active projects</span>
+          <span className="rounded-full border border-[rgba(0,0,0,0.08)] px-3 py-1">Proof: weekly review ships a summary</span>
+        </div>
+
         <header className="grid gap-10 md:grid-cols-[1.25fr_1fr] md:items-center">
           <div className="space-y-4">
             <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1e293b]">Problem to Solution to Proof</p>
@@ -95,7 +101,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="panel space-y-4">
+          <div className="panel space-y-4 shadow-lg ring-1 ring-[rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">Precision overview</span>
               <span className="badge">PARA enforced</span>
@@ -114,12 +120,10 @@ export default function LandingPage() {
           </div>
         </header>
         <div className="flex flex-wrap gap-3">
-          <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
+          <Link href="/auth/register" className={`${primaryCta} px-4 py-2 shadow-md shadow-[rgba(15,23,42,0.2)]`}>
             Start your 7-day clarity trial
           </Link>
-          <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
-            View a live demo
-          </Link>
+          <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>View a live demo</Link>
         </div>
 
         <section className="space-y-4">
