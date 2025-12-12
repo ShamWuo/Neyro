@@ -1,9 +1,5 @@
-import dynamic from "next/dynamic";
 import Link from "next/link";
-
-const RadialOrbitalTimelineDemo = dynamic(() => import("@/components/ui/radial-orbital-timeline-demo"), {
-  ssr: false,
-});
+import RadialOrbitalTimelineDemo from "@/components/ui/radial-orbital-timeline-demo";
 
 const stats = [
   { label: "Projects capped", value: "7", detail: "Hard guardrail" },
