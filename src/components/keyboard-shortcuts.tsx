@@ -24,7 +24,10 @@ export function KeyboardShortcuts() {
         router.push("/focus");
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        router.push("/search");
+        window.dispatchEvent(new CustomEvent("command-palette:toggle"));
+      } else if (e.shiftKey && e.key === "?") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("shortcuts:toggle"));
       }
     }
     window.addEventListener("keydown", onKey);

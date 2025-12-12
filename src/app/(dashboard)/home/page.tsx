@@ -70,53 +70,62 @@ export default async function Home() {
   }
   const nextReviewDue = lastReview ? new Date(lastReview.completedAt.getTime() + 7 * 86400000) : null;
   const nextReviewLabel = nextReviewDue ? nextReviewDue.toISOString().slice(0, 10) : "Schedule now";
+  const upcomingDeadlines = activeProjectsList.filter((p) => p.deadline).slice(0, 3);
+  const recentActivity = recentReviews.slice(0, 5);
+  const formatDate = (date?: Date | null) => (date ? date.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "No date");
 
   return (
     <div className="space-y-8">
-      <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-gradient-to-r from-[#0b1224] via-[#0f172a] to-[#0b0d0f] p-6 text-white shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/70">Today</p>
-            <h1 className="text-3xl font-semibold tracking-tight">Welcome back, {name}</h1>
-            <p className="text-sm text-white/80">Neyro PARA pulse: capture, sort into Projects / Areas / Resources / Archive, stay under seven projects, publish a weekly review.</p>
+      <div className="rounded-3xl border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_10%_10%,rgba(87,114,255,0.16),transparent_35%),radial-gradient(circle_at_85%_0%,rgba(255,155,108,0.15),transparent_35%),linear-gradient(135deg,var(--card),var(--card-muted))] p-6 shadow-[var(--elev-2)]">
+        <div className="grid gap-6 md:grid-cols-[1.2fr_0.9fr] md:items-center">
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-tertiary)]">Welcome back, {name}</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Your PARA cockpit for today</h1>
+            <p className="text-sm text-[var(--text-secondary)]">Capture fast, keep projects under seven, review weekly. Stay in motion with focused time blocks.</p>
             <div className="flex flex-wrap gap-2 text-sm font-semibold">
-              <Link href="/inbox" className="rounded-md border border-white/40 bg-white/10 px-4 py-2 text-white hover:border-white">Capture now</Link>
-              <Link href="/projects" className="rounded-md border border-white/20 bg-white/0 px-4 py-2 text-white hover:border-white/50">Add a project</Link>
-              <Link href="/review" className="rounded-md border border-white/20 bg-white/0 px-4 py-2 text-white hover:border-white/50">Start weekly review</Link>
-              <Link href="/focus" className="rounded-md border border-white/20 bg-white/0 px-4 py-2 text-white hover:border-white/50">Enter focus mode</Link>
+              <Link href="/inbox" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-3)]">Capture now</Link>
+              <Link href="/projects" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Add a project</Link>
+              <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Start weekly review</Link>
+              <Link href="/focus" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Enter focus mode</Link>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-[var(--text-tertiary)]">
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">Cmd/Ctrl + K: Command palette</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1"> ?: Shortcuts</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">Keep {projectsRemaining} project slots free</span>
             </div>
           </div>
-          <div className="rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/90">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">What to do now</div>
-            <ul className="mt-2 space-y-1">
-              <li>- Capture 1 thing and classify it</li>
-              <li>- {activeProjects >= 7 ? "Close or archive a project" : "Keep projects under 7"}</li>
-              <li>- {lastReview ? "Log your weekly review" : "Run your first review"}</li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Capture queue</div>
-            <div className="text-2xl font-semibold">{inboxCount}</div>
-            <p className="text-xs text-white/70">Empty inbox daily. <Link href="/inbox" className="underline">Open inbox</Link></p>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
-              <span>Project cap</span>
-              <span className="text-[11px]">Cap 7</span>
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--elev-1)]">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
+              <span>Momentum</span>
+              <span className="rounded-full border border-[var(--border-subtle)] px-2 py-1 text-[10px] text-[var(--text-secondary)]">Streak {streak}w</span>
             </div>
-            <div className="text-2xl font-semibold">{activeProjects}/7</div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
-              <div className={`${activeProjects >= 7 ? "bg-[#fca5a5]" : "bg-white"} h-full`} style={{ width: `${projectLoad * 100}%` }} />
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3">
+                <div className="text-xs font-semibold text-[var(--text-tertiary)]">Review cadence</div>
+                <div className="text-2xl font-semibold text-[var(--text-primary)]">{lastReviewDate ?? "Not yet"}</div>
+                <p className="text-xs text-[var(--text-secondary)]">{reviewStatus}</p>
+                <p className="text-[11px] text-[var(--text-tertiary)]">Next due: {nextReviewLabel}</p>
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3">
+                <div className="text-xs font-semibold text-[var(--text-tertiary)]">Project cap</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-semibold text-[var(--text-primary)]">{activeProjects}/7</span>
+                  <span className="text-[11px] text-[var(--text-secondary)]">{projectsRemaining} open</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface)]">
+                  <div className={`${activeProjects >= 7 ? "bg-[var(--danger)]" : "bg-[var(--primary-strong)]"} h-full transition-[width] duration-300`} style={{ width: `${projectLoad * 100}%` }} />
+                </div>
+                <p className="text-[11px] text-[var(--text-tertiary)]">{activeProjects >= 7 ? "Over cap — archive or finish one." : "Stay under seven to keep focus."}</p>
+              </div>
             </div>
-            <p className="text-xs text-white/70">{activeProjects >= 7 ? "Over cap - pause one before adding" : `${projectsRemaining} slots left`} - <Link href="/projects" className="underline">Manage</Link></p>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Review cadence</div>
-            <div className="text-2xl font-semibold">{lastReviewDate ?? "Not yet"}</div>
-            <p className="text-xs text-white/70">{reviewStatus} - <Link href="/review" className="underline">Run review</Link></p>
-            <p className="text-xs text-white/60">Streak: {streak} weeks | Next due: {nextReviewLabel}</p>
+            <div className="mt-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3 text-xs text-[var(--text-secondary)]">
+              <div className="font-semibold text-[var(--text-primary)]">What to do now</div>
+              <ul className="mt-2 space-y-1 list-disc pl-4">
+                <li>Capture one thing then classify it.</li>
+                <li>{activeProjects >= 7 ? "Close or archive a project." : "Keep projects under seven."}</li>
+                <li>{lastReview ? "Log your weekly review." : "Run your first review."}</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -274,56 +283,111 @@ export default async function Home() {
       <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
         <div className="panel space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#0b0d0f]">Active projects / nearest deadlines</h2>
-            <Link href="/projects" className="text-xs font-semibold text-[#1e293b] underline">View all</Link>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Active projects / nearest deadlines</h2>
+            <Link href="/projects" className="text-xs font-semibold text-[var(--text-secondary)] underline">View all</Link>
           </div>
           <div className="space-y-2">
             {activeProjectsList.map((p) => (
               <Link
                 key={p.id}
                 href={`/projects/${p.id}`}
-                className="flex items-center justify-between rounded-md border border-[rgba(0,0,0,0.06)] px-3 py-2 text-sm transition hover:-translate-y-[1px] hover:border-[#0b0d0f]"
+                className="flex items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 text-sm transition hover:-translate-y-[1px] hover:border-[var(--border-strong)] hover:shadow-[var(--elev-1)]"
               >
                 <div>
-                  <div className="font-semibold text-[#0b0d0f]">{p.name}</div>
-                  <div className="text-xs text-[#555]">{p.outcome}</div>
+                  <div className="font-semibold text-[var(--text-primary)]">{p.name}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{p.outcome}</div>
                 </div>
-                <div className="text-xs text-[#1e293b]">{p.deadline ? p.deadline.toISOString().slice(0, 10) : "No deadline"}</div>
+                <div className="text-xs text-[var(--text-secondary)]">{p.deadline ? p.deadline.toISOString().slice(0, 10) : "No deadline"}</div>
               </Link>
             ))}
             {activeProjectsList.length === 0 && (
-              <div className="flex flex-col gap-2 rounded-md border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] px-3 py-3 text-sm text-[#555]">
-                <div className="font-semibold text-[#0b0d0f]">No active projects yet.</div>
-                <div>Start with one clear outcome, set a deadline, and keep under seven.</div>
-                <div className="flex gap-2 text-xs font-semibold">
-                  <Link href="/projects" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Create a project</Link>
-                  <Link href="/templates" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Use a template</Link>
+              <div className="flex flex-col gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-3 text-sm text-[var(--text-secondary)]">
+                <div className="font-semibold text-[var(--text-primary)]">No active projects yet.</div>
+                <div>Start with one clear outcome, set a deadline, and keep under seven. Try a template or import sample data.</div>
+                <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                  <Link href="/projects" className="rounded border border-[var(--border-subtle)] bg-[var(--card)] px-2 py-1">Create a project</Link>
+                  <Link href="/templates" className="rounded border border-[var(--border-subtle)] bg-[var(--card)] px-2 py-1">Use a template</Link>
+                  <Link href="/assist" className="rounded border border-[var(--border-subtle)] bg-[var(--card)] px-2 py-1">See guided tour</Link>
                 </div>
               </div>
             )}
           </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Upcoming deadlines</div>
+              <div className="mt-2 space-y-2 text-sm text-[var(--text-secondary)]">
+                {upcomingDeadlines.length === 0 && <p>No deadlines set yet.</p>}
+                {upcomingDeadlines.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
+                    <div className="text-[var(--text-primary)]">{p.name}</div>
+                    <div className="text-xs font-semibold text-[var(--text-secondary)]">{formatDate(p.deadline)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Recent activity</div>
+              <div className="mt-2 space-y-2 text-sm text-[var(--text-secondary)]">
+                {recentActivity.length === 0 && <p>Nothing logged yet. Run your first review.</p>}
+                {recentActivity.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
+                    <div>
+                      <div className="font-semibold text-[var(--text-primary)]">Weekly review</div>
+                      <div className="text-[11px] text-[var(--text-tertiary)]">Completed</div>
+                    </div>
+                    <div className="text-xs font-semibold text-[var(--text-secondary)]">{formatDate(r.completedAt)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="panel space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#0b0d0f]">Quick capture</h2>
-            <span className="text-xs text-[#555]">Inbox to classify later</span>
+        <div className="space-y-4">
+          <div className="panel space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Quick capture</h2>
+              <span className="text-xs text-[var(--text-secondary)]">Inbox to classify later</span>
+            </div>
+            <form action={quickCapture} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+              <input
+                name="title"
+                placeholder="Task, note, or link"
+                className="border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 md:col-span-1"
+                required
+              />
+              <input
+                name="url"
+                placeholder="URL (optional)"
+                className="border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 md:col-span-1"
+              />
+              <button type="submit" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--border-strong)] md:col-span-1">Capture to inbox</button>
+            </form>
+            <p className="text-xs text-[var(--text-secondary)]">Tip: Capture first, classify once per day. Keyboard hint: press Ctrl/Cmd+K to jump to the command palette.</p>
           </div>
-          <form action={quickCapture} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-            <input
-              name="title"
-              placeholder="Task, note, or link"
-              className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-1"
-              required
-            />
-            <input
-              name="url"
-              placeholder="URL (optional)"
-              className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-1"
-            />
-            <button type="submit" className="rounded-md border border-[rgba(0,0,0,0.12)] px-4 py-2 text-sm font-semibold md:col-span-1">Capture to inbox</button>
-          </form>
-          <p className="text-xs text-[#555]">Tip: Capture first, classify once per day. Keyboard hint: press Ctrl/Cmd+K in your browser to jump to the address bar and type /home quickly.</p>
+
+          <div className="panel space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Review streak</h2>
+              <Link href="/weekly-review" className="text-xs font-semibold text-[var(--text-secondary)] underline">Open wizard</Link>
+            </div>
+            <div className="grid gap-2 text-sm text-[var(--text-secondary)]">
+              <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
+                <span>Current streak</span>
+                <span className="font-semibold text-[var(--text-primary)]">{streak} weeks</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
+                <span>Last review</span>
+                <span className="font-semibold text-[var(--text-primary)]">{lastReviewDate ?? "Not yet"}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
+                <span>Next due</span>
+                <span className="font-semibold text-[var(--text-primary)]">{nextReviewLabel}</span>
+              </div>
+            </div>
+            <p className="text-xs text-[var(--text-tertiary)]">Streaks keep your PARA loop honest. Add a 15-minute slot to run it weekly.</p>
+          </div>
         </div>
       </div>
     </div>

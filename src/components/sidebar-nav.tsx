@@ -33,7 +33,7 @@ type IconName =
   | "search";
 
 function Icon({ name, active }: { name: IconName; active: boolean }) {
-  const stroke = active ? "#0f172a" : "#7b839a";
+  const stroke = active ? "var(--text-primary)" : "#7b839a";
   const common = { stroke, strokeWidth: 1.6, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
   switch (name) {
@@ -166,7 +166,7 @@ export function SidebarNav({ sections }: { sections: NavSection[] }) {
     <nav className="space-y-6">
       {sections.map((section) => (
         <div key={section.title} className="space-y-2">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9aa0ab]">{section.title}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{section.title}</div>
           <div className="space-y-1">
             {section.items.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -176,13 +176,13 @@ export function SidebarNav({ sections }: { sections: NavSection[] }) {
                   href={item.href}
                   className={`group flex items-center gap-3 rounded-lg border border-transparent border-l-4 px-3 py-2 text-sm transition ${
                     active
-                      ? "border-l-[#5b4bff] bg-white/95 text-[#0f172a] shadow-[0_10px_25px_rgba(15,23,42,0.08)]"
-                      : "border-l-transparent text-[#6b7280] hover:border-white/70 hover:bg-white/80"
+                      ? "border-l-[var(--primary-strong)] bg-[var(--card)] text-[var(--text-primary)] shadow-[var(--elev-1)]"
+                      : "border-l-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface-muted)]"
                   }`}
                 >
                   <span
                     className={`flex h-9 w-9 items-center justify-center rounded-md border text-xs ${
-                      active ? "border-[#5b4bff] bg-white" : "border-white/70 bg-white"
+                      active ? "border-[var(--primary-strong)] bg-[var(--card)]" : "border-[var(--border-subtle)] bg-[var(--surface)]"
                     }`}
                   >
                     <Icon name={item.icon} active={active} />
