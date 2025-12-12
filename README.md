@@ -43,3 +43,10 @@ Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with 
 ## Notes
 - Signed-in pages live under the `(dashboard)` route group and redirect to `/auth/login` when `auth()` has no user.
 - Tailwind v4 inline usage in globals.
+
+## Quick Production Checklist
+
+- Ensure `.env` is not committed and rotate any exposed secrets (DB, OAuth, OpenAI keys).
+- Run `npm run lint` and fix any warnings flagged as errors by your CI.
+- Run `npm run build` locally and test the main flows: capture, classify, review, projects.
+- Optionally run `npm audit` and address vulnerabilities before public release.
