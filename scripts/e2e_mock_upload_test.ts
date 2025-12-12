@@ -18,7 +18,18 @@ async function main() {
   console.log("Wrote mock file:", outPath);
 
   try {
-    const decision = await analyzeParaCapture({ text, imageUrl: publicUrl });
+    let decision;
+    if (process.env.OPENAI_API_KEY) {
+      decision = await analyzeParaCapture({ text, imageUrl: publicUrl });
+    } else {
+      // Local/dev fallback: mocked classification when no API key is present
+      decision = {
+        classification: "INBOX",
+        title: text.slice(0, 80),
+        details: text,
+        type: "NOTE",
+      };
+    }
     console.log(JSON.stringify({ ok: true, key: safeKey, publicUrl, decision }, null, 2));
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
