@@ -2,6 +2,12 @@ import { ItemClassification, ItemType } from "@prisma/client";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
+type ChatContent =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
+type ChatMessage = { role: "system" | "user"; content: ChatContent[] };
+
 export type ParaDecision = {
   classification: ItemClassification;
   title: string;
@@ -22,7 +28,7 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
 
-  const messages: { role: "system" | "user"; content: any }[] = [
+  const messages: ChatMessage[] = [
     {
       role: "system",
       content:
@@ -30,7 +36,7 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
     },
   ];
 
-  const userContent: any[] = [];
+  const userContent: ChatContent[] = [];
   if (params.text) {
     userContent.push({ type: "text", text: `User input: ${params.text}` });
   }
@@ -74,7 +80,7 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
         type: obj.type && Object.values(ItemType).includes(obj.type) ? obj.type : ItemType.NOTE,
       };
     }
-  } catch (err) {
+  } catch {
     parsed = { classification: ItemClassification.INBOX, title: params.text?.slice(0, 80) || "Captured note", details: params.text || null, type: ItemType.NOTE };
   }
 

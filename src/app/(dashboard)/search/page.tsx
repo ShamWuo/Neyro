@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { analyzeParaCapture } from "@/lib/ai";
 import { ItemClassification } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
