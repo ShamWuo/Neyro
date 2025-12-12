@@ -31,8 +31,13 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content:
-        "You classify inputs into the PARA method. Output strict JSON with keys classification (INBOX|PROJECT|AREA|RESOURCE|ARCHIVE), title, details, and optional type (NOTE|TASK|LINK). Keep it concise.",
+      content: [
+        {
+          type: "text",
+          text:
+            "You classify inputs into the PARA method. Output strict JSON with keys classification (INBOX|PROJECT|AREA|RESOURCE|ARCHIVE), title, details, and optional type (NOTE|TASK|LINK). Keep it concise.",
+        },
+      ],
     },
   ];
 
