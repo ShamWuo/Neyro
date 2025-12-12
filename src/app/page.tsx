@@ -1,4 +1,9 @@
+import dynamic from "next/dynamic";
 import Link from "next/link";
+
+const RadialOrbitalTimelineDemo = dynamic(() => import("@/components/ui/radial-orbital-timeline-demo"), {
+  ssr: false,
+});
 
 const stats = [
   { label: "Projects capped", value: "7", detail: "Hard guardrail" },
@@ -179,6 +184,20 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="grid gap-6 rounded-2xl border border-white/40 bg-white/70 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.1)] md:grid-cols-[0.55fr_0.45fr] md:items-center">
+          <div className="space-y-3">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#768198]">Para method</p>
+            <h2 className="text-2xl font-semibold text-[#0f172a]">Orbit through Capture → Projects → Areas → Resources → Review.</h2>
+            <p className="text-sm text-[#536072]">
+              The radial PARA orbit shows how Neyro keeps the loop moving: capture everything once, promote to projects, sustain areas, attach resources, and close the loop with review.
+            </p>
+            <p className="text-xs text-[#6c7280]">Click any node to spotlight dependencies and see energy flowing through the PARA system.</p>
+          </div>
+          <div className="rounded-2xl border border-white/40 bg-black/[0.92] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+            <RadialOrbitalTimelineDemo />
           </div>
         </section>
 
