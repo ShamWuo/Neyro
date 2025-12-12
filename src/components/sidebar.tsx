@@ -35,8 +35,6 @@ const navSections: NavSection[] = [
       { href: "/review", label: "Weekly Review", icon: "review" },
       { href: "/weekly-review", label: "Wizard", icon: "review" },
       { href: "/activity", label: "Activity", icon: "activity" },
-      { href: "/integrity", label: "Integrity", icon: "integrity" },
-      { href: "/timeline", label: "Timeline", icon: "timeline" },
       { href: "/search", label: "Search", icon: "search" },
     ],
   },

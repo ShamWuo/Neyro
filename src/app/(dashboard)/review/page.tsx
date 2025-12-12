@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { getActiveProjectCount } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
+import { analyzeParaCapture } from "@/lib/ai";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -40,6 +41,23 @@ export default async function ReviewPage({ searchParams }: { searchParams?: Prom
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), projectId: null, areaId: null, resourceCollectionId: null } });
     } else if (target === "inbox") {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.INBOX, projectId: null, areaId: null, resourceCollectionId: null, archivedAt: null } });
+    } else if (target === "ai") {
+      const item = await prisma.item.findUnique({ where: { id: itemId, userId } });
+      if (!item) return;
+      const decision = await analyzeParaCapture({ text: `${item.title}\n${item.details ?? ""}` });
+      await prisma.item.update({
+        where: { id: itemId, userId },
+        data: {
+          title: decision.title || item.title,
+          details: decision.details || item.details,
+          classification: decision.classification,
+          type: decision.type ?? item.type,
+          projectId: null,
+          areaId: null,
+          resourceCollectionId: null,
+          archivedAt: decision.classification === ItemClassification.ARCHIVE ? new Date() : null,
+        },
+      });
     }
     redirect("/review?step=1");
   }
@@ -167,6 +185,7 @@ export default async function ReviewPage({ searchParams }: { searchParams?: Prom
                     <option value="resource">Resource</option>
                     <option value="archive">Archive</option>
                     <option value="inbox">Inbox</option>
+                    <option value="ai">Let AI decide</option>
                   </select>
                   <select name="projectId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
                     <option value="">Project</option>

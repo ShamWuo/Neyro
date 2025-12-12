@@ -3,6 +3,7 @@ import { ensureProjectLimit, touchArea, touchCollection, touchProject } from "@/
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { AICaptureCard } from "./ai-capture";
 
 function daysAgo(days: number) {
   const d = new Date();
@@ -87,6 +88,8 @@ export default async function AssistPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Smart Assist</h1>
         <p className="text-sm text-[#555]">Prompts based on your activity—not chatty AI.</p>
       </div>
+
+      <AICaptureCard />
 
       <section className="panel space-y-3">
         <h2 className="text-sm font-semibold text-[#0b0d0f]">Duplicates</h2>
