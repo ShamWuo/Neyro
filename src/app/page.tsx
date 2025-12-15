@@ -1,13 +1,6 @@
 import Link from "next/link";
 import RadialOrbitalTimelineDemo from "@/components/ui/radial-orbital-timeline-demo";
 
-const stats = [
-  { label: "Projects capped", value: "7", detail: "Hard guardrail" },
-  { label: "Inbox to classify", value: "< 1s", detail: "Keyboard capture" },
-  { label: "Weekly review", value: "4 steps", detail: "Guided wizard" },
-  { label: "Area health", value: "Live", detail: "Auto prompts" },
-];
-
 const pillars = [
   {
     title: "Capture to Clarify",
@@ -83,12 +76,9 @@ const pricing = [
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f7f5ff] text-[#0b0d0f]">
-      <div className="absolute inset-0 -z-10 opacity-80">
-        <div className="h-full w-full bg-[radial-gradient(circle_at_15%_20%,rgba(93,95,239,0.25),transparent_45%),radial-gradient(circle_at_85%_15%,rgba(248,113,113,0.25),transparent_35%),linear-gradient(135deg,#f7f5ff,#fef9f4)]" />
-      </div>
-      <div className="sticky top-0 z-20 border-b border-white/40 bg-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 text-sm font-semibold">
+    <main className="min-h-screen bg-white text-[#0b0d0f]">
+      <div className="sticky top-0 z-20 border-b border-[#e8ebf3] bg-white/90">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3 text-sm font-semibold">
           <span>Neyro :: PARA enforced</span>
           <div className="flex gap-2">
             <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
@@ -101,55 +91,65 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 md:gap-16 md:py-24">
-        <header className="grid gap-10 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5b4bff] shadow-sm">
-              PARA / Building a Second Brain
+      <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-14 md:gap-14 md:py-20">
+        <header className="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#e8ebf3] bg-[#f7f8fc] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#4f5bff]">
+              PARA, no theatrics
             </div>
-            <div className="space-y-4">
-              <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] text-[#0f172a] md:text-5xl">
-                PARA discipline, baked in. Capture fast, keep projects capped, keep areas healthy, and ship a weekly review.
+            <div className="space-y-3">
+              <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] text-[#0f172a] md:text-[44px]">
+                One inbox. Seven projects max. Ship the weekly review.
               </h1>
-              <p className="text-lg text-[#384152]">
-                Neyro automates the rules from Tiago Forte&apos;s Building a Second Brain. One inbox, enforced PARA buckets, and a weekly cadence that actually happens.
+              <p className="text-lg text-[#3b4255]">
+                Neyro strips the PARA workflow to the essentials so people know exactly what to do: capture, classify, focus, and close the loop.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/auth/register" className={`${primaryCta} shadow-[0_14px_35px_rgba(15,23,42,0.18)]`}>
-                Start enforcing PARA
+              <Link href="/auth/register" className={`${primaryCta} shadow-[0_10px_28px_rgba(15,23,42,0.16)]`}>
+                Start free
               </Link>
               <Link href="/auth/login" className={secondaryCta}>
-                Watch product tour
+                See product tour
               </Link>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {stats.map((stat) => (
-                <div key={stat.label} className="rounded-xl border border-white/60 bg-white/80 px-4 py-3 shadow-inner">
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6c7280]">{stat.label}</div>
-                  <div className="text-2xl font-semibold text-[#0f172a]">{stat.value}</div>
-                  <p className="text-xs text-[#6c7280]">{stat.detail}</p>
-                </div>
-              ))}
+            <div className="grid gap-2 text-sm text-[#4c5366] sm:grid-cols-2">
+              <div className="rounded-lg border border-[#eef1f6] bg-[#fafbff] px-3 py-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#778198]">What are you?</p>
+                <p className="font-semibold text-[#0f172a]">PARA workspace with enforced guardrails</p>
+              </div>
+              <div className="rounded-lg border border-[#eef1f6] bg-[#fafbff] px-3 py-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#778198]">What should I do?</p>
+                <p className="font-semibold text-[#0f172a]">Capture now, classify, and cap projects at seven</p>
+              </div>
             </div>
           </div>
-          <div className="flex h-full w-full flex-col gap-4 rounded-2xl border border-white/50 bg-white/80 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.15)]">
-            <div className="flex items-center justify-between text-sm font-semibold text-[#0f172a]">
-              <span>Precision overview</span>
-              <span className="rounded-full border border-[#dfe3f1] px-2 py-1 text-[11px] text-[#6c7280]">PARA enforced</span>
+          <div className="w-full max-w-md justify-self-end rounded-2xl border border-[#e8ebf3] bg-[#0f172a] p-5 text-white shadow-[0_18px_55px_rgba(15,23,42,0.25)]">
+            <div className="flex items-center justify-between text-sm font-semibold">
+              <span>Today&apos;s PARA loop</span>
+              <span className="rounded-full border border-white/25 px-2 py-1 text-[11px] text-white/80">Action first</span>
             </div>
-            <div className="space-y-4 text-sm text-[#4a5364]">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#848da7]">PARA guardrails</p>
-                <ul className="mt-2 space-y-2">
-                  <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#0f172a]" /> Single capture inbox</li>
-                  <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#0f172a]" /> Seven active projects max</li>
-                  <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#0f172a]" /> Area health scores</li>
-                  <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#0f172a]" /> Weekly review wizard</li>
-                </ul>
+            <div className="mt-4 space-y-3 text-sm text-white/85">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 h-2 w-2 rounded-full bg-[#5bffb1]" />
+                <div>
+                  <p className="font-semibold">Inbox → classify</p>
+                  <p className="text-white/70">Add anything and move it to Projects, Areas, Resources, or Archive in under 10 seconds.</p>
+                </div>
               </div>
-              <div className="rounded-lg border border-[#e7e9f4] bg-gradient-to-br from-[#eef1ff] to-white px-4 py-3 text-xs text-[#0f172a]">
-                &ldquo;Another notes app No. Neyro keeps PARA honest: caps projects, nudges reviews, and turns a second brain into output.&rdquo;
+              <div className="flex items-start gap-3">
+                <div className="mt-1 h-2 w-2 rounded-full bg-[#8fb2ff]" />
+                <div>
+                  <p className="font-semibold">Projects capped at 7</p>
+                  <p className="text-white/70">See next actions and deadlines without the clutter of endless lists.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="mt-1 h-2 w-2 rounded-full bg-[#ffd480]" />
+                <div>
+                  <p className="font-semibold">Weekly review wizard</p>
+                  <p className="text-white/70">A four-step recap that keeps PARA trusted and ship-ready.</p>
+                </div>
               </div>
             </div>
           </div>
