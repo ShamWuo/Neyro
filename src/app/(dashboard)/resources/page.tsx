@@ -45,8 +45,8 @@ export default async function ResourcesPage({ searchParams }: { searchParams?: P
 
       <form action={createCollection} className="panel space-y-3">
         <div className="grid gap-3 md:grid-cols-2">
-          <input name="name" placeholder="Collection name" className="w-full border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" required />
-          <textarea name="description" placeholder="Description (optional)" className="w-full border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-2" rows={2} />
+          <input name="name" placeholder="Collection name" className="w-full border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" required />
+          <textarea name="description" placeholder="Description (optional)" className="w-full border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" rows={2} />
         </div>
         <button type="submit" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)]">Create collection</button>
       </form>

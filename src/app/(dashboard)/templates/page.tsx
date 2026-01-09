@@ -101,8 +101,8 @@ export default async function TemplatesPage() {
               <div className="font-semibold">Access premium template packs and sharing with Focus.</div>
             </div>
             <div className="flex gap-2 text-sm font-semibold">
-              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-2)]">See plans</Link>
-              <Link href="/assist" className="rounded-md border border-[var(--border-default)] bg-white px-3 py-2 text-[var(--text-primary)]">Generate with AI</Link>
+              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">See plans</Link>
+              <Link href="/assist" className="rounded-md border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)]">Generate with AI</Link>
             </div>
           </div>
         </div>
@@ -110,16 +110,16 @@ export default async function TemplatesPage() {
 
       <form action={createTemplate} className="panel space-y-3">
         <div className="grid gap-3 md:grid-cols-2">
-          <input name="name" placeholder="Template name" className="border border-[var(--border-default)] bg-white px-3 py-2" required />
-          <select name="type" className="border border-[var(--border-default)] bg-white px-3 py-2">
+          <input name="name" placeholder="Template name" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" required />
+          <select name="type" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2">
             {Object.values(TemplateType).map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
         </div>
-        <input name="description" placeholder="Description" className="border border-[var(--border-default)] bg-white px-3 py-2" />
-        <textarea name="data" placeholder='Optional JSON e.g. {"outcome":"Ship feature"}' className="w-full border border-[var(--border-default)] bg-white px-3 py-2" rows={4} />
-        <button className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-white">Save template</button>
+        <input name="description" placeholder="Description" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" />
+        <textarea name="data" placeholder='Optional JSON e.g. {"outcome":"Ship feature"}' className="w-full border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" rows={4} />
+        <button className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)]">Save template</button>
       </form>
 
       <div className="space-y-3">

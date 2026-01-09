@@ -173,7 +173,7 @@ export const VoiceInput = memo(function VoiceInput({ onTranscript, onClose, clas
               }`}
               aria-label={isListening ? "Stop listening" : "Start listening"}
             >
-              <span className="text-2xl text-white">{isListening ? "⏹" : "🎤"}</span>
+              <span className="text-2xl text-[var(--text-inverse)]">{isListening ? "⏹" : "🎤"}</span>
             </button>
           </div>
 
@@ -205,7 +205,7 @@ export const VoiceInput = memo(function VoiceInput({ onTranscript, onClose, clas
           <button
             onClick={handleSubmit}
             disabled={!transcript.trim() || isListening}
-            className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50"
           >
             Use Transcript
           </button>

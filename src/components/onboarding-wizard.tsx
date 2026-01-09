@@ -157,7 +157,7 @@ export function OnboardingWizard() {
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Welcome to Neyro</h1>
             <p className="text-sm text-[var(--text-secondary)]">
-              Let's set up your PARA productivity system in just a few steps.
+              Let&apos;s set up your PARA productivity system in just a few steps.
             </p>
           </div>
           <div className="space-y-3 text-left">
@@ -170,7 +170,7 @@ export function OnboardingWizard() {
           </div>
           <button
             onClick={handleNext}
-            className="w-full rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-3 text-sm font-semibold text-white"
+            className="w-full rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-3 text-sm font-semibold text-[var(--text-inverse)]"
           >
             Get Started
           </button>
@@ -182,7 +182,7 @@ export function OnboardingWizard() {
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Understanding PARA</h2>
             <p className="text-sm text-[var(--text-secondary)]">
-              Here's how PARA works in Neyro:
+              Here&apos;s how PARA works in Neyro:
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
@@ -208,7 +208,7 @@ export function OnboardingWizard() {
             </button>
             <button
               onClick={handleNext}
-              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white"
+              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)]"
             >
               Next
             </button>
@@ -262,7 +262,7 @@ export function OnboardingWizard() {
             <button
               onClick={handleCreateProject}
               disabled={loading || !formData.projectName || !formData.projectOutcome}
-              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50"
             >
               {loading ? "Creating..." : "Create Project"}
             </button>
@@ -314,7 +314,7 @@ export function OnboardingWizard() {
             <button
               onClick={handleCreateAreas}
               disabled={loading || formData.areas.filter((a) => a.name && a.standard).length === 0}
-              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50"
             >
               {loading ? "Creating..." : "Continue"}
             </button>
@@ -371,7 +371,7 @@ export function OnboardingWizard() {
             <button
               onClick={handleComplete}
               disabled={loading}
-              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50"
             >
               {loading ? "Completing..." : "Complete Setup"}
             </button>

@@ -76,7 +76,7 @@ export default async function FocusPage() {
             <h1 className="text-2xl font-semibold tracking-tight">Focus</h1>
             <p className="text-sm text-[var(--text-secondary)]">Pick one project, pin three tasks, box the time. This is the PARA execution lane.</p>
           </div>
-          <div className="rounded-md border border-[var(--border-subtle)] bg-white px-4 py-2 text-xs text-[var(--text-secondary)]">
+          <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-xs text-[var(--text-secondary)]">
             <div className="font-semibold text-[var(--text-primary)]">How to use focus</div>
             <div>1) Commit a project for today. 2) Pin up to 3 tasks. 3) Log time boxes. Clear pins before new ones.</div>
           </div>
@@ -90,8 +90,8 @@ export default async function FocusPage() {
               <p className="text-xs text-[var(--text-secondary)]">Keep pins, time boxes, and review exports synced for your weekly cadence.</p>
             </div>
             <div className="flex gap-2 text-sm font-semibold">
-              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-2)]">Upgrade</Link>
-              <Link href="/assist" className="rounded-md border border-[var(--border-default)] bg-white px-3 py-2 text-[var(--text-primary)]">Try Smart Assist</Link>
+              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">Upgrade</Link>
+              <Link href="/assist" className="rounded-md border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)]">Try Smart Assist</Link>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default async function FocusPage() {
           {dailyFocus?.project && <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-1 text-xs text-[var(--text-secondary)]">Committed: {dailyFocus.project.name}</span>}
         </div>
         <form action={setDailyProject} className="flex flex-wrap items-center gap-2 text-sm">
-          <select name="projectId" defaultValue={dailyFocus?.projectId ?? ""} className="border border-[var(--border-default)] bg-white px-3 py-2">
+          <select name="projectId" defaultValue={dailyFocus?.projectId ?? ""} className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2">
             <option value="">Choose a project</option>
             {activeProjects.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
@@ -182,8 +182,8 @@ export default async function FocusPage() {
           <span className="text-xs text-[var(--text-secondary)]">Total: {totalMinutes} min</span>
         </div>
         <form action={addSession} className="flex flex-wrap gap-2 text-sm">
-          <input name="label" placeholder="Focus block" className="border border-[var(--border-default)] bg-white px-3 py-2 flex-1" required />
-          <input name="minutes" type="number" min={15} step={5} placeholder="Minutes" className="border border-[var(--border-default)] bg-white px-3 py-2 w-28" required />
+          <input name="label" placeholder="Focus block" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 flex-1" required />
+          <input name="minutes" type="number" min={15} step={5} placeholder="Minutes" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 w-28" required />
           <button type="submit" className="rounded-md border border-[var(--border-default)] px-4 py-2 text-sm font-semibold">Add</button>
         </form>
         <div className="space-y-2">

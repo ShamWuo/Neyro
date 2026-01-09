@@ -238,7 +238,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
                   <option value="">Project target</option>
                   {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
-                <select name="collectionId" className="border border-[var(--border-default)] bg-white px-2 py-1">
+                <select name="collectionId" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   <option value="">Resource target</option>
                   {collections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
@@ -253,10 +253,10 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
       <div className="panel space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-primary)]">Add next action</h2>
         <form action={addItem} className="grid gap-3 md:grid-cols-2">
-          <input name="title" placeholder="Title" className="border border-[var(--border-default)] bg-white px-3 py-2 md:col-span-2" required />
-          <textarea name="details" placeholder="Details" className="border border-[var(--border-default)] bg-white px-3 py-2 md:col-span-2" rows={3} />
-          <input name="url" placeholder="URL (optional)" className="border border-[var(--border-default)] bg-white px-3 py-2 md:col-span-2" />
-          <select name="type" className="border border-[var(--border-default)] bg-white px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
+          <input name="title" placeholder="Title" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" required />
+          <textarea name="details" placeholder="Details" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" rows={3} />
+          <input name="url" placeholder="URL (optional)" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" />
+          <select name="type" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
             {Object.values(ItemType).map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
           <button type="submit" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] md:col-span-2">Add item</button>

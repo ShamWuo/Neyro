@@ -97,7 +97,7 @@ export function ReferralPanel() {
           />
           <button
             onClick={handleCopy}
-            className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-1 text-xs font-semibold text-white"
+            className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-1 text-xs font-semibold text-[var(--text-inverse)]"
           >
             Copy
           </button>

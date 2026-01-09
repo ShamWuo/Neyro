@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, memo, useCallback } from "react";
+import { useEffect, useState, memo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
 
 type Suggestion = {

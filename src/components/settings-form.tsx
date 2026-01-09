@@ -43,7 +43,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
       showToast("Settings saved!", "success");
       router.refresh();
-    } catch (error) {
+    } catch {
       showToast("Failed to save settings", "error");
     } finally {
       setLoading(false);
@@ -210,7 +210,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save Settings"}
         </button>

@@ -151,7 +151,7 @@ export function SavedSearches({ initialSearches = [] }: SavedSearchesProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Search name..."
-            className="flex-1 border border-[var(--border-default)] bg-white px-3 py-2 text-sm"
+            className="flex-1 border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 text-sm"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSaveSearch();
@@ -164,7 +164,7 @@ export function SavedSearches({ initialSearches = [] }: SavedSearchesProps) {
           <button
             onClick={handleSaveSearch}
             disabled={saving || !name.trim()}
-            className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save
           </button>

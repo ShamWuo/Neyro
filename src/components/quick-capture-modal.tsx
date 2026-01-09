@@ -197,7 +197,7 @@ export function QuickCaptureModal() {
             <button
               type="submit"
               disabled={loading || !title.trim()}
-              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[var(--elev-2)] disabled:opacity-50"
+              className="flex-1 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] transition hover:shadow-[var(--elev-2)] disabled:opacity-50"
             >
               {loading ? "Capturing..." : "Capture to Inbox"}
             </button>

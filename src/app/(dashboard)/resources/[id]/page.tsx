@@ -121,7 +121,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
             {collection.description && <div className="text-sm text-[var(--text-secondary)]">{collection.description}</div>}
           </div>
           <form action={deleteCollection}>
-            <button className="text-sm font-semibold text-red-600 underline" type="submit">Delete</button>
+            <button className="text-sm font-semibold text-[var(--danger)] underline" type="submit">Delete</button>
           </form>
         </div>
         <form action={updateCollection} className="grid gap-3 md:grid-cols-2">

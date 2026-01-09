@@ -25,7 +25,6 @@ type KanbanBoardProps = {
 
 // projectId is reserved for future API calls to update items by project
 export const KanbanBoard = memo(function KanbanBoard({ columns: initialColumns, projectId: _projectId }: KanbanBoardProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   void _projectId; // Reserved for future use
   const [columns, setColumns] = useState(initialColumns);
   const [draggedItem, setDraggedItem] = useState<{ itemId: string; columnId: string } | null>(null);
