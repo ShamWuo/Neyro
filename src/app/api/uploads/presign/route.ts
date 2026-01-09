@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -6,7 +7,12 @@ export const runtime = "nodejs";
 // Required env vars: S3_BUCKET, S3_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({} as unknown))) as Record<string, unknown>;
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    body = {};
+  }
   const filename = String(body.filename ?? body.key ?? "upload.bin");
   const contentType = String(body.contentType ?? "application/octet-stream");
 
@@ -18,14 +24,25 @@ export async function POST(request: Request) {
     try {
       // Dynamically import AWS SDK to avoid requiring it if not installed in some environments
       // Dynamic import; if AWS SDK isn't installed we'll gracefully fall back to the mock presign.
-      // @ts-expect-error - allow runtime import to fail in environments without the AWS SDK installed.
       const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
-      // @ts-expect-error - s3-request-presigner may not be present in some dev environments.
       const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
 
       const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 9)}-${filename.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
 
-      const client = new S3Client({ region });
+      const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+      const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+      if (!accessKeyId || !secretAccessKey) {
+        throw new Error("AWS credentials not configured");
+      }
+
+      const client = new S3Client({
+        region,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+      });
       const cmd = new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType });
       const url = await getSignedUrl(client, cmd, { expiresIn: 300 }); // 5 minutes
 
@@ -33,7 +50,7 @@ export async function POST(request: Request) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       // Fall through to mock presign below for dev convenience
-      console.warn("S3 presign failed, falling back to mock presign:", msg);
+      logger.warn("S3 presign failed, falling back to mock presign", { message: msg });
     }
   }
 

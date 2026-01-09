@@ -43,28 +43,28 @@ export default async function ActivityPage() {
     <div className="space-y-10">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
-        <p className="text-sm text-[#555]">Volume over the last 8 weeks.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Volume over the last 8 weeks.</p>
       </div>
 
       <div className="panel space-y-3">
         {rows.map((r) => (
           <div key={r.week} className="space-y-1 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#555]">Week of {r.week.slice(0,10)}</span>
-              <span className="text-xs text-[#555]">Created {r.created} · Archived {r.archived}</span>
+              <span className="text-xs text-[var(--text-secondary)]">Week of {r.week.slice(0,10)}</span>
+              <span className="text-xs text-[var(--text-secondary)]">Created {r.created} · Archived {r.archived}</span>
             </div>
-            <div className="flex h-2 w-full overflow-hidden rounded bg-[#eef1f5]">
-              <div className="bg-[#0f172a]" style={{ width: `${Math.min(100, r.created * 5)}%` }} />
-              <div className="bg-[#3b82f6]" style={{ width: `${Math.min(100, r.archived * 5)}%` }} />
+            <div className="flex h-2 w-full overflow-hidden rounded bg-[var(--border-subtle)]">
+              <div className="bg-[var(--primary-strong)]" style={{ width: `${Math.min(100, r.created * 5)}%` }} />
+              <div className="bg-[var(--primary)]" style={{ width: `${Math.min(100, r.archived * 5)}%` }} />
             </div>
           </div>
         ))}
-        {rows.length === 0 && <div className="text-sm text-[#555]">Not enough data yet.</div>}
+        {rows.length === 0 && <div className="text-sm text-[var(--text-secondary)]">Not enough data yet.</div>}
       </div>
 
       <div className="panel">
-        <div className="text-sm font-semibold text-[#0b0d0f]">Active project count</div>
-        <div className="text-2xl font-semibold mt-1 text-[#0b0d0f]">{activeProjects.filter((p) => p.status === "ACTIVE").length}</div>
+        <div className="text-sm font-semibold text-[var(--text-primary)]">Active project count</div>
+        <div className="text-2xl font-semibold mt-1 text-[var(--text-primary)]">{activeProjects.filter((p) => p.status === "ACTIVE").length}</div>
       </div>
     </div>
   );

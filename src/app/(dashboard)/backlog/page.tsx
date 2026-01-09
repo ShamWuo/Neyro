@@ -29,23 +29,23 @@ export default async function BacklogPage() {
     <div className="space-y-10">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Backlog</h1>
-        <p className="text-sm text-[#555]">Promote rich resource collections into real projects.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Promote rich resource collections into real projects.</p>
       </div>
       <div className="space-y-3">
         {collections.map((c) => (
           <div key={c.id} className="panel flex items-center justify-between text-sm">
             <div className="space-y-1">
-              <div className="font-semibold text-[#0b0d0f]">{c.name}</div>
-              <div className="text-xs text-[#555]">{c._count.items} items</div>
+              <div className="font-semibold text-[var(--text-primary)]">{c.name}</div>
+              <div className="text-xs text-[var(--text-secondary)]">{c._count.items} items</div>
             </div>
             {c._count.items >= 5 && (
               <form action={() => convert(c.id)}>
-                <button className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-3 py-1 text-xs font-semibold text-white">Convert to project</button>
+                <button className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-3 py-1 text-xs font-semibold text-[var(--text-inverse)]">Convert to project</button>
               </form>
             )}
           </div>
         ))}
-        {collections.length === 0 && <div className="text-sm text-[#555]">No collections yet.</div>}
+        {collections.length === 0 && <div className="text-sm text-[var(--text-secondary)]">No collections yet.</div>}
       </div>
     </div>
   );

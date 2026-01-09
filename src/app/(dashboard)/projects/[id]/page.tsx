@@ -4,6 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus, SharePermission } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
+
+// Code splitting: Load completion percentage component dynamically
+const ProjectCompletionPercentage = dynamic(
+  () => import("@/components/project-completion-percentage").then((mod) => ({ default: mod.ProjectCompletionPercentage })),
+  {
+    loading: () => <div className="h-24 w-full bg-[var(--surface-muted)] rounded animate-pulse" />,
+    ssr: true,
+  }
+);
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -29,26 +39,45 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   async function updateProject(formData: FormData) {
     "use server";
-    const name = String(formData.get("name") ?? "").trim();
-    const outcome = String(formData.get("outcome") ?? "").trim();
-    const deadlineRaw = String(formData.get("deadline") ?? "").trim();
-    if (!name || !outcome) return;
-    await prisma.project.update({
-      where: { id: projectId, userId },
-      data: { name, outcome, deadline: deadlineRaw ? new Date(deadlineRaw) : null },
-    });
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
+    try {
+      const name = String(formData.get("name") ?? "").trim();
+      const outcome = String(formData.get("outcome") ?? "").trim();
+      const deadlineRaw = String(formData.get("deadline") ?? "").trim();
+      if (!name || !outcome) return;
+      let deadline: Date | null = null;
+      if (deadlineRaw) {
+        try {
+          deadline = new Date(deadlineRaw);
+          if (isNaN(deadline.getTime())) deadline = null;
+        } catch {
+          deadline = null;
+        }
+      }
+      await prisma.project.update({
+        where: { id: projectId, userId },
+        data: { name, outcome, deadline },
+      });
+      await touchProject(userId, projectId);
+      redirect(`/projects/${projectId}`);
+    } catch (error) {
+      logger.error("Error updating project", error);
+      redirect(`/projects/${projectId}?error=update_failed`);
+    }
   }
 
   async function changeStatus(status: ProjectStatus) {
     "use server";
-    if (status === ProjectStatus.ACTIVE) {
-      await ensureProjectLimit(userId);
+    try {
+      if (status === ProjectStatus.ACTIVE) {
+        await ensureProjectLimit(userId);
+      }
+      await prisma.project.update({ where: { id: projectId, userId }, data: { status } });
+      await touchProject(userId, projectId);
+      redirect(`/projects/${projectId}`);
+    } catch (error) {
+      logger.error("Error changing project status", error);
+      redirect(`/projects/${projectId}?error=status_failed`);
     }
-    await prisma.project.update({ where: { id: projectId, userId }, data: { status } });
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
   }
 
   async function archiveProject() {
@@ -145,14 +174,20 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 rounded border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 rounded border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="text-sm text-zinc-500">Project</div>
-            <div className="text-xl font-semibold">{project.name}</div>
-            <div className="text-sm text-zinc-600">Outcome: {project.outcome}</div>
-            <div className="text-xs text-zinc-500">Status: {project.status}</div>
-            <div className="text-xs text-zinc-500">Active projects: {activeCount}/7</div>
+            <div className="text-sm text-[var(--text-tertiary)]">Project</div>
+            <div className="text-xl font-semibold text-[var(--text-primary)]">{project.name}</div>
+            <div className="text-sm text-[var(--text-secondary)]">Outcome: {project.outcome}</div>
+            <div className="text-xs text-[var(--text-tertiary)]">Status: {project.status}</div>
+            <div className="text-xs text-[var(--text-tertiary)]">Active projects: {activeCount}/7</div>
+            <div className="mt-3">
+              <ProjectCompletionPercentage
+                totalItems={project.items.length}
+                completedItems={project.items.filter((i) => i.isDone).length}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
             <form action={() => changeStatus(ProjectStatus.ACTIVE)}>
@@ -166,48 +201,48 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </form>
             {project.status === ProjectStatus.COMPLETED && (
               <form action={archiveProject}>
-                <button className="rounded border px-3 py-2 text-red-600">Move to archive</button>
+                <button className="rounded border px-3 py-2 text-[var(--danger)]">Move to archive</button>
               </form>
             )}
           </div>
         </div>
         <form action={updateProject} className="grid gap-3 md:grid-cols-2">
-          <input name="name" defaultValue={project.name} placeholder="Name" className="rounded border border-zinc-300 px-3 py-2" required />
-          <input name="outcome" defaultValue={project.outcome} placeholder="Outcome" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" required />
-          <label className="text-sm text-zinc-600 flex flex-col">
+          <input name="name" defaultValue={project.name} placeholder="Name" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" required />
+          <input name="outcome" defaultValue={project.outcome} placeholder="Outcome" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" required />
+          <label className="text-sm text-[var(--text-secondary)] flex flex-col">
             Deadline
-            <input name="deadline" type="date" defaultValue={project.deadline ? project.deadline.toISOString().slice(0, 10) : ""} className="rounded border border-zinc-300 px-3 py-2" />
+            <input name="deadline" type="date" defaultValue={project.deadline ? project.deadline.toISOString().slice(0, 10) : ""} className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" />
           </label>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white md:col-span-2">Save project</button>
+          <button type="submit" className="rounded bg-[var(--text-primary)] px-4 py-2 text-[var(--text-inverse)] md:col-span-2">Save project</button>
         </form>
       </div>
 
-      <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-3">
+      <div className="rounded border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-700">Items in this project</h2>
-          <span className="text-xs text-zinc-500">{project.items.length} items</span>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Items in this project</h2>
+          <span className="text-xs text-[var(--text-tertiary)]">{project.items.length} items</span>
         </div>
-        <div className="flex items-center justify-between text-xs text-zinc-600">
+        <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
           <span>Share with a partner</span>
           <form action={addShare} className="flex gap-2 items-center">
-            <input name="email" placeholder="email" className="rounded border border-zinc-300 px-2 py-1" />
+            <input name="email" placeholder="email" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" />
             <button className="rounded border px-2 py-1">Share</button>
           </form>
         </div>
-        {project.shares.length > 0 && <div className="text-xs text-zinc-500">Shared with: {project.shares.map((s) => s.email).join(", ")}</div>}
+          {project.shares.length > 0 && <div className="text-xs text-[var(--text-tertiary)]">Shared with: {project.shares.map((s) => s.email).join(", ")}</div>}
         <div className="space-y-3">
           {project.items.map((item) => (
-            <div key={item.id} className="rounded border border-zinc-200 p-3 space-y-2">
+            <div key={item.id} className="rounded border border-[var(--border-subtle)] bg-[var(--card)] p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">{item.title}</div>
-                  {item.details && <div className="text-sm text-zinc-600">{item.details}</div>}
+                  <div className="font-semibold text-[var(--text-primary)]">{item.title}</div>
+                  {item.details && <div className="text-sm text-[var(--text-secondary)]">{item.details}</div>}
                   {item.url && (
-                    <a href={item.url} className="text-xs text-blue-600 underline" target="_blank" rel="noreferrer">
+                    <a href={item.url} className="text-xs text-[var(--primary-strong)] underline" target="_blank" rel="noreferrer">
                       {item.url}
                     </a>
                   )}
-                  <div className="text-xs text-zinc-500">Type: {item.type}</div>
+                  <div className="text-xs text-[var(--text-tertiary)]">Type: {item.type}</div>
                 </div>
                 <form action={() => toggleDone(item.id, !item.isDone)}>
                   <button className="text-xs rounded border px-2 py-1">{item.isDone ? "Mark undone" : "Mark done"}</button>
@@ -215,30 +250,30 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               </div>
               <form action={updateItem} className="grid gap-2 md:grid-cols-2">
                 <input type="hidden" name="itemId" value={item.id} />
-                <input name="title" defaultValue={item.title} className="rounded border border-zinc-300 px-2 py-1" required />
-                <select name="type" defaultValue={item.type} className="rounded border border-zinc-300 px-2 py-1">
+                <input name="title" defaultValue={item.title} className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" required />
+                <select name="type" defaultValue={item.type} className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   {Object.values(ItemType).map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
                   ))}
                 </select>
-                <textarea name="details" defaultValue={item.details ?? ""} rows={2} className="rounded border border-zinc-300 px-2 py-1 md:col-span-2" />
-                <input name="url" defaultValue={item.url ?? ""} placeholder="URL" className="rounded border border-zinc-300 px-2 py-1 md:col-span-2" />
-                <button type="submit" className="rounded bg-black px-3 py-2 text-white md:col-span-2 text-sm">
+                <textarea name="details" defaultValue={item.details ?? ""} rows={2} className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 md:col-span-2" />
+                <input name="url" defaultValue={item.url ?? ""} placeholder="URL" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 md:col-span-2" />
+                <button type="submit" className="rounded bg-[var(--text-primary)] px-3 py-2 text-[var(--text-inverse)] md:col-span-2 text-sm">
                   Save item
                 </button>
               </form>
               <form action={moveItem} className="flex flex-wrap gap-2 text-sm">
                 <input type="hidden" name="itemId" value={item.id} />
-                <select name="target" className="rounded border border-zinc-300 px-2 py-1" required>
+                <select name="target" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" required>
                   <option value="">Move to...</option>
                   <option value="inbox">Inbox</option>
                   <option value="area">Area</option>
                   <option value="resource">Resource</option>
                   <option value="archive">Archive</option>
                 </select>
-                <select name="areaId" className="rounded border border-zinc-300 px-2 py-1">
+                <select name="areaId" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   <option value="">Area target</option>
                   {areas.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -246,7 +281,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                     </option>
                   ))}
                 </select>
-                <select name="collectionId" className="rounded border border-zinc-300 px-2 py-1">
+                <select name="collectionId" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   <option value="">Resource target</option>
                   {collections.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -260,30 +295,30 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               </form>
             </div>
           ))}
-          {project.items.length === 0 && <div className="text-sm text-zinc-500">No items yet.</div>}
+          {project.items.length === 0 && <div className="text-sm text-[var(--text-tertiary)]">No items yet.</div>}
         </div>
       </div>
 
-      <div className="rounded border border-zinc-200 bg-white p-4 shadow-sm space-y-3">
-        <h2 className="text-sm font-semibold text-zinc-700">Add item to this project</h2>
-        <form action={addItem} className="grid gap-3 md:grid-cols-2">
-          <input name="title" placeholder="Title" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" required />
-          <textarea name="details" placeholder="Details" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" rows={3} />
-          <input name="url" placeholder="URL (optional)" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" />
-          <select name="type" className="rounded border border-zinc-300 px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
+      <div className="rounded border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-sm space-y-3">
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Add item to this project</h2>
+        <form action={addItem} className="grid gap-3 md:col-span-2">
+          <input name="title" placeholder="Title" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" required />
+          <textarea name="details" placeholder="Details" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" rows={3} />
+          <input name="url" placeholder="URL (optional)" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" />
+          <select name="type" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
             {Object.values(ItemType).map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
           </select>
-          <button type="submit" className="rounded bg-black px-4 py-2 text-white md:col-span-2">
+          <button type="submit" className="rounded bg-[var(--text-primary)] px-4 py-2 text-[var(--text-inverse)] md:col-span-2">
             Add item
           </button>
         </form>
       </div>
 
-      <div className="text-sm text-zinc-500">
+      <div className="text-sm text-[var(--text-tertiary)]">
         <Link href="/projects" className="underline">
           Back to projects
         </Link>

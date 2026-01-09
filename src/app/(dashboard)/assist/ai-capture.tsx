@@ -44,18 +44,27 @@ export function AICaptureCard() {
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Describe what you captured..."
-          className="w-full border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 text-sm"
-          rows={3}
-        />
-        <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+        <div>
+          <label htmlFor="ai-capture-text" className="sr-only">
+            Describe what you captured
+          </label>
+          <textarea
+            id="ai-capture-text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Describe what you captured..."
+            aria-label="Describe what you captured for AI classification"
+            className="w-full border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 text-sm"
+            rows={3}
+          />
+        </div>
+        <label htmlFor="ai-capture-file" className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
           <input
+            id="ai-capture-file"
             type="file"
             accept="image/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            aria-label="Attach a photo (optional)"
             className="text-xs"
           />
           <span>{file ? file.name : "Optional: attach a photo"}</span>
@@ -64,7 +73,7 @@ export function AICaptureCard() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-[var(--elev-1)] disabled:opacity-60"
+            className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-1)] disabled:opacity-60"
           >
             {status === "loading" ? "Classifying..." : "Send to AI"}
           </button>

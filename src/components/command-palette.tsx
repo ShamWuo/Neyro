@@ -12,6 +12,7 @@ const actions = [
   { label: "Weekly review", href: "/review", hint: "W" },
   { label: "Wizard", href: "/weekly-review", hint: "" },
   { label: "Smart assist", href: "/assist", hint: "" },
+  { label: "Upgrade to Focus", href: "/pricing", hint: "U" },
   { label: "Search", href: "/search", hint: "Cmd/Ctrl+K" },
 ];
 
@@ -27,22 +28,29 @@ export function CommandPalette() {
 
   useEffect(() => {
     function onOpen() {
-      setOpen(true);
-      setQuery("");
+      // Use setTimeout to avoid synchronous setState in event handlers
+      setTimeout(() => {
+        setOpen(true);
+        setQuery("");
+      }, 0);
     }
     function onToggle(e: CustomEvent) {
-      if (typeof e.detail === "boolean") {
-        setOpen(e.detail);
-        if (!e.detail) setQuery("");
-      } else {
-        setOpen((prev) => !prev);
-        if (open) setQuery("");
-      }
+      setTimeout(() => {
+        if (typeof e.detail === "boolean") {
+          setOpen(e.detail);
+          if (!e.detail) setQuery("");
+        } else {
+          setOpen((prev) => !prev);
+          setQuery("");
+        }
+      }, 0);
     }
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setOpen(false);
-        setQuery("");
+        setTimeout(() => {
+          setOpen(false);
+          setQuery("");
+        }, 0);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -53,12 +61,18 @@ export function CommandPalette() {
       window.removeEventListener("command-palette:open", onOpen as EventListener);
       window.removeEventListener("command-palette:toggle", onToggle as EventListener);
     };
-  }, [open]);
+  }, []);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(0,0,0,0.35)] p-4 backdrop-blur-sm" onClick={() => setOpen(false)}>
+    <div 
+      className="fixed inset-0 z-50 flex items-start justify-center bg-[var(--overlay)] p-4 backdrop-blur-sm" 
+      onClick={() => setOpen(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
+    >
       <div
         className="w-full max-w-xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--elev-3)]"
         onClick={(e) => e.stopPropagation()}
@@ -77,7 +91,14 @@ export function CommandPalette() {
           </button>
         </div>
         <div className="mt-3 max-h-72 space-y-1 overflow-y-auto">
-          {filtered.length === 0 && <div className="rounded-md bg-[var(--card-muted)] px-3 py-2 text-sm text-[var(--text-secondary)]">No matches</div>}
+          {filtered.length === 0 && (
+            <div className="space-y-2 rounded-md bg-[var(--card-muted)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+              <div>No matches</div>
+              <Link href="/pricing" className="inline-flex items-center gap-2 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-[11px] font-semibold text-[var(--text-inverse)] shadow-sm hover:shadow-[var(--elev-2)]">
+                Unlock Focus
+              </Link>
+            </div>
+          )}
           {filtered.map((action) => (
             <Link
               key={action.href}

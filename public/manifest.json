@@ -1,0 +1,48 @@
+{
+  "name": "Neyro – PARA Productivity App",
+  "short_name": "Neyro",
+  "description": "One inbox. Seven projects max. Ship the weekly review. Neyro enforces the PARA workflow.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Quick Capture",
+      "short_name": "Capture",
+      "description": "Quick capture to inbox",
+      "url": "/inbox?action=capture",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Weekly Review",
+      "short_name": "Review",
+      "description": "Start weekly review",
+      "url": "/review",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

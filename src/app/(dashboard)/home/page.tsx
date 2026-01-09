@@ -1,8 +1,20 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
+import { logger } from "@/lib/logger";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
+import { LoadingState } from "@/components/loading-state";
+
+// Code splitting: Load suggestions component dynamically
+const SmartSuggestions = dynamic(
+  () => import("@/components/smart-suggestions").then((mod) => ({ default: mod.SmartSuggestions })),
+  {
+    loading: () => <LoadingState type="default" />,
+    ssr: true,
+  }
+);
 
 export default async function Home() {
   const session = await auth();
@@ -27,19 +39,24 @@ export default async function Home() {
 
   async function quickCapture(formData: FormData) {
     "use server";
-    const title = String(formData.get("title") ?? "").trim();
-    const url = String(formData.get("url") ?? "").trim() || null;
-    if (!title) return;
-    await prisma.item.create({
-      data: {
-        userId,
-        title,
-        url,
-        type: ItemType.NOTE,
-        classification: ItemClassification.INBOX,
-      },
-    });
-    redirect("/inbox");
+    try {
+      const title = String(formData.get("title") ?? "").trim();
+      const url = String(formData.get("url") ?? "").trim() || null;
+      if (!title) return;
+      await prisma.item.create({
+        data: {
+          userId,
+          title,
+          url,
+          type: ItemType.NOTE,
+          classification: ItemClassification.INBOX,
+        },
+      });
+      redirect("/inbox");
+    } catch (error) {
+      logger.error("Error creating item", error);
+      redirect("/inbox?error=create_failed");
+    }
   }
 
   const projectLoad = Math.min(activeProjects / 7, 1);
@@ -83,7 +100,7 @@ export default async function Home() {
             <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Your PARA cockpit for today</h1>
             <p className="text-sm text-[var(--text-secondary)]">Capture fast, keep projects under seven, review weekly. Stay in motion with focused time blocks.</p>
             <div className="flex flex-wrap gap-2 text-sm font-semibold">
-              <Link href="/inbox" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-3)]">Capture now</Link>
+              <Link href="/inbox" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-3)]">Capture now</Link>
               <Link href="/projects" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Add a project</Link>
               <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Start weekly review</Link>
               <Link href="/focus" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Enter focus mode</Link>
@@ -130,29 +147,76 @@ export default async function Home() {
         </div>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-[1.6fr_1fr]">
+        <div className="panel space-y-2 border-[var(--primary-strong)] bg-[color-mix(in_srgb,var(--primary-strong)_8%,var(--surface))] shadow-[var(--elev-2)]">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
+            <span>Upgrade to Focus</span>
+            <span className="rounded-full border border-[var(--primary-strong)] bg-[color-mix(in_srgb,var(--primary-strong)_15%,transparent)] px-2 py-1 text-[var(--primary-strong)]">Best value</span>
+          </div>
+          <div className="text-[var(--text-primary)]">Unlimited Smart Assist, advanced exports, and team sharing. Keep PARA under control with higher limits.</div>
+          <div className="grid gap-2 text-sm text-[var(--text-secondary)] md:grid-cols-2">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2">
+              <div className="text-xs font-semibold text-[var(--text-primary)]">Credits</div>
+              <div className="text-sm">Unlimited AI assist and classification.</div>
+            </div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2">
+              <div className="text-xs font-semibold text-[var(--text-primary)]">Exports</div>
+              <div className="text-sm">PDF/email weekly review summaries.</div>
+            </div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2">
+              <div className="text-xs font-semibold text-[var(--text-primary)]">Teams</div>
+              <div className="text-sm">Shared PARA spaces and roles.</div>
+            </div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2">
+              <div className="text-xs font-semibold text-[var(--text-primary)]">Timeline</div>
+              <div className="text-sm">Activity trail and accountability streaks.</div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm font-semibold">
+            <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">Upgrade now</Link>
+            <Link href="/assist" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Try Smart Assist</Link>
+          </div>
+        </div>
+
+        <div className="panel space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Trial tracker</div>
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-3 text-sm text-[var(--text-secondary)]">
+            <div className="flex items-center justify-between">
+              <span className="text-[var(--text-primary)] font-semibold">Trial days left</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--card)] px-2 py-1 text-xs">14-day trial</span>
+            </div>
+            <p className="mt-2">Upgrade to keep Smart Assist at full speed and unlock exports once your trial ends.</p>
+            <div className="mt-3 flex gap-2 text-sm font-semibold">
+              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">See plans</Link>
+              <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Run weekly review</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-[1.2fr_1fr]">
         <div className="panel space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#0b0d0f]">Review tracker</h2>
-            <Link href="/review" className="text-xs font-semibold text-[#1e293b] underline">Open weekly review</Link>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Review tracker</h2>
+            <Link href="/review" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Open weekly review</Link>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Streak</div>
-              <div className="text-2xl font-semibold text-[#0b0d0f]">{streak} weeks</div>
-              <div className="text-xs text-[#555]">Log a review this week to keep the streak alive.</div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Streak</div>
+              <div className="text-2xl font-semibold text-[var(--text-primary)]">{streak} weeks</div>
+              <div className="text-xs text-[var(--text-secondary)]">Log a review this week to keep the streak alive.</div>
             </div>
-            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Last review</div>
-              <div className="text-2xl font-semibold text-[#0b0d0f]">{lastReviewDate ?? "Not yet"}</div>
-              <div className="text-xs text-[#555]">Next due: {nextReviewLabel}</div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Last review</div>
+              <div className="text-2xl font-semibold text-[var(--text-primary)]">{lastReviewDate ?? "Not yet"}</div>
+              <div className="text-xs text-[var(--text-secondary)]">Next due: {nextReviewLabel}</div>
             </div>
-            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Prompts</div>
-              <div className="text-xs text-[#555]">Run the weekly wizard, capture wins, prune projects, refresh areas.</div>
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Prompts</div>
+              <div className="text-xs text-[var(--text-secondary)]">Run the weekly wizard, capture wins, prune projects, refresh areas.</div>
               <div className="mt-2 flex gap-2 text-xs font-semibold">
-                <Link href="/weekly-review" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Wizard</Link>
-                <Link href="/review" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Manual</Link>
+                <Link href="/weekly-review" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Wizard</Link>
+                <Link href="/review" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Manual</Link>
               </div>
             </div>
           </div>
@@ -160,20 +224,20 @@ export default async function Home() {
 
         <div className="panel space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#0b0d0f]">Focus streak</h2>
-            <Link href="/focus" className="text-xs font-semibold text-[#1e293b] underline">Enter focus</Link>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Focus streak</h2>
+            <Link href="/focus" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Enter focus</Link>
           </div>
-          <div className="space-y-2 text-sm text-[#0b0d0f]">
-            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3">
+          <div className="space-y-2 text-sm text-[var(--text-primary)]">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3">
               <div className="font-semibold">Define today</div>
-              <p className="text-xs text-[#555]">Pick one project, pin three tasks, log one time box. This keeps PARA in motion.</p>
+              <p className="text-xs text-[var(--text-secondary)]">Pick one project, pin three tasks, log one time box. This keeps PARA in motion.</p>
             </div>
-            <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3">
               <div className="font-semibold">Rapid start</div>
-              <p className="text-xs text-[#555]">Go to Focus, set a daily project, then log a 25-minute block.</p>
+              <p className="text-xs text-[var(--text-secondary)]">Go to Focus, set a daily project, then log a 25-minute block.</p>
               <div className="mt-2 flex gap-2 text-xs font-semibold">
-                <Link href="/focus" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Open Focus</Link>
-                <Link href="/inbox" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Grab tasks</Link>
+                <Link href="/focus" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Open Focus</Link>
+                <Link href="/inbox" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Grab tasks</Link>
               </div>
             </div>
           </div>
@@ -182,69 +246,69 @@ export default async function Home() {
 
       <div className="grid gap-3 md:grid-cols-5">
         <div className="panel space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Inbox</div>
-          <div className="text-3xl font-semibold">{inboxCount}</div>
-          <div className="text-xs text-[#555]">Everything starts here. {inboxCount === 0 ? "Drop something now." : "Process once per day."}</div>
-          <Link href="/inbox" className="text-xs font-semibold text-[#1e293b] underline">Open inbox</Link>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Inbox</div>
+          <div className="text-3xl font-semibold text-[var(--text-primary)]">{inboxCount}</div>
+          <div className="text-xs text-[var(--text-secondary)]">Everything starts here. {inboxCount === 0 ? "Drop something now." : "Process once per day."}</div>
+          <Link href="/inbox" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Open inbox</Link>
         </div>
 
-        <div className={`panel space-y-2 ${activeProjects >= 7 ? "border-[#d14343]" : ""}`}>
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">
+        <div className={`panel space-y-2 ${activeProjects >= 7 ? "border-[var(--danger)]" : ""}`}>
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
             <span>Projects</span>
-            <span className="text-[10px] text-[#555]">Cap 7</span>
+            <span className="text-[10px] text-[var(--text-secondary)]">Cap 7</span>
           </div>
-          <div className="text-3xl font-semibold">{activeProjects}/7</div>
-          <div className="h-2 overflow-hidden rounded-full bg-[rgba(0,0,0,0.05)]">
-            <div className={`${activeProjects >= 7 ? "bg-[#d14343]" : "bg-[#0b0d0f]"} h-full`} style={{ width: `${projectLoad * 100}%` }} />
+          <div className="text-3xl font-semibold text-[var(--text-primary)]">{activeProjects}/7</div>
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--border-subtle)]">
+            <div className={`${activeProjects >= 7 ? "bg-[var(--danger)]" : "bg-[var(--primary-strong)]"} h-full`} style={{ width: `${projectLoad * 100}%` }} />
           </div>
-          <div className="text-xs text-[#555]">{activeProjects >= 7 ? "Over cap - pause one before adding." : `${projectsRemaining} slots left.`}</div>
-          <Link href="/projects" className="text-xs font-semibold text-[#1e293b] underline">Manage projects</Link>
+          <div className="text-xs text-[var(--text-secondary)]">{activeProjects >= 7 ? "Over cap - pause one before adding." : `${projectsRemaining} slots left.`}</div>
+          <Link href="/projects" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Manage projects</Link>
         </div>
 
         <div className="panel space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Areas</div>
-          <div className="text-3xl font-semibold">{areasCount}</div>
-          <div className="text-xs text-[#555]">Keep standards healthy. {areasCount === 0 ? "Define your core areas." : "Touch each weekly."}</div>
-          <Link href="/areas" className="text-xs font-semibold text-[#1e293b] underline">Open areas</Link>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Areas</div>
+          <div className="text-3xl font-semibold text-[var(--text-primary)]">{areasCount}</div>
+          <div className="text-xs text-[var(--text-secondary)]">Keep standards healthy. {areasCount === 0 ? "Define your core areas." : "Touch each weekly."}</div>
+          <Link href="/areas" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Open areas</Link>
         </div>
 
         <div className="panel space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Resources</div>
-          <div className="text-3xl font-semibold">{resourcesCount}</div>
-          <div className="text-xs text-[#555]">Tag references so projects stay lean. {resourcesCount === 0 ? "Create your first collection." : "Keep adding references."}</div>
-          <Link href="/resources" className="text-xs font-semibold text-[#1e293b] underline">Open resources</Link>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Resources</div>
+          <div className="text-3xl font-semibold text-[var(--text-primary)]">{resourcesCount}</div>
+          <div className="text-xs text-[var(--text-secondary)]">Tag references so projects stay lean. {resourcesCount === 0 ? "Create your first collection." : "Keep adding references."}</div>
+          <Link href="/resources" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Open resources</Link>
         </div>
 
         <div className="panel space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1e293b]">Archive</div>
-          <div className="text-3xl font-semibold">{archiveCount}</div>
-          <div className="text-xs text-[#555]">Close loops weekly. Move done items here.</div>
-          <Link href="/archive" className="text-xs font-semibold text-[#1e293b] underline">Go to archive</Link>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Archive</div>
+          <div className="text-3xl font-semibold text-[var(--text-primary)]">{archiveCount}</div>
+          <div className="text-xs text-[var(--text-secondary)]">Close loops weekly. Move done items here.</div>
+          <Link href="/archive" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Go to archive</Link>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.2fr_1fr]">
         <div className="panel space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#0b0d0f]">Guided PARA flow</h2>
-            <span className="text-xs text-[#555]">Capture, classify into Projects/Areas/Resources/Archive, then Review</span>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Guided PARA flow</h2>
+            <span className="text-xs text-[var(--text-secondary)]">Capture, classify into Projects/Areas/Resources/Archive, then Review</span>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="space-y-2 rounded border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="font-semibold text-[#0b0d0f]">Capture and sort</div>
-              <p className="text-xs text-[#555]">Drop tasks and notes, then batch classify to Project, Area, Resource, or Archive.</p>
+            <div className="space-y-2 rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3 text-sm">
+              <div className="font-semibold text-[var(--text-primary)]">Capture and sort</div>
+              <p className="text-xs text-[var(--text-secondary)]">Drop tasks and notes, then batch classify to Project, Area, Resource, or Archive.</p>
               <div className="flex gap-2 text-xs">
-                <Link href="/inbox" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Inbox</Link>
-                <Link href="/archive" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Archive</Link>
+                <Link href="/inbox" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Inbox</Link>
+                <Link href="/archive" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Archive</Link>
               </div>
             </div>
-            <div className="space-y-2 rounded border border-[rgba(0,0,0,0.08)] bg-[#f8f9fa] p-3 text-sm">
-              <div className="font-semibold text-[#0b0d0f]">Work and review</div>
-              <p className="text-xs text-[#555]">Stay under seven projects, touch areas weekly, and publish a weekly review.</p>
+            <div className="space-y-2 rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] p-3 text-sm">
+              <div className="font-semibold text-[var(--text-primary)]">Work and review</div>
+              <p className="text-xs text-[var(--text-secondary)]">Stay under seven projects, touch areas weekly, and publish a weekly review.</p>
               <div className="flex gap-2 text-xs">
-                <Link href="/projects" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Projects</Link>
-                <Link href="/areas" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Areas</Link>
-                <Link href="/review" className="rounded border border-[rgba(0,0,0,0.12)] px-2 py-1">Review</Link>
+                <Link href="/projects" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Projects</Link>
+                <Link href="/areas" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Areas</Link>
+                <Link href="/review" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 text-[var(--text-primary)] hover:border-[var(--border-strong)] transition">Review</Link>
               </div>
             </div>
           </div>
@@ -252,29 +316,29 @@ export default async function Home() {
 
         <div className="panel space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#0b0d0f]">Onboarding steps</h2>
-            <span className="text-xs text-[#555]">Finish these first</span>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Onboarding steps</h2>
+            <span className="text-xs text-[var(--text-secondary)]">Finish these first</span>
           </div>
-          <ul className="space-y-2 text-sm text-[#0b0d0f]">
-            <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
+          <ul className="space-y-2 text-sm text-[var(--text-primary)]">
+            <li className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
               <span>Add your first project</span>
-              <Link href="/projects" className="text-xs font-semibold text-[#1e293b] underline">Add</Link>
+              <Link href="/projects" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Add</Link>
             </li>
-            <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
+            <li className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
               <span>Define 3-5 areas</span>
-              <Link href="/areas" className="text-xs font-semibold text-[#1e293b] underline">Define</Link>
+              <Link href="/areas" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Define</Link>
             </li>
-            <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
+            <li className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
               <span>Capture 5 items into inbox</span>
-              <Link href="/inbox" className="text-xs font-semibold text-[#1e293b] underline">Capture</Link>
+              <Link href="/inbox" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Capture</Link>
             </li>
-            <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
+            <li className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
               <span>Run your first weekly review</span>
-              <Link href="/review" className="text-xs font-semibold text-[#1e293b] underline">Run</Link>
+              <Link href="/review" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Run</Link>
             </li>
-            <li className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2">
+            <li className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-2">
               <span>Take the 60s PARA tour</span>
-              <Link href="/assist" className="text-xs font-semibold text-[#1e293b] underline">Start</Link>
+              <Link href="/assist" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Start</Link>
             </li>
           </ul>
         </div>
@@ -328,6 +392,7 @@ export default async function Home() {
             </div>
             <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3">
               <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Recent activity</div>
+              <SmartSuggestions />
               <div className="mt-2 space-y-2 text-sm text-[var(--text-secondary)]">
                 {recentActivity.length === 0 && <p>Nothing logged yet. Run your first review.</p>}
                 {recentActivity.map((r) => (

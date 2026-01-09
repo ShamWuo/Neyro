@@ -30,10 +30,12 @@ type IconName =
   | "activity"
   | "templates"
   | "timeline"
-  | "search";
+  | "search"
+  | "settings"
+  | "analytics";
 
 function Icon({ name, active }: { name: IconName; active: boolean }) {
-  const stroke = active ? "var(--text-primary)" : "#7b839a";
+  const stroke = active ? "var(--text-primary)" : "var(--text-tertiary)";
   const common = { stroke, strokeWidth: 1.6, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
   switch (name) {
@@ -145,6 +147,21 @@ function Icon({ name, active }: { name: IconName; active: boolean }) {
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
           <circle {...common} cx="11" cy="11" r="5" />
           <path {...common} d="m15.5 15.5 3 3" />
+        </svg>
+      );
+    case "settings":
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+          <circle {...common} cx="12" cy="12" r="3" />
+          <path {...common} d="M12 1v6m0 10v6M5.6 5.6l4.2 4.2m8.4 8.4-4.2-4.2M1 12h6m10 0h6M5.6 18.4l4.2-4.2m8.4-8.4-4.2 4.2" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+          <path {...common} d="M3 3v18h18" />
+          <path {...common} d="M7 16l4-4 4 4 6-6" />
+          <path {...common} d="M7 12h10" />
         </svg>
       );
   }

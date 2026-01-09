@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   }
   if (!text) return new NextResponse(JSON.stringify({ error: "Provide text in `text` form field" }), { status: 400, headers: { "Content-Type": "application/json" } });
 
-  if (process.env.OPENAI_API_KEY) {
+  if (process.env.GEMINI_API_KEY) {
     try {
       const decision = await analyzeParaCapture({ text, imageUrl: imageUrlRaw });
       return NextResponse.json({ ok: true, decision });

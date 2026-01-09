@@ -3,6 +3,7 @@ import { ensureProjectLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { TemplateType, ProjectStatus, ItemClassification, ItemType } from "@prisma/client";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 type TemplateData = {
   name?: string;
@@ -92,21 +93,33 @@ export default async function TemplatesPage() {
     <div className="space-y-10">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Templates</h1>
-        <p className="text-sm text-[#555]">Create and apply your rituals quickly.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Create and apply your rituals quickly.</p>
+        <div className="rounded-lg border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--primary-strong)_6%,var(--card))] px-3 py-2 text-sm text-[var(--text-primary)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Upgrade</div>
+              <div className="font-semibold">Access premium template packs and sharing with Focus.</div>
+            </div>
+            <div className="flex gap-2 text-sm font-semibold">
+              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-2)]">See plans</Link>
+              <Link href="/assist" className="rounded-md border border-[var(--border-default)] bg-white px-3 py-2 text-[var(--text-primary)]">Generate with AI</Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       <form action={createTemplate} className="panel space-y-3">
         <div className="grid gap-3 md:grid-cols-2">
-          <input name="name" placeholder="Template name" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" required />
-          <select name="type" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2">
+          <input name="name" placeholder="Template name" className="border border-[var(--border-default)] bg-white px-3 py-2" required />
+          <select name="type" className="border border-[var(--border-default)] bg-white px-3 py-2">
             {Object.values(TemplateType).map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
         </div>
-        <input name="description" placeholder="Description" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" />
-        <textarea name="data" placeholder='Optional JSON e.g. {"outcome":"Ship feature"}' className="w-full border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" rows={4} />
-        <button className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white">Save template</button>
+        <input name="description" placeholder="Description" className="border border-[var(--border-default)] bg-white px-3 py-2" />
+        <textarea name="data" placeholder='Optional JSON e.g. {"outcome":"Ship feature"}' className="w-full border border-[var(--border-default)] bg-white px-3 py-2" rows={4} />
+        <button className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-white">Save template</button>
       </form>
 
       <div className="space-y-3">
@@ -114,18 +127,18 @@ export default async function TemplatesPage() {
           <div key={t.id} className="panel space-y-2">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="font-semibold text-[#0b0d0f]">{t.name}</div>
-                <div className="text-xs text-[#555]">{t.type}</div>
-                {t.description && <div className="text-sm text-[#555]">{t.description}</div>}
+                <div className="font-semibold text-[var(--text-primary)]">{t.name}</div>
+                <div className="text-xs text-[var(--text-secondary)]">{t.type}</div>
+                {t.description && <div className="text-sm text-[var(--text-secondary)]">{t.description}</div>}
               </div>
               <form action={applyTemplate}>
                 <input type="hidden" name="templateId" value={t.id} />
-                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-sm font-semibold">Apply</button>
+                <button className="rounded-md border border-[var(--border-default)] px-3 py-1 text-sm font-semibold">Apply</button>
               </form>
             </div>
           </div>
         ))}
-        {templates.length === 0 && <div className="text-sm text-[#555]">No templates yet.</div>}
+        {templates.length === 0 && <div className="text-sm text-[var(--text-secondary)]">No templates yet.</div>}
       </div>
     </div>
   );

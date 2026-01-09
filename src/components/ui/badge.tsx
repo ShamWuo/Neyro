@@ -1,29 +1,27 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+type BadgeProps = {
+  children: React.ReactNode;
+  variant?: "default" | "success" | "warning" | "error" | "info";
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+};
 
-import { cn } from "@/lib/utils";
+export function Badge({ children, variant = "default", className = "", style, onClick }: BadgeProps) {
+  const variants = {
+    default: "border-[var(--border-subtle)] bg-[var(--card-muted)] text-[var(--text-secondary)]",
+    success: "border-[var(--success)] bg-[color-mix(in_srgb,var(--success)_15%,transparent)] text-[var(--success)]",
+    warning: "border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_15%,transparent)] text-[var(--warning)]",
+    error: "border-[var(--danger)] bg-[color-mix(in_srgb,var(--danger)_15%,transparent)] text-[var(--danger)]",
+    info: "border-[var(--primary-strong)] bg-[color-mix(in_srgb,var(--primary-strong)_15%,transparent)] text-[var(--primary-strong)]",
+  };
 
-const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-  {
-    variants: {
-      variant: {
-        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "text-foreground",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
-
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold ${variants[variant]} ${className} ${onClick ? "cursor-pointer hover:opacity-80" : ""}`}
+      style={style}
+      onClick={onClick}
+    >
+      {children}
+    </span>
+  );
 }
-
-export { Badge, badgeVariants };

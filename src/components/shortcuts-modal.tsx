@@ -3,13 +3,23 @@
 import { useEffect, useState } from "react";
 
 const shortcuts = [
-  { keys: "C", action: "Go to Inbox" },
-  { keys: "P", action: "Projects" },
-  { keys: "A", action: "Areas" },
-  { keys: "R", action: "Resources" },
-  { keys: "F", action: "Focus" },
-  { keys: "Cmd/Ctrl + K", action: "Command palette" },
-  { keys: "Shift + /", action: "Show shortcuts" },
+  { category: "Navigation", items: [
+    { keys: "C", action: "Go to Inbox" },
+    { keys: "P", action: "Projects" },
+    { keys: "A", action: "Areas" },
+    { keys: "R", action: "Resources" },
+    { keys: "F", action: "Focus" },
+    { keys: "S", action: "Search" },
+  ]},
+  { category: "Actions", items: [
+    { keys: "Cmd/Ctrl + I", action: "Quick capture" },
+    { keys: "Cmd/Ctrl + K", action: "Command palette" },
+  ]},
+  { category: "Other", items: [
+    { keys: "Shift + U", action: "Upgrade / Pricing" },
+    { keys: "Shift + ?", action: "Show shortcuts" },
+    { keys: "Esc", action: "Close modals" },
+  ]},
 ];
 
 export function ShortcutsModal() {
@@ -36,7 +46,13 @@ export function ShortcutsModal() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-start justify-center bg-[rgba(0,0,0,0.25)] p-4 backdrop-blur-sm" onClick={() => setOpen(false)}>
+    <div 
+      className="fixed inset-0 z-40 flex items-start justify-center bg-[var(--overlay)] p-4 backdrop-blur-sm" 
+      onClick={() => setOpen(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Keyboard shortcuts"
+    >
       <div
         className="w-full max-w-lg rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--elev-2)]"
         onClick={(e) => e.stopPropagation()}
@@ -47,11 +63,25 @@ export function ShortcutsModal() {
             Esc
           </button>
         </div>
-        <div className="grid gap-2 text-sm text-[var(--text-secondary)]">
-          {shortcuts.map((s) => (
-            <div key={s.action} className="flex items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2">
-              <span className="text-[var(--text-primary)]">{s.action}</span>
-              <span className="rounded border border-[var(--border-subtle)] bg-[var(--card)] px-2 py-1 text-[11px] text-[var(--text-tertiary)]">{s.keys}</span>
+        <div className="space-y-4 text-sm text-[var(--text-secondary)]">
+          {shortcuts.map((category) => (
+            <div key={category.category}>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-tertiary)]">
+                {category.category}
+              </h4>
+              <div className="grid gap-2">
+                {category.items.map((s) => (
+                  <div
+                    key={s.action}
+                    className="flex items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2"
+                  >
+                    <span className="text-[var(--text-primary)]">{s.action}</span>
+                    <span className="rounded border border-[var(--border-subtle)] bg-[var(--card)] px-2 py-1 text-[11px] font-mono text-[var(--text-tertiary)]">
+                      {s.keys}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

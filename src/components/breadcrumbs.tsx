@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { memo, useMemo } from "react";
 
 const labels: Record<string, string> = {
   home: "Home",
@@ -22,16 +23,20 @@ const labels: Record<string, string> = {
   search: "Search",
 };
 
-export function Breadcrumbs() {
+export const Breadcrumbs = memo(function Breadcrumbs() {
   const pathname = usePathname();
-  const parts = pathname.split("/").filter(Boolean);
+  
+  const crumbs = useMemo(() => {
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts.length <= 1) return null;
+    
+    return parts.map((part, idx) => {
+      const href = `/${parts.slice(0, idx + 1).join("/")}`;
+      return { href, label: labels[part] ?? part };
+    });
+  }, [pathname]);
 
-  if (parts.length <= 1) return null;
-
-  const crumbs = parts.map((part, idx) => {
-    const href = `/${parts.slice(0, idx + 1).join("/")}`;
-    return { href, label: labels[part] ?? part };
-  });
+  if (!crumbs) return null;
 
   return (
     <nav className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-tertiary)]">
@@ -46,6 +51,10 @@ export function Breadcrumbs() {
           )}
         </span>
       ))}
+      <span aria-hidden className="ml-2 text-[var(--text-tertiary)]">|</span>
+      <Link href="/pricing" className="rounded-md border border-[var(--border-subtle)] px-2 py-1 text-[var(--text-secondary)] transition hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]">
+        Upgrade
+      </Link>
     </nav>
   );
-}
+});

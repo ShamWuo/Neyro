@@ -12,7 +12,10 @@ export function KeyboardShortcuts() {
       const isTyping = tag === "input" || tag === "textarea" || (e.target as HTMLElement)?.isContentEditable;
       if (isTyping) return;
 
-      if (e.key === "c") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "i") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("quick-capture:open"));
+      } else if (e.key === "c") {
         router.push("/inbox");
       } else if (e.key === "p") {
         router.push("/projects");
@@ -22,6 +25,10 @@ export function KeyboardShortcuts() {
         router.push("/resources");
       } else if (e.key.toLowerCase() === "f") {
         router.push("/focus");
+      } else if (e.key.toLowerCase() === "s") {
+        router.push("/search");
+      } else if (e.shiftKey && e.key.toLowerCase() === "u") {
+        router.push("/pricing");
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent("command-palette:toggle"));

@@ -4,6 +4,7 @@ import { touchCollection } from "@/lib/para";
 import { ItemClassification, ItemType } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ResourceCollectionTags } from "@/components/resource-collection-tags";
 
 export default async function ResourceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,16 +14,26 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
 
   const collection = await prisma.resourceCollection.findUnique({
     where: { id, userId },
-    include: { items: { where: { classification: ItemClassification.RESOURCE }, orderBy: { createdAt: "desc" } } },
+    include: {
+      items: { where: { classification: ItemClassification.RESOURCE }, orderBy: { createdAt: "desc" } },
+      resourceTags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
   });
   if (!collection) redirect("/resources");
   const collectionId = collection.id;
 
-  const [projects, areas, collections] = await Promise.all([
+  const [projects, areas, collections, allTags] = await Promise.all([
     prisma.project.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.area.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.resourceCollection.findMany({ where: { userId, archivedAt: null }, orderBy: { name: "asc" } }),
+    prisma.tag.findMany({ where: { userId }, orderBy: { name: "asc" } }),
   ]);
+
+  const collectionTags = collection.resourceTags.map((rt) => rt.tag);
 
   async function updateCollection(formData: FormData) {
     "use server";
@@ -105,88 +116,96 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
       <div className="panel space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <div className="text-xs text-[#555]">Collection</div>
-            <div className="text-2xl font-semibold tracking-tight text-[#0b0d0f]">{collection.name}</div>
-            {collection.description && <div className="text-sm text-[#555]">{collection.description}</div>}
+            <div className="text-xs text-[var(--text-secondary)]">Collection</div>
+            <div className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">{collection.name}</div>
+            {collection.description && <div className="text-sm text-[var(--text-secondary)]">{collection.description}</div>}
           </div>
           <form action={deleteCollection}>
             <button className="text-sm font-semibold text-red-600 underline" type="submit">Delete</button>
           </form>
         </div>
         <form action={updateCollection} className="grid gap-3 md:grid-cols-2">
-          <input name="name" defaultValue={collection.name} className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2" required />
-          <textarea name="description" defaultValue={collection.description ?? ""} className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-2" rows={3} />
-          <button type="submit" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white md:col-span-2">Save collection</button>
+          <input name="name" defaultValue={collection.name} className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" required />
+          <textarea name="description" defaultValue={collection.description ?? ""} className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" rows={3} />
+          <button type="submit" className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] md:col-span-2">Save collection</button>
         </form>
+        <div className="space-y-2">
+          <div className="text-sm font-semibold text-[var(--text-primary)]">Tags</div>
+          <ResourceCollectionTags
+            resourceCollectionId={collectionId}
+            initialTags={collectionTags}
+            allTags={allTags}
+          />
+        </div>
       </div>
 
       <div className="panel space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#0b0d0f]">Items</h2>
-          <span className="text-xs text-[#555]">{collection.items.length} items</span>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Items</h2>
+          <span className="text-xs text-[var(--text-secondary)]">{collection.items.length} items</span>
         </div>
         <div className="space-y-3">
           {collection.items.map((item) => (
-            <div key={item.id} className="rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] p-4 space-y-2">
+            <div key={item.id} className="rounded border border-[var(--border-subtle)] bg-[var(--card)] p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <div className="font-semibold text-[#0b0d0f]">{item.title}</div>
-                <span className="text-xs text-[#555]">{item.type}</span>
+                <div className="font-semibold text-[var(--text-primary)]">{item.title}</div>
+                <span className="text-xs text-[var(--text-secondary)]">{item.type}</span>
               </div>
-              {item.details && <div className="text-sm text-[#555]">{item.details}</div>}
-              {item.url && <a href={item.url} className="text-xs font-semibold text-[#0f172a] underline" target="_blank" rel="noreferrer">{item.url}</a>}
+              {item.details && <div className="text-sm text-[var(--text-secondary)]">{item.details}</div>}
+              {item.url && <a href={item.url} className="text-xs font-semibold text-[var(--text-primary)] underline" target="_blank" rel="noreferrer">{item.url}</a>}
               <form action={updateItem} className="grid gap-2 md:grid-cols-2">
                 <input type="hidden" name="itemId" value={item.id} />
-                <input name="title" defaultValue={item.title} className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1" required />
-                <select name="type" defaultValue={item.type} className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
+                <input name="title" defaultValue={item.title} className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" required />
+                <select name="type" defaultValue={item.type} className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   {Object.values(ItemType).map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
-                <textarea name="details" defaultValue={item.details ?? ""} rows={2} className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1 md:col-span-2" />
-                <input name="url" defaultValue={item.url ?? ""} placeholder="URL" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1 md:col-span-2" />
-                <button type="submit" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-3 py-2 text-sm font-semibold text-white md:col-span-2">Save item</button>
+                <textarea name="details" defaultValue={item.details ?? ""} rows={2} className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 md:col-span-2" />
+                <input name="url" defaultValue={item.url ?? ""} placeholder="URL" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 md:col-span-2" />
+                <button type="submit" className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-3 py-2 text-sm font-semibold text-[var(--text-inverse)] md:col-span-2">Save item</button>
               </form>
               <form action={moveItem} className="flex flex-wrap gap-2 text-sm">
                 <input type="hidden" name="itemId" value={item.id} />
-                <select name="target" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1" required>
+                <select name="target" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" required>
                   <option value="">Move to...</option>
                   <option value="project">Project</option>
                   <option value="area">Area</option>
                   <option value="collection">Another collection</option>
                   <option value="archive">Archive</option>
                 </select>
-                <select name="projectId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
+                <select name="projectId" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   <option value="">Project target</option>
                   {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
-                <select name="areaId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
+                <select name="areaId" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   <option value="">Area target</option>
                   {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
-                <select name="collectionId" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1">
+                <select name="collectionId" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
                   <option value="">Collection target</option>
                   {collections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-                <button type="submit" className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-2 text-sm font-semibold">Apply</button>
+                <button type="submit" className="rounded-md border border-[var(--border-default)] px-3 py-2 text-sm font-semibold">Apply</button>
               </form>
             </div>
           ))}
-          {collection.items.length === 0 && <div className="text-sm text-[#555]">No items in this collection.</div>}
+          {collection.items.length === 0 && <div className="text-sm text-[var(--text-secondary)]">No items in this collection.</div>}
         </div>
       </div>
 
       <div className="panel space-y-3">
-        <h2 className="text-sm font-semibold text-[#0b0d0f]">Add resource item</h2>
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Add resource item</h2>
         <form action={addItem} className="grid gap-3 md:grid-cols-2">
-          <input name="title" placeholder="Title" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-2" required />
-          <textarea name="details" placeholder="Details" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-2" rows={3} />
-          <input name="url" placeholder="URL (optional)" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-2" />
-          <select name="type" className="border border-[rgba(0,0,0,0.12)] bg-white px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
+          <input name="title" placeholder="Title" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" required />
+          <textarea name="details" placeholder="Details" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" rows={3} />
+          <input name="url" placeholder="URL (optional)" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" />
+          <select name="type" className="border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" defaultValue={ItemType.NOTE}>
             {Object.values(ItemType).map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
-          <button type="submit" className="rounded-md border border-[#0b0d0f] bg-[#0b0d0f] px-4 py-2 text-sm font-semibold text-white md:col-span-2">Add item</button>
+          <button type="submit" className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] md:col-span-2">Add item</button>
         </form>
       </div>
 
-      <div className="text-sm text-[#555]"><Link href="/resources" className="underline">Back to resources</Link></div>
+      <div className="text-sm text-[var(--text-secondary)]"><Link href="/resources" className="underline">Back to resources</Link></div>
     </div>
   );
 }

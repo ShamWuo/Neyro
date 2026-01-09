@@ -40,11 +40,14 @@ enum SharePermission {
 }
 
 model User {
-  id                  String                @id @default(cuid())
+  id                  String               @id @default(cuid())
   name                String?
-  email               String?               @unique
+  email               String?              @unique
   emailVerified       DateTime?
   image               String?
+  referralCode        String?              @unique
+  referredBy          String?
+  referralCount       Int                  @default(0)
   accounts            Account[]
   sessions            Session[]
   items               Item[]
@@ -58,8 +61,15 @@ model User {
   templates           Template[]
   shareAccesses       ShareAccess[]        @relation("OwnerShares")
   activityLogs        ActivityLog[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  tags                Tag[]
+  referrals           Referral[]           @relation("Referrer")
+  referredByUser      User?                @relation("Referrer", fields: [referredBy], references: [id])
+  referredUsers       User[]               @relation("Referrer")
+  settings            UserSettings?
+  areaHealthHistory   AreaHealthHistory[]
+  savedSearches       SavedSearch[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model Account {
@@ -97,84 +107,132 @@ model VerificationToken {
 }
 
 model Project {
-  id         String         @id @default(cuid())
-  userId     String
-  name       String
-  outcome    String
-  status     ProjectStatus  @default(ACTIVE)
-  deadline   DateTime?
-  archivedAt DateTime?
-  lastActivityAt DateTime   @default(now())
-  items      Item[]
-  shares     ShareAccess[]       @relation("ProjectShares")
-  dailyFocus DailyFocus[]
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
+  id             String        @id @default(cuid())
+  userId         String
+  name           String
+  outcome        String
+  status         ProjectStatus @default(ACTIVE)
+  deadline       DateTime?
+  archivedAt     DateTime?
+  lastActivityAt DateTime      @default(now())
+  items          Item[]
+  shares         ShareAccess[] @relation("ProjectShares")
+  dailyFocus     DailyFocus[]
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@index([userId, status])
   @@index([userId, lastActivityAt])
 }
 
 model Area {
-  id              String    @id @default(cuid())
+  id              String              @id @default(cuid())
   userId          String
   name            String
   standard        String
   lastReviewDate  DateTime?
   lastHealthScore Int?
   archivedAt      DateTime?
-  lastActivityAt  DateTime  @default(now())
+  lastActivityAt  DateTime            @default(now())
   items           Item[]
-  shares          ShareAccess[]    @relation("AreaShares")
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  shares          ShareAccess[]       @relation("AreaShares")
+  healthHistory   AreaHealthHistory[]
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
   @@index([userId])
   @@index([userId, lastActivityAt])
 }
 
 model ResourceCollection {
-  id          String    @id @default(cuid())
-  userId      String
-  name        String
-  description String?
-  archivedAt  DateTime?
-  lastActivityAt DateTime @default(now())
-  items       Item[]
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String                  @id @default(cuid())
+  userId         String
+  name           String
+  description    String?
+  archivedAt     DateTime?
+  lastActivityAt DateTime                @default(now())
+  items          Item[]
+  resourceTags   ResourceCollectionTag[]
+  user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
 
   @@index([userId])
 }
 
+model Tag {
+  id           String                  @id @default(cuid())
+  userId       String
+  name         String
+  color        String? // Optional hex color for visual distinction
+  itemTags     ItemTag[]
+  resourceTags ResourceCollectionTag[]
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model ItemTag {
+  id        String   @id @default(cuid())
+  itemId    String
+  tagId     String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([itemId, tagId])
+  @@index([itemId])
+  @@index([tagId])
+}
+
+model ResourceCollectionTag {
+  id                   String             @id @default(cuid())
+  resourceCollectionId String
+  tagId                String
+  resourceCollection   ResourceCollection @relation(fields: [resourceCollectionId], references: [id], onDelete: Cascade)
+  tag                  Tag                @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt            DateTime           @default(now())
+
+  @@unique([resourceCollectionId, tagId])
+  @@index([resourceCollectionId])
+  @@index([tagId])
+}
+
 model Item {
-  id                    String              @id @default(cuid())
-  userId                String
-  title                 String
-  details               String?
-  url                   String?
-  type                  ItemType            @default(NOTE)
-  classification        ItemClassification  @default(INBOX)
-  projectId             String?
-  areaId                String?
-  resourceCollectionId  String?
-  archivedAt            DateTime?
-  isDone                Boolean             @default(false)
-  project               Project?            @relation(fields: [projectId], references: [id])
-  area                  Area?               @relation(fields: [areaId], references: [id])
-  resourceCollection    ResourceCollection? @relation(fields: [resourceCollectionId], references: [id])
-  focusPins             FocusPin[]
-  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  id                   String              @id @default(cuid())
+  userId               String
+  title                String
+  details              String?
+  url                  String?
+  type                 ItemType            @default(NOTE)
+  classification       ItemClassification  @default(INBOX)
+  projectId            String?
+  areaId               String?
+  resourceCollectionId String?
+  archivedAt           DateTime?
+  isDone               Boolean             @default(false)
+  dueDate              DateTime?
+  reminderAt           DateTime?
+  project              Project?            @relation(fields: [projectId], references: [id])
+  area                 Area?               @relation(fields: [areaId], references: [id])
+  resourceCollection   ResourceCollection? @relation(fields: [resourceCollectionId], references: [id])
+  focusPins            FocusPin[]
+  itemTags             ItemTag[]
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 
   @@index([userId, classification])
   @@index([projectId])
   @@index([areaId])
   @@index([resourceCollectionId])
+  @@index([dueDate])
+  @@index([reminderAt])
 }
 
 model DailyFocus {
@@ -203,41 +261,41 @@ model FocusPin {
 }
 
 model FocusSession {
-  id       String   @id @default(cuid())
-  userId   String
-  date     DateTime @default(now())
-  label    String
-  minutes  Int
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  label     String
+  minutes   Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@index([userId, date])
 }
 
 model Template {
-  id          String        @id @default(cuid())
+  id          String       @id @default(cuid())
   userId      String
   type        TemplateType
   name        String
   description String?
   data        Json
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime      @default(now())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
 
   @@index([userId, type])
 }
 
 model ShareAccess {
-  id           String          @id @default(cuid())
-  ownerId      String
-  projectId    String?
-  areaId       String?
-  email        String
-  permission   SharePermission @default(VIEW)
-  owner        User            @relation("OwnerShares", fields: [ownerId], references: [id], onDelete: Cascade)
-  project      Project?        @relation("ProjectShares", fields: [projectId], references: [id])
-  area         Area?           @relation("AreaShares", fields: [areaId], references: [id])
-  createdAt    DateTime        @default(now())
+  id         String          @id @default(cuid())
+  ownerId    String
+  projectId  String?
+  areaId     String?
+  email      String
+  permission SharePermission @default(VIEW)
+  owner      User            @relation("OwnerShares", fields: [ownerId], references: [id], onDelete: Cascade)
+  project    Project?        @relation("ProjectShares", fields: [projectId], references: [id])
+  area       Area?           @relation("AreaShares", fields: [areaId], references: [id])
+  createdAt  DateTime        @default(now())
 
   @@index([email])
   @@index([projectId])
@@ -256,13 +314,75 @@ model ActivityLog {
 }
 
 model WeeklyReview {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
   userId              String
   inboxCount          Int
   activeProjectsCount Int
   areaHealthAverage   Float?
-  completedAt         DateTime @default(now())
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shareToken          String?   @unique
+  sharedAt            DateTime?
+  completedAt         DateTime  @default(now())
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([shareToken])
+}
+
+model Referral {
+  id            String    @id @default(cuid())
+  referrerId    String
+  referredEmail String
+  status        String    @default("pending") // pending, signed_up, converted
+  createdAt     DateTime  @default(now())
+  convertedAt   DateTime?
+  referrer      User      @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, referredEmail])
+  @@index([referrerId])
+}
+
+model UserSettings {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  projectLimit  Int      @default(7)
+  voiceLanguage String   @default("en-US")
+  ttsEnabled    Boolean  @default(false)
+  personality   String   @default("balanced") // strict, supportive, balanced
+  reviewDay     String   @default("sunday")
+  reviewTime    String   @default("09:00")
+  theme         String   @default("system") // light, dark, system
+  notifications Json     @default("{}") // { deadlines: true, inbox: true, review: true, areas: true }
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model AreaHealthHistory {
+  id        String   @id @default(cuid())
+  areaId    String
+  userId    String
+  score     Int
+  date      DateTime @default(now())
+  area      Area     @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([areaId, date])
+  @@index([userId, date])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  query     String? // Search query text
+  filters   Json     @default("{}") // { classification, type, sort, etc. }
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, createdAt])
 }

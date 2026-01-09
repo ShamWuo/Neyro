@@ -3,6 +3,7 @@ import { ensureProjectLimit, touchArea, touchCollection, touchProject } from "@/
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { AICaptureCard } from "./ai-capture";
 
 function daysAgo(days: number) {
@@ -84,87 +85,117 @@ export default async function AssistPage() {
 
   return (
     <div className="space-y-10">
-      <div className="space-y-1">
+      <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Smart Assist</h1>
-        <p className="text-sm text-[#555]">Prompts based on your activity—not chatty AI.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Prompts based on your activity—not chatty AI.</p>
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--primary-strong)_8%,var(--card))] p-3 text-sm text-[var(--text-primary)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Upgrade</div>
+              <div className="font-semibold">Unlock unlimited Smart Assist, timelines, and exports with Focus.</div>
+            </div>
+            <div className="flex gap-2 text-sm font-semibold">
+              <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">See plans</Link>
+              <Link href="/weekly-review" className="rounded-md border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)]">Run weekly review</Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       <AICaptureCard />
 
       <section className="panel space-y-3">
-        <h2 className="text-sm font-semibold text-[#0b0d0f]">Duplicates</h2>
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Duplicates</h2>
         <div className="space-y-2">
           {duplicateGroups.map((g) => (
-            <div key={g.title} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
+            <div key={g.title} className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold text-[#0b0d0f]">{g.title}</div>
-                <div className="text-xs text-[#555]">{g.ids.length} inbox items</div>
+                <div className="font-semibold text-[var(--text-primary)]">{g.title}</div>
+                <div className="text-xs text-[var(--text-secondary)]">{g.ids.length} inbox items</div>
               </div>
               <form action={() => mergeDuplicates(g.title)}>
-                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Archive duplicates</button>
+                <button 
+                  type="submit"
+                  aria-label={`Archive ${g.ids.length} duplicate items titled "${g.title}"`}
+                  className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold hover:border-[var(--border-strong)] transition"
+                >
+                  Archive duplicates
+                </button>
               </form>
             </div>
           ))}
-          {duplicateGroups.length === 0 && <div className="text-sm text-[#555]">No duplicates detected this week.</div>}
+          {duplicateGroups.length === 0 && <div className="text-sm text-[var(--text-secondary)]">No duplicates detected this week.</div>}
         </div>
       </section>
 
       <section className="panel space-y-3">
-        <h2 className="text-sm font-semibold text-[#0b0d0f]">Stale projects</h2>
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Stale projects</h2>
         <div className="space-y-2">
           {staleProjects.map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
+            <div key={p.id} className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold text-[#0b0d0f]">{p.name}</div>
-                <div className="text-xs text-[#555]">No movement since {p.lastActivityAt.toISOString().slice(0,10)}</div>
+                <div className="font-semibold text-[var(--text-primary)]">{p.name}</div>
+                <div className="text-xs text-[var(--text-secondary)]">No movement since {p.lastActivityAt.toISOString().slice(0,10)}</div>
               </div>
               <form action={() => pauseProject(p.id)}>
-                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Pause</button>
+                <button 
+                  type="submit"
+                  aria-label={`Pause project "${p.name}"`}
+                  className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold hover:border-[var(--border-strong)] transition"
+                >
+                  Pause
+                </button>
               </form>
             </div>
           ))}
-          {staleProjects.length === 0 && <div className="text-sm text-[#555]">All active projects moved in the last 7 days.</div>}
+          {staleProjects.length === 0 && <div className="text-sm text-[var(--text-secondary)]">All active projects moved in the last 7 days.</div>}
         </div>
       </section>
 
       <section className="panel space-y-3">
-        <h2 className="text-sm font-semibold text-[#0b0d0f]">Neglected areas</h2>
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Neglected areas</h2>
         <div className="space-y-2">
           {neglectedAreas.map((a) => (
-            <div key={a.id} className="space-y-2 rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
+            <div key={a.id} className="space-y-2 rounded border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-[#0b0d0f]">{a.name}</div>
-                  <div className="text-xs text-[#555]">No new activity since {a.lastActivityAt.toISOString().slice(0,10)}</div>
+                  <div className="font-semibold text-[var(--text-primary)]">{a.name}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">No new activity since {a.lastActivityAt.toISOString().slice(0,10)}</div>
                 </div>
               </div>
               <form action={addAreaAction} className="flex flex-wrap gap-2">
                 <input type="hidden" name="areaId" value={a.id} />
-                <input name="title" placeholder="Add one action" className="border border-[rgba(0,0,0,0.12)] bg-white px-2 py-1 flex-1" />
-                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Add</button>
+                <input name="title" placeholder="Add one action" className="border border-[var(--border-default)] bg-[var(--card)] px-2 py-1 flex-1" />
+                <button className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold">Add</button>
               </form>
             </div>
           ))}
-          {neglectedAreas.length === 0 && <div className="text-sm text-[#555]">Areas look good.</div>}
+          {neglectedAreas.length === 0 && <div className="text-sm text-[var(--text-secondary)]">Areas look good.</div>}
         </div>
       </section>
 
       <section className="panel space-y-3">
-        <h2 className="text-sm font-semibold text-[#0b0d0f]">Resource → Project?</h2>
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Resource → Project?</h2>
         <div className="space-y-2">
           {resourceCandidates.filter((c) => c._count.items >= 8).map((c) => (
-            <div key={c.id} className="flex items-center justify-between rounded border border-[rgba(0,0,0,0.06)] bg-[#f8f9fa] px-3 py-2 text-sm">
+            <div key={c.id} className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-sm">
               <div>
-                <div className="font-semibold text-[#0b0d0f]">{c.name}</div>
-                <div className="text-xs text-[#555]">{c._count.items} items</div>
+                <div className="font-semibold text-[var(--text-primary)]">{c.name}</div>
+                <div className="text-xs text-[var(--text-secondary)]">{c._count.items} items</div>
               </div>
               <form action={convertCollection} className="flex gap-2 items-center">
                 <input type="hidden" name="collectionId" value={c.id} />
-                <button className="rounded-md border border-[rgba(0,0,0,0.12)] px-3 py-1 text-xs font-semibold">Convert to project</button>
+                <button 
+                  type="submit"
+                  aria-label={`Convert collection "${c.name}" with ${c._count.items} items to a project`}
+                  className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold hover:border-[var(--border-strong)] transition"
+                >
+                  Convert to project
+                </button>
               </form>
             </div>
           ))}
-          {resourceCandidates.filter((c) => c._count.items >= 8).length === 0 && <div className="text-sm text-[#555]">No resource collections look like projects yet.</div>}
+          {resourceCandidates.filter((c) => c._count.items >= 8).length === 0 && <div className="text-sm text-[var(--text-secondary)]">No resource collections look like projects yet.</div>}
         </div>
       </section>
     </div>
