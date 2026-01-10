@@ -74,7 +74,7 @@ describe("SocialShare", () => {
     }
   });
 
-  it("shows native share button when navigator.share is available", () => {
+  it("shows native share button when navigator.share is available", async () => {
     // Mock navigator.share
     Object.defineProperty(navigator, "share", {
       value: jest.fn().mockResolvedValue(undefined),
@@ -82,7 +82,14 @@ describe("SocialShare", () => {
       configurable: true,
     });
     render(<SocialShare />);
-    expect(screen.getByText("Share")).toBeInTheDocument();
+    
+    // Wait for component to mount and state to update (hasNativeShare is set in useEffect with setTimeout)
+    await waitFor(
+      () => {
+        expect(screen.getByText("Share")).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
   });
 
   it("calls native share when share button is clicked", async () => {
@@ -97,6 +104,14 @@ describe("SocialShare", () => {
     });
 
     render(<SocialShare url="https://test.com" />);
+
+    // Wait for component to mount and state to update (hasNativeShare is set in useEffect with setTimeout)
+    await waitFor(
+      () => {
+        expect(screen.getByText("Share")).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
     const shareButton = screen.getByText("Share");
     await act(async () => {
@@ -130,18 +145,24 @@ describe("SocialShare", () => {
     });
   });
 
-  it("generates correct share URLs", () => {
+  it("generates correct share URLs", async () => {
     render(<SocialShare url="https://test.com" title="Test Title" />);
 
-    const twitterLink = screen.getByText("Twitter").closest("a");
-    expect(twitterLink).toHaveAttribute(
-      "href",
-      expect.stringContaining("twitter.com")
-    );
-    // URL is encoded, so check for encoded version
-    expect(twitterLink).toHaveAttribute(
-      "href",
-      expect.stringContaining("Test%20Title")
+    // Wait for component to mount and shareLinks to be computed (mounted state is set in useEffect with setTimeout)
+    await waitFor(
+      () => {
+        const twitterLink = screen.getByText("Twitter").closest("a");
+        expect(twitterLink).toHaveAttribute(
+          "href",
+          expect.stringContaining("twitter.com")
+        );
+        // URL is encoded, so check for encoded version
+        expect(twitterLink).toHaveAttribute(
+          "href",
+          expect.stringContaining("Test%20Title")
+        );
+      },
+      { timeout: 2000 }
     );
   });
 });

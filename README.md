@@ -9,7 +9,7 @@ Opinionated, constrained PARA system (Projects, Areas, Resources, Archive) with 
 - Tailwind CSS
 
 ## Setup
-1. Create `.env`, set `DATABASE_URL`, and generate a stable `NEXTAUTH_SECRET` (or `AUTH_SECRET`). Set `NEXTAUTH_URL` per environment (`http://localhost:3000` in dev; your Vercel domain in prod). See Env Vars below.
+1. Create `.env`, set `DATABASE_URL`, and generate a stable `NEXTAUTH_SECRET` (or `AUTH_SECRET`). Set `NEXTAUTH_URL` per environment (`http://localhost:3001` in dev; your Vercel domain in prod). See Env Vars below.
 2. Install deps: `npm install --legacy-peer-deps`
 3. Run migrations & generate client: `npx prisma generate && npx prisma migrate dev --name init`
 4. Start dev server: `npm run dev`
@@ -23,7 +23,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/neyro?schema=public
 
 # NextAuth
 NEXTAUTH_SECRET=replace-with-long-stable-secret
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3001
 # Alternatively:
 # AUTH_SECRET=replace-with-long-stable-secret
 

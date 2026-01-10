@@ -12,7 +12,7 @@ async function main() {
 
   await fs.writeFile(outPath, Buffer.from("mock-image-bytes"));
 
-  const publicUrl = `http://localhost:3000/uploads/${encodeURIComponent(safeKey)}`;
+  const publicUrl = `http://localhost:3001/uploads/${encodeURIComponent(safeKey)}`;
   const text = "E2E mock upload test: schedule planning meeting";
 
   console.log("Wrote mock file:", outPath);

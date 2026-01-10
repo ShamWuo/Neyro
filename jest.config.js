@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const nextJest = require("next/jest");
 
 const createJestConfig = nextJest({
@@ -19,6 +20,12 @@ const customJestConfig = {
     "!src/**/*.stories.{js,jsx,ts,tsx}",
     "!src/**/__tests__/**",
   ],
+  // Mock Stripe module to avoid loading actual SDK
+  modulePathIgnorePatterns: [],
+  // Set environment variables for tests
+  testEnvironmentOptions: {
+    customExportConditions: [""],
+  },
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

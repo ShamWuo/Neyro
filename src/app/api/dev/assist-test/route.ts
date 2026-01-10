@@ -31,22 +31,26 @@ export async function POST(request: Request) {
   }
   if (!text) return new NextResponse(JSON.stringify({ error: "Provide text in `text` form field" }), { status: 400, headers: { "Content-Type": "application/json" } });
 
+  let decision;
+  let aiEnabled = false;
+  
   if (process.env.GEMINI_API_KEY) {
     try {
-      const decision = await analyzeParaCapture({ text, imageUrl: imageUrlRaw });
-      return NextResponse.json({ ok: true, decision });
+      decision = await analyzeParaCapture({ text, imageUrl: imageUrlRaw });
+      aiEnabled = true;
+      return NextResponse.json({ ok: true, decision, aiEnabled });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      return new NextResponse(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
+      console.warn("AI test failed, using fallback:", err);
+      // Fall through to mock response
     }
   }
 
-  // Mocked decision when no API key is present (safe for local dev)
+  // Mocked decision when no API key is present or AI fails (safe for local dev)
   const mock = {
     classification: ItemClassification.INBOX,
     title: text.slice(0, 80),
     details: text,
     type: ItemType.NOTE,
   };
-  return NextResponse.json({ ok: true, decision: mock });
+  return NextResponse.json({ ok: true, decision: mock, aiEnabled: false, message: "AI not configured - using mock classification" });
 }

@@ -15,22 +15,28 @@ export function UpgradeBanner() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    // Set initial time after mount
-    setNow(Date.now());
-    
-    const storedStart = window.localStorage.getItem("para-trial-start");
-    const startDate = storedStart ? new Date(storedStart) : new Date();
-    if (!storedStart) {
-      window.localStorage.setItem("para-trial-start", startDate.toISOString());
-    }
-    setStart(startDate.getTime());
+    // Use setTimeout to defer state updates and avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      setMounted(true);
+      // Set initial time after mount
+      setNow(Date.now());
+      
+      const storedStart = window.localStorage.getItem("para-trial-start");
+      const startDate = storedStart ? new Date(storedStart) : new Date();
+      if (!storedStart) {
+        window.localStorage.setItem("para-trial-start", startDate.toISOString());
+      }
+      setStart(startDate.getTime());
 
-    const storedDismiss = window.localStorage.getItem("para-upgrade-dismissed-until");
-    setDismissUntil(storedDismiss ? Number(storedDismiss) : null);
+      const storedDismiss = window.localStorage.getItem("para-upgrade-dismissed-until");
+      setDismissUntil(storedDismiss ? Number(storedDismiss) : null);
+    }, 0);
 
     const id = window.setInterval(() => setNow(Date.now()), 60000);
-    return () => window.clearInterval(id);
+    return () => {
+      clearTimeout(timer);
+      window.clearInterval(id);
+    };
   }, []);
 
   const daysLeft = useMemo(() => {
@@ -58,7 +64,7 @@ export function UpgradeBanner() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 text-sm font-semibold">
-          <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-2)]">Upgrade</Link>
+          <Link href="/pricing" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">Upgrade</Link>
           <button onClick={() => hideForHours(6)} className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Remind me later</button>
           <button onClick={() => hideForHours(72)} className="rounded-md border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 text-[var(--text-secondary)] hover:border-[var(--border-strong)]">No thanks</button>
         </div>

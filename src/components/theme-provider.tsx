@@ -12,12 +12,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const forceLightTheme = () => {
       const root = document.documentElement;
       root.setAttribute("data-theme", "light");
+      root.style.colorScheme = "light";
       // Remove any stored theme preference
       try {
         localStorage.removeItem("theme");
         // Also clear any system preference
         localStorage.setItem("theme", "light");
-      } catch (error) {
+      } catch {
         // localStorage may be unavailable
       }
     };
@@ -59,7 +60,7 @@ export function useTheme() {
   return {
     theme: "light" as const,
     setTheme: () => {
-      // No-op - theme is always light
+      // No-op - theme is always light (parameter ignored intentionally)
     },
     mounted: true,
   };

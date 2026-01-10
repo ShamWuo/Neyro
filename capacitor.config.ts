@@ -1,5 +1,5 @@
 import { CapacitorConfig } from '@capacitor/cli';
-import { KeyboardResize } from '@capacitor/keyboard';
+import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
   appId: 'app.neyro.para',
@@ -22,7 +22,7 @@ const config: CapacitorConfig = {
     },
     Keyboard: {
       resize: KeyboardResize.Body,
-      style: 'dark',
+      style: KeyboardStyle.Dark,
       resizeOnFullScreen: true,
     },
     StatusBar: {

@@ -1,12 +1,11 @@
 import { auth } from "@/auth";
 import { getActiveProjectCount } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
-import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
-import { analyzeParaCapture } from "@/lib/ai";
+import { ItemClassification, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProgressIndicator } from "@/components/progress-indicator";
-import { logger } from "@/lib/logger";
+import { classifyInboxItem, applyProjectDecisions, toSummary, finishReview } from "./actions";
 
 export default async function ReviewPage({ searchParams }: { searchParams?: Promise<{ step?: string; scores?: string; avg?: string }> }) {
   const { step = "1", scores = "", avg } = (await searchParams) ?? {};
@@ -23,166 +22,6 @@ export default async function ReviewPage({ searchParams }: { searchParams?: Prom
     prisma.item.count({ where: { userId, classification: ItemClassification.INBOX, archivedAt: null } }),
     getActiveProjectCount(userId),
   ]);
-
-  async function classifyInboxItem(formData: FormData) {
-    "use server";
-    const itemId = String(formData.get("itemId") ?? "");
-    const target = String(formData.get("target") ?? "");
-    const projectId = String(formData.get("projectId") ?? "").trim() || null;
-    const areaId = String(formData.get("areaId") ?? "").trim() || null;
-    const collectionId = String(formData.get("collectionId") ?? "").trim() || null;
-    if (!itemId) return;
-
-    if (target === "project" && projectId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.PROJECT, projectId, areaId: null, resourceCollectionId: null, archivedAt: null } });
-    } else if (target === "area" && areaId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.AREA, areaId, projectId: null, resourceCollectionId: null, archivedAt: null } });
-    } else if (target === "resource" && collectionId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.RESOURCE, resourceCollectionId: collectionId, projectId: null, areaId: null, archivedAt: null } });
-    } else if (target === "archive") {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), projectId: null, areaId: null, resourceCollectionId: null } });
-    } else if (target === "inbox") {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.INBOX, projectId: null, areaId: null, resourceCollectionId: null, archivedAt: null } });
-    } else if (target === "ai") {
-      const item = await prisma.item.findUnique({ where: { id: itemId, userId } });
-      if (!item) return;
-      const decision = await analyzeParaCapture({ text: `${item.title}\n${item.details ?? ""}` });
-      await prisma.item.update({
-        where: { id: itemId, userId },
-        data: {
-          title: decision.title || item.title,
-          details: decision.details || item.details,
-          classification: decision.classification,
-          type: decision.type ?? item.type,
-          projectId: null,
-          areaId: null,
-          resourceCollectionId: null,
-          archivedAt: decision.classification === ItemClassification.ARCHIVE ? new Date() : null,
-        },
-      });
-    }
-    redirect("/review?step=1");
-  }
-
-  async function applyProjectDecisions(formData: FormData) {
-    "use server";
-    try {
-      const entries = Array.from(formData.entries()).filter(([key]) => key.startsWith("decision-")) as [string, FormDataEntryValue][];
-      const decisions = entries.map(([key, value]) => ({ id: key.replace("decision-", ""), status: value as ProjectStatus })).filter((d) => d.id && Object.values(ProjectStatus).includes(d.status));
-      if (!decisions.length) {
-        redirect("/review?step=3");
-        return;
-      }
-      const desiredActive = decisions.filter((d) => d.status === ProjectStatus.ACTIVE).length;
-      const remainingActive = await prisma.project.count({ where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null, NOT: { id: { in: decisions.map((d) => d.id) } } } });
-      if (desiredActive + remainingActive > 7) {
-        redirect("/review?step=2&error=project_limit");
-        return;
-      }
-      await Promise.all(decisions.map((d) => prisma.project.update({ where: { id: d.id, userId }, data: { status: d.status } })));
-      redirect("/review?step=3");
-    } catch (error) {
-      logger.error("Error applying project decisions", error);
-      redirect("/review?step=2&error=update_failed");
-    }
-  }
-
-  async function toSummary(formData: FormData) {
-    "use server";
-    try {
-      const scores: { areaId: string; score: number }[] = [];
-      const nextActions: { areaId: string; title: string; details: string | null; url: string | null }[] = [];
-      formData.forEach((value, key) => {
-        if (key.startsWith("area-")) {
-          const areaId = key.replace("area-", "");
-          if (areaId) {
-            const score = Number(value);
-            if (Number.isFinite(score) && score >= 1 && score <= 5) {
-              scores.push({ areaId, score });
-            }
-          }
-        }
-        if (key.startsWith("next-")) {
-          const areaId = key.replace("next-", "");
-          const title = String(value ?? "").trim();
-          if (title && areaId) {
-            const details = String(formData.get(`details-${areaId}`) ?? "").trim() || null;
-            const url = String(formData.get(`url-${areaId}`) ?? "").trim() || null;
-            nextActions.push({ areaId, title, details, url });
-          }
-        }
-      });
-      if (scores.length !== areas.length) {
-        redirect("/review?step=3&error=score_all");
-        return;
-      }
-      if (nextActions.length) {
-        await Promise.all(
-          nextActions.map((n) =>
-            prisma.item.create({ data: { userId, title: n.title, details: n.details, url: n.url, type: ItemType.TASK, classification: ItemClassification.AREA, areaId: n.areaId } })
-          )
-        );
-      }
-      const avg = scores.length > 0 ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length : 0;
-      const encoded = encodeURIComponent(scores.map((s) => `${s.areaId}:${s.score}`).join(","));
-      redirect(`/review?step=4&scores=${encoded}&avg=${avg}`);
-    } catch (error) {
-      logger.error("Error in review summary", error);
-      redirect("/review?step=3&error=summary_failed");
-    }
-  }
-
-  async function finishReview(formData: FormData) {
-    "use server";
-    try {
-      const scoresRaw = String(formData.get("scores") ?? "");
-      if (!scoresRaw) {
-        redirect("/review?step=4&error=missing_scores");
-        return;
-      }
-      let pairs: string[];
-      try {
-        pairs = decodeURIComponent(scoresRaw).split(",").filter(Boolean);
-      } catch {
-        redirect("/review?step=4&error=invalid_scores");
-        return;
-      }
-      const areaScores = pairs
-        .map((pair) => {
-          const [areaId, scoreStr] = pair.split(":");
-          if (!areaId || !scoreStr) return null;
-          const score = Number(scoreStr);
-          if (!Number.isFinite(score) || score < 1 || score > 5) return null;
-          return { areaId, score };
-        })
-        .filter((s): s is { areaId: string; score: number } => s !== null);
-      const [currentInbox, currentActive] = await Promise.all([
-        prisma.item.count({ where: { userId, classification: ItemClassification.INBOX, archivedAt: null } }),
-        getActiveProjectCount(userId),
-      ]);
-
-      if (areaScores.length) {
-        await Promise.all(
-          areaScores.map(({ areaId, score }) =>
-            prisma.area.update({ where: { id: areaId, userId }, data: { lastHealthScore: score, lastReviewDate: new Date() } })
-          )
-        );
-      }
-      const areaHealthAverage = areaScores.length > 0 ? areaScores.reduce((a, b) => a + b.score, 0) / areaScores.length : null;
-      await prisma.weeklyReview.create({
-        data: {
-          userId,
-          inboxCount: currentInbox,
-          activeProjectsCount: currentActive,
-          areaHealthAverage,
-        },
-      });
-      redirect("/home");
-    } catch (error) {
-      logger.error("Error finishing review", error);
-      redirect("/review?step=4&error=finish_failed");
-    }
-  }
 
   const decodedScores = scoresParam ? decodeURIComponent(scoresParam).split(",").filter(Boolean) : [];
 

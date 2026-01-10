@@ -40,7 +40,7 @@ describe("POST /api/newsletter", () => {
   });
 
   it("returns success for valid email", async () => {
-    const request = new MockRequest("http://localhost:3000/api/newsletter", {
+    const request = new MockRequest("http://localhost:3001/api/newsletter", {
       method: "POST",
       body: JSON.stringify({ email: "test@example.com" }),
       headers: { "Content-Type": "application/json" },
@@ -55,7 +55,7 @@ describe("POST /api/newsletter", () => {
   });
 
   it("returns error for invalid email", async () => {
-    const request = new MockRequest("http://localhost:3000/api/newsletter", {
+    const request = new MockRequest("http://localhost:3001/api/newsletter", {
       method: "POST",
       body: JSON.stringify({ email: "invalid-email" }),
       headers: { "Content-Type": "application/json" },
@@ -69,7 +69,7 @@ describe("POST /api/newsletter", () => {
   });
 
   it("returns error for missing email", async () => {
-    const request = new MockRequest("http://localhost:3000/api/newsletter", {
+    const request = new MockRequest("http://localhost:3001/api/newsletter", {
       method: "POST",
       body: JSON.stringify({}),
       headers: { "Content-Type": "application/json" },
@@ -83,7 +83,7 @@ describe("POST /api/newsletter", () => {
   });
 
   it("handles errors gracefully", async () => {
-    const request = new MockRequest("http://localhost:3000/api/newsletter", {
+    const request = new MockRequest("http://localhost:3001/api/newsletter", {
       method: "POST",
       body: "invalid json",
       headers: { "Content-Type": "application/json" },

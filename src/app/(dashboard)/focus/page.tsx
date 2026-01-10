@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { setDailyProject, pinItem, unpin, addSession } from "./actions";
 
 function startOfToday() {
   const iso = new Date().toISOString().slice(0, 10);
@@ -32,40 +33,6 @@ export default async function FocusPage() {
   const pinnedIds = new Set(pinnedItems.map((p) => p.id));
   const unpinnedSuggestions = suggested.filter((s) => !pinnedIds.has(s.id)).slice(0, 5);
   const totalMinutes = sessions.reduce((sum, s) => sum + s.minutes, 0);
-
-  async function setDailyProject(formData: FormData) {
-    "use server";
-    const projectId = String(formData.get("projectId") ?? "");
-    await prisma.dailyFocus.upsert({
-      where: { userId_date: { userId, date: startOfToday() } },
-      update: { projectId: projectId || null },
-      create: { userId, date: startOfToday(), projectId: projectId || null },
-    });
-    redirect("/focus");
-  }
-
-  async function pinItem(formData: FormData) {
-    "use server";
-    const itemId = String(formData.get("itemId") ?? "");
-    if (!itemId) return;
-    await prisma.focusPin.upsert({ where: { userId_itemId_date: { userId, itemId, date: startOfToday() } }, update: {}, create: { userId, itemId, date: startOfToday() } });
-    redirect("/focus");
-  }
-
-  async function unpin(itemId: string) {
-    "use server";
-    await prisma.focusPin.deleteMany({ where: { userId, itemId, date: { gte: startOfToday() } } });
-    redirect("/focus");
-  }
-
-  async function addSession(formData: FormData) {
-    "use server";
-    const label = String(formData.get("label") ?? "").trim();
-    const minutes = Number(formData.get("minutes"));
-    if (!label || Number.isNaN(minutes) || minutes <= 0) return;
-    await prisma.focusSession.create({ data: { userId, label, minutes, date: startOfToday() } });
-    redirect("/focus");
-  }
 
   return (
     <div className="space-y-10">
@@ -126,7 +93,10 @@ export default async function FocusPage() {
                   <div className="font-semibold text-[var(--text-primary)]">{item.title}</div>
                   {item.projectId && <div className="text-xs text-[var(--text-secondary)]">Project task</div>}
                 </div>
-                <form action={() => unpin(item.id)}><button className="text-xs font-semibold text-[var(--text-primary)]">Unpin</button></form>
+                <form action={unpin}>
+                  <input type="hidden" name="itemId" value={item.id} />
+                  <button className="text-xs font-semibold text-[var(--text-primary)]">Unpin</button>
+                </form>
               </div>
             ))}
             {pinnedItems.length === 0 && (

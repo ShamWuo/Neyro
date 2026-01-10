@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { ResourceSearch } from "@/components/resource-search";
+import { createCollection } from "./actions";
 
 export default async function ResourcesPage({ searchParams }: { searchParams?: Promise<{ q?: string }> }) {
   const session = await auth();
@@ -21,18 +22,9 @@ export default async function ResourcesPage({ searchParams }: { searchParams?: P
         ],
       } : {}),
     },
-    where: { userId, archivedAt: null },
     include: { _count: { select: { items: true } } },
     orderBy: { createdAt: "desc" },
   });
-
-  async function createCollection(formData: FormData) {
-    "use server";
-    const name = String(formData.get("name") ?? "").trim();
-    const description = String(formData.get("description") ?? "").trim() || null;
-    if (!name) return;
-    await prisma.resourceCollection.create({ data: { userId, name, description } });
-  }
 
   return (
     <div className="space-y-10">

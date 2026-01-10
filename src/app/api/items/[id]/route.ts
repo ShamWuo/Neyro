@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { validateId } from "@/lib/validation";
 import { ItemClassification } from "@prisma/client";
+import { takeToken } from "@/lib/rateLimiter";
+import { verifyOwnership } from "@/lib/security";
+
+// Request size limit: 1MB
+const MAX_REQUEST_SIZE = 1024 * 1024;
 
 export async function PATCH(
   request: Request,
@@ -13,11 +18,31 @@ export async function PATCH(
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
+    // Rate limiting
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+    
+    // Check request size
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
+    
     const { id } = await params;
     try {
       validateId(id);
     } catch {
       return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
+    }
+    
+    // Verify ownership before updating
+    const ownsItem = await verifyOwnership("item", id, session.user.id);
+    if (!ownsItem) {
+      logger.warn(`User ${session.user.id} attempted to update item ${id} without ownership`);
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
     
     let body: Record<string, unknown>;
@@ -80,11 +105,25 @@ export async function DELETE(
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
+    // Rate limiting
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+    
     const { id } = await params;
     try {
       validateId(id);
     } catch {
       return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
+    }
+    
+    // Verify ownership before deleting
+    const ownsItem = await verifyOwnership("item", id, session.user.id);
+    if (!ownsItem) {
+      logger.warn(`User ${session.user.id} attempted to delete item ${id} without ownership`);
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
     
     await prisma.item.delete({ where: { id, userId: session.user.id } });

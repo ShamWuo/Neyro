@@ -1,17 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, memo } from "react";
-import { useRouter } from "next/navigation";
 import { useToast } from "./ui/toast";
 import { logger } from "@/lib/logger";
-
-// Extend Window interface for TypeScript
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
+import type { SpeechRecognition, SpeechRecognitionEvent } from "@/types/voice-recognition";
 
 type VoiceInputButtonProps = {
   onTranscript?: (text: string) => void;
@@ -21,13 +13,12 @@ export const VoiceInputButton = memo(function VoiceInputButton({ onTranscript }:
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const SpeechRecognition = window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: { new (): SpeechRecognition } }).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
@@ -38,8 +29,10 @@ export const VoiceInputButton = memo(function VoiceInputButton({ onTranscript }:
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let finalTranscript = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + " ";
+        const result = event.results[i];
+        const alternative = result[0];
+        if (alternative && result.isFinal) {
+          finalTranscript += alternative.transcript + " ";
         }
       }
       if (finalTranscript) {
@@ -69,7 +62,7 @@ export const VoiceInputButton = memo(function VoiceInputButton({ onTranscript }:
       toast({
         title: "Speech recognition not available",
         description: "Your browser doesn't support speech recognition",
-        variant: "danger",
+        variant: "error",
       });
       return;
     }

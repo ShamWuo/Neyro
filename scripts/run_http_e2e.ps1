@@ -1,5 +1,5 @@
 param(
-  [string]$HostUrl = "http://localhost:3000"
+  [string]$HostUrl = "http://localhost:3001"
 )
 
 Write-Host "Starting HTTP E2E test against $HostUrl"

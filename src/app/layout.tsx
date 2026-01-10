@@ -15,6 +15,7 @@ const forceLightThemeScript = (
         (function() {
           try {
             document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.colorScheme = 'light';
             if (typeof localStorage !== 'undefined') {
               localStorage.setItem('theme', 'light');
               localStorage.removeItem('theme-preference');
@@ -30,10 +31,10 @@ const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-int
 
 export const metadata: Metadata = {
   title: {
-    default: "Neyro – PARA Productivity App | One Inbox, Seven Projects Max",
+    default: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
     template: "%s | Neyro",
   },
-  description: "Neyro enforces the PARA workflow: capture everything once, classify to Projects/Areas/Resources, cap projects at seven, and ship weekly reviews. Opinionated productivity for people who want focus, not features.",
+  description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise.",
   keywords: ["PARA", "productivity", "task management", "project management", "GTD", "productivity system", "second brain", "weekly review"],
   authors: [{ name: "Neyro" }],
   creator: "Neyro",
@@ -47,8 +48,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "Neyro",
-    title: "Neyro – PARA Productivity App | One Inbox, Seven Projects Max",
-    description: "Neyro enforces the PARA workflow: capture everything once, classify to Projects/Areas/Resources, cap projects at seven, and ship weekly reviews.",
+    title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
+    description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise.",
     images: [
       {
         url: "/og-image.png",
@@ -60,8 +61,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Neyro – PARA Productivity App | One Inbox, Seven Projects Max",
-    description: "Neyro enforces the PARA workflow: capture everything once, classify to Projects/Areas/Resources, cap projects at seven, and ship weekly reviews.",
+    title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
+    description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise.",
     images: ["/og-image.png"],
     creator: "@neyroapp",
   },
@@ -100,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en" data-theme="light" style={{ colorScheme: "light" }}>
       <body className={`${inter.variable} bg-[var(--bg)] text-[var(--text-primary)] antialiased`}>
         {forceLightThemeScript}
         {gaId && (

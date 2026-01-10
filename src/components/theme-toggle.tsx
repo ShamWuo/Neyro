@@ -3,7 +3,7 @@
 import { useTheme } from "./theme-provider";
 
 export function ThemeToggle() {
-  const { theme, setTheme, mounted } = useTheme();
+  const { theme, mounted } = useTheme();
 
   if (!mounted) {
     return (
@@ -14,13 +14,8 @@ export function ThemeToggle() {
   }
 
   const cycleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("system");
-    } else {
-      setTheme("light");
-    }
+    // Theme is always light - no-op
+    // This component is kept for compatibility but doesn't change theme
   };
 
   const icon = theme === "light" ? "☀️" : theme === "dark" ? "🌙" : "🌓";

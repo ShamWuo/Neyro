@@ -3,8 +3,6 @@
  * In production, this can be extended to send logs to external services
  */
 
-type LogLevel = "log" | "info" | "warn" | "error";
-
 const isDevelopment = process.env.NODE_ENV === "development";
 
 export const logger = {

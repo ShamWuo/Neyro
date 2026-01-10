@@ -1,16 +1,30 @@
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
+import { checkSubscriptionLimit } from "@/lib/subscription";
 
 export const MAX_ACTIVE_PROJECTS = 7;
+export const MAX_ACTIVE_PROJECTS_FREE = 3;
 
 export async function getActiveProjectCount(userId: string) {
   return prisma.project.count({ where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null } });
 }
 
 export async function ensureProjectLimit(userId: string) {
-  const count = await getActiveProjectCount(userId);
-  if (count >= MAX_ACTIVE_PROJECTS) {
-    throw new Error("You have reached the 7 active projects limit. Pause or complete one first.");
+  const limitCheck = await checkSubscriptionLimit(userId, "maxProjects");
+  
+  if (!limitCheck.allowed) {
+    const current = limitCheck.current ?? 0;
+    const limit = limitCheck.limit;
+    
+    if (limit === MAX_ACTIVE_PROJECTS_FREE) {
+      throw new Error(
+        `You've reached the free tier limit of ${limit} active projects. Upgrade to Focus to unlock 7 active projects.`
+      );
+    } else {
+      throw new Error(
+        `You have reached the ${limit} active projects limit. Pause or complete one first.`
+      );
+    }
   }
 }
 

@@ -26,7 +26,16 @@ function coerceClassification(value: string | undefined): ItemClassification {
 
 export async function analyzeParaCapture(params: { text?: string; imageDataUrl?: string; imageUrl?: string }) {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+  if (!apiKey) {
+    // Return a basic fallback classification instead of throwing
+    // This allows the app to work without AI configured
+    return {
+      classification: ItemClassification.INBOX,
+      title: params.text?.slice(0, 80) || "Captured note",
+      details: params.text || null,
+      type: ItemType.NOTE,
+    };
+  }
 
   // Build Gemini API request parts
   const parts: GeminiPart[] = [];
@@ -156,11 +165,17 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
       }
     }
     
-    const maybeType = obj.type && Object.values(ItemType).includes(obj.type) ? obj.type : ItemType.NOTE;
+    // Type guard for obj
+    if (!obj || typeof obj !== "object") {
+      throw new Error("Invalid response format");
+    }
+    
+    const objTyped = obj as Record<string, unknown>;
+    const maybeType = "type" in objTyped && typeof objTyped.type === "string" && Object.values(ItemType).includes(objTyped.type as ItemType) ? objTyped.type as ItemType : ItemType.NOTE;
     parsed = {
-      classification: coerceClassification(String(obj.classification || obj.bucket)),
-      title: String(obj.title || params.text || "Captured note"),
-      details: obj.details ? String(obj.details) : params.text || null,
+      classification: coerceClassification(String(objTyped.classification || objTyped.bucket || "")),
+      title: String(objTyped.title || params.text || "Captured note"),
+      details: objTyped.details ? String(objTyped.details) : params.text || null,
       type: maybeType,
     };
   } catch {

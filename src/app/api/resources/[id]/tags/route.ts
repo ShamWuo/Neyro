@@ -3,9 +3,16 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { takeToken } from "@/lib/rateLimiter";
+import { verifyOwnership } from "@/lib/security";
+import { validateId } from "@/lib/validation";
+import { validateIdArray } from "@/lib/security";
+
+// Request size limit: 1MB
+const MAX_REQUEST_SIZE = 1024 * 1024;
 
 const updateTagsSchema = z.object({
-  tagIds: z.array(z.string()),
+  tagIds: z.array(z.string().min(1).max(100)).max(50), // Max 50 tags per collection
 });
 
 export async function GET(
@@ -50,8 +57,33 @@ export async function PATCH(
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // Rate limiting
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
+    // Check request size
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
+
     const { id } = await params;
-    if (!id) return NextResponse.json({ error: "Resource collection ID required" }, { status: 400 });
+    
+    try {
+      validateId(id);
+    } catch {
+      return NextResponse.json({ error: "Invalid resource collection ID" }, { status: 400 });
+    }
+
+    // Verify ownership
+    const ownsCollection = await verifyOwnership("resourceCollection", id, session.user.id);
+    if (!ownsCollection) {
+      logger.warn(`User ${session.user.id} attempted to update tags for collection ${id} without ownership`);
+      return NextResponse.json({ error: "Resource collection not found" }, { status: 404 });
+    }
 
     let body: unknown;
     try {

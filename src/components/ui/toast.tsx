@@ -53,8 +53,12 @@ export function ToastContainer() {
 
   useEffect(() => {
     toastListeners.push(setCurrentToasts);
-    setCurrentToasts([...toasts]);
+    // Use setTimeout to defer state updates and avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      setCurrentToasts([...toasts]);
+    }, 0);
     return () => {
+      clearTimeout(timer);
       toastListeners = toastListeners.filter((l) => l !== setCurrentToasts);
     };
   }, []);

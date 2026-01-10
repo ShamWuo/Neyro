@@ -1,10 +1,11 @@
 import { auth } from "@/auth";
-import { ensureProjectLimit, getActiveProjectCount, touchProject } from "@/lib/para";
+import { getActiveProjectCount } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
-import { ItemClassification, ItemType, ProjectStatus, SharePermission } from "@prisma/client";
+import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import dynamic from "next/dynamic";
+import { updateProject, changeStatus, archiveProject, addShare, addItem, updateItem, toggleDone, moveItem } from "./actions";
 
 // Code splitting: Load completion percentage component dynamically
 const ProjectCompletionPercentage = dynamic(
@@ -37,139 +38,45 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     getActiveProjectCount(userId),
   ]);
 
-  async function updateProject(formData: FormData) {
+  // Wrapper functions to pass projectId and userId to actions
+  async function updateProjectAction(formData: FormData) {
     "use server";
-    try {
-      const name = String(formData.get("name") ?? "").trim();
-      const outcome = String(formData.get("outcome") ?? "").trim();
-      const deadlineRaw = String(formData.get("deadline") ?? "").trim();
-      if (!name || !outcome) return;
-      let deadline: Date | null = null;
-      if (deadlineRaw) {
-        try {
-          deadline = new Date(deadlineRaw);
-          if (isNaN(deadline.getTime())) deadline = null;
-        } catch {
-          deadline = null;
-        }
-      }
-      await prisma.project.update({
-        where: { id: projectId, userId },
-        data: { name, outcome, deadline },
-      });
-      await touchProject(userId, projectId);
-      redirect(`/projects/${projectId}`);
-    } catch (error) {
-      logger.error("Error updating project", error);
-      redirect(`/projects/${projectId}?error=update_failed`);
-    }
+    await updateProject(projectId, formData);
   }
 
-  async function changeStatus(status: ProjectStatus) {
+  async function changeStatusAction(status: ProjectStatus) {
     "use server";
-    try {
-      if (status === ProjectStatus.ACTIVE) {
-        await ensureProjectLimit(userId);
-      }
-      await prisma.project.update({ where: { id: projectId, userId }, data: { status } });
-      await touchProject(userId, projectId);
-      redirect(`/projects/${projectId}`);
-    } catch (error) {
-      logger.error("Error changing project status", error);
-      redirect(`/projects/${projectId}?error=status_failed`);
-    }
+    await changeStatus(projectId, userId, status);
   }
 
-  async function archiveProject() {
+  async function archiveProjectAction() {
     "use server";
-    await prisma.project.update({ where: { id: projectId, userId }, data: { archivedAt: new Date(), status: ProjectStatus.COMPLETED } });
-    redirect("/projects");
+    await archiveProject(projectId, userId);
   }
 
-  async function addShare(formData: FormData) {
+  async function addShareAction(formData: FormData) {
     "use server";
-    const email = String(formData.get("email") ?? "").trim();
-    if (!email) return;
-    await prisma.shareAccess.create({
-      data: { ownerId: userId, projectId, email, permission: SharePermission.VIEW },
-    });
-    redirect(`/projects/${projectId}`);
+    await addShare(projectId, formData);
   }
 
-  async function addItem(formData: FormData) {
+  async function addItemAction(formData: FormData) {
     "use server";
-    const title = String(formData.get("title") ?? "").trim();
-    const details = String(formData.get("details") ?? "").trim() || null;
-    const url = String(formData.get("url") ?? "").trim() || null;
-    const type = (String(formData.get("type") ?? ItemType.NOTE) as ItemType) || ItemType.NOTE;
-    if (!title) return;
-    await prisma.item.create({
-      data: {
-        userId,
-        title,
-        details,
-        url,
-        type,
-        classification: ItemClassification.PROJECT,
-        projectId,
-      },
-    });
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
+    await addItem(projectId, formData);
   }
 
-  async function updateItem(formData: FormData) {
+  async function updateItemAction(formData: FormData) {
     "use server";
-    const itemId = String(formData.get("itemId") ?? "");
-    const title = String(formData.get("title") ?? "").trim();
-    const details = String(formData.get("details") ?? "").trim() || null;
-    const url = String(formData.get("url") ?? "").trim() || null;
-    const type = (String(formData.get("type") ?? ItemType.NOTE) as ItemType) || ItemType.NOTE;
-    if (!itemId || !title) return;
-    await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
+    await updateItem(projectId, formData);
   }
 
-  async function toggleDone(itemId: string, isDone: boolean) {
+  async function toggleDoneAction(itemId: string, isDone: boolean) {
     "use server";
-    if (!itemId) return;
-    await prisma.item.update({ where: { id: itemId, userId }, data: { isDone } });
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
+    await toggleDone(projectId, itemId, isDone);
   }
 
-  async function moveItem(formData: FormData) {
+  async function moveItemAction(formData: FormData) {
     "use server";
-    const itemId = String(formData.get("itemId") ?? "");
-    const target = String(formData.get("target") ?? "");
-    const areaId = String(formData.get("areaId") ?? "").trim() || null;
-    const collectionId = String(formData.get("collectionId") ?? "").trim() || null;
-    if (!itemId) return;
-
-    if (target === "inbox") {
-      await prisma.item.update({
-        where: { id: itemId, userId },
-        data: { classification: ItemClassification.INBOX, projectId: null, areaId: null, resourceCollectionId: null, archivedAt: null },
-      });
-    } else if (target === "area" && areaId) {
-      await prisma.item.update({
-        where: { id: itemId, userId },
-        data: { classification: ItemClassification.AREA, areaId, projectId: null, resourceCollectionId: null, archivedAt: null },
-      });
-    } else if (target === "resource" && collectionId) {
-      await prisma.item.update({
-        where: { id: itemId, userId },
-        data: { classification: ItemClassification.RESOURCE, resourceCollectionId: collectionId, projectId: null, areaId: null, archivedAt: null },
-      });
-    } else if (target === "archive") {
-      await prisma.item.update({
-        where: { id: itemId, userId },
-        data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), projectId: null, areaId: null, resourceCollectionId: null },
-      });
-    }
-    await touchProject(userId, projectId);
-    redirect(`/projects/${projectId}`);
+    await moveItem(projectId, formData);
   }
 
   return (
@@ -190,23 +97,23 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
-            <form action={() => changeStatus(ProjectStatus.ACTIVE)}>
+            <form action={() => changeStatusAction(ProjectStatus.ACTIVE)}>
               <button className="rounded border px-3 py-2">Set active</button>
             </form>
-            <form action={() => changeStatus(ProjectStatus.PAUSED)}>
+            <form action={() => changeStatusAction(ProjectStatus.PAUSED)}>
               <button className="rounded border px-3 py-2">Pause</button>
             </form>
-            <form action={() => changeStatus(ProjectStatus.COMPLETED)}>
+            <form action={() => changeStatusAction(ProjectStatus.COMPLETED)}>
               <button className="rounded border px-3 py-2">Complete</button>
             </form>
             {project.status === ProjectStatus.COMPLETED && (
-              <form action={archiveProject}>
+              <form action={archiveProjectAction}>
                 <button className="rounded border px-3 py-2 text-[var(--danger)]">Move to archive</button>
               </form>
             )}
           </div>
         </div>
-        <form action={updateProject} className="grid gap-3 md:grid-cols-2">
+        <form action={updateProjectAction} className="grid gap-3 md:grid-cols-2">
           <input name="name" defaultValue={project.name} placeholder="Name" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2" required />
           <input name="outcome" defaultValue={project.outcome} placeholder="Outcome" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" required />
           <label className="text-sm text-[var(--text-secondary)] flex flex-col">
@@ -224,7 +131,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </div>
         <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
           <span>Share with a partner</span>
-          <form action={addShare} className="flex gap-2 items-center">
+          <form action={addShareAction} className="flex gap-2 items-center">
             <input name="email" placeholder="email" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" />
             <button className="rounded border px-2 py-1">Share</button>
           </form>
@@ -244,11 +151,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   )}
                   <div className="text-xs text-[var(--text-tertiary)]">Type: {item.type}</div>
                 </div>
-                <form action={() => toggleDone(item.id, !item.isDone)}>
+                <form action={() => toggleDoneAction(item.id, !item.isDone)}>
                   <button className="text-xs rounded border px-2 py-1">{item.isDone ? "Mark undone" : "Mark done"}</button>
                 </form>
               </div>
-              <form action={updateItem} className="grid gap-2 md:grid-cols-2">
+              <form action={updateItemAction} className="grid gap-2 md:grid-cols-2">
                 <input type="hidden" name="itemId" value={item.id} />
                 <input name="title" defaultValue={item.title} className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" required />
                 <select name="type" defaultValue={item.type} className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1">
@@ -264,7 +171,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   Save item
                 </button>
               </form>
-              <form action={moveItem} className="flex flex-wrap gap-2 text-sm">
+              <form action={moveItemAction} className="flex flex-wrap gap-2 text-sm">
                 <input type="hidden" name="itemId" value={item.id} />
                 <select name="target" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-2 py-1" required>
                   <option value="">Move to...</option>
@@ -301,7 +208,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
       <div className="rounded border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-sm space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-primary)]">Add item to this project</h2>
-        <form action={addItem} className="grid gap-3 md:col-span-2">
+        <form action={addItemAction} className="grid gap-3 md:col-span-2">
           <input name="title" placeholder="Title" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" required />
           <textarea name="details" placeholder="Details" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" rows={3} />
           <input name="url" placeholder="URL (optional)" className="rounded border border-[var(--border-default)] bg-[var(--card)] px-3 py-2 md:col-span-2" />

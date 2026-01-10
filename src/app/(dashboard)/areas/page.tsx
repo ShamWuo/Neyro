@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { AreaTemplateForm } from "@/components/area-template-form";
+import { createArea } from "./actions";
 
 export default async function AreasPage() {
   const session = await auth();
@@ -10,14 +11,6 @@ export default async function AreasPage() {
   const userId = session.user.id;
 
   const areas = await prisma.area.findMany({ where: { userId, archivedAt: null }, orderBy: { createdAt: "desc" } });
-
-  async function createArea(formData: FormData) {
-    "use server";
-    const name = String(formData.get("name") ?? "").trim();
-    const standard = String(formData.get("standard") ?? "").trim();
-    if (!name || !standard) return;
-    await prisma.area.create({ data: { userId, name, standard } });
-  }
 
   return (
     <div className="space-y-10">

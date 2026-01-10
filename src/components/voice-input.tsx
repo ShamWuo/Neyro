@@ -3,14 +3,7 @@
 import { useState, useRef, useEffect, memo } from "react";
 import { useToast } from "./ui/toast";
 import { logger } from "@/lib/logger";
-
-// Extend Window interface for TypeScript
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
+import type { SpeechRecognition, SpeechRecognitionEvent } from "@/types/voice-recognition";
 
 type VoiceInputProps = {
   onTranscript: (text: string) => void;
@@ -28,9 +21,12 @@ export const VoiceInput = memo(function VoiceInput({ onTranscript, onClose, clas
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const SpeechRecognition = window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: { new (): SpeechRecognition } }).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError("Speech recognition not supported in this browser");
+      // Use setTimeout to defer state updates and avoid synchronous setState in effect
+      setTimeout(() => {
+        setError("Speech recognition not supported in this browser");
+      }, 0);
       return;
     }
 
@@ -44,20 +40,25 @@ export const VoiceInput = memo(function VoiceInput({ onTranscript, onClose, clas
       let finalTranscript = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + " ";
-        } else {
-          interimTranscript += transcript;
+        const result = event.results[i];
+        const alternative = result[0];
+        if (alternative) {
+          const transcript = alternative.transcript;
+          if (result.isFinal) {
+            finalTranscript += transcript + " ";
+          } else {
+            interimTranscript += transcript;
+          }
         }
       }
 
       setTranscript(finalTranscript + interimTranscript);
     };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      logger.error("Speech recognition error", new Error(event.error));
-      setError(`Speech recognition error: ${event.error}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (event: any) => {
+      logger.error("Speech recognition error", new Error(event.error || "Unknown error"));
+      setError(`Speech recognition error: ${event.error || "Unknown error"}`);
       setIsListening(false);
     };
 
@@ -79,7 +80,7 @@ export const VoiceInput = memo(function VoiceInput({ onTranscript, onClose, clas
       toast({
         title: "Speech recognition not available",
         description: "Your browser doesn't support speech recognition",
-        variant: "danger",
+        variant: "error",
       });
       return;
     }
@@ -125,7 +126,7 @@ export const VoiceInput = memo(function VoiceInput({ onTranscript, onClose, clas
             toast({
               title: "Speech recognition not available",
               description: "Your browser doesn't support speech recognition",
-              variant: "danger",
+              variant: "error",
             });
             return;
           }

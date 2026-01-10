@@ -13,7 +13,9 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const audioFile = formData.get("audio") as File | null;
-  const provider = (formData.get("provider") as string) || "whisper";
+  // Default to Deepgram if available, otherwise Whisper
+  const preferredProvider = process.env.DEEPGRAM_API_KEY ? "deepgram" : "whisper";
+  const provider = (formData.get("provider") as string) || preferredProvider;
 
   if (!audioFile) {
     return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
@@ -56,12 +58,25 @@ export async function POST(request: Request) {
       // Deepgram API
       const deepgramKey = process.env.DEEPGRAM_API_KEY;
       if (!deepgramKey) {
-        return NextResponse.json({ error: "Deepgram API key not configured" }, { status: 500 });
+        return NextResponse.json({ 
+          error: "Deepgram API key not configured. Set DEEPGRAM_API_KEY environment variable or use Whisper provider.",
+          provider: "deepgram",
+        }, { status: 500 });
       }
 
       const audioBuffer = await audioFile.arrayBuffer();
+      
+      // Deepgram v1 API with better model and language settings
+      const model = "nova-2"; // Best accuracy model
+      const language = "en";
+      const punctuate = "true";
+      const utterances = "true";
+      const diarize = "false";
+      const smart_format = "true";
+      
+      const url = `https://api.deepgram.com/v1/listen?model=${model}&language=${language}&punctuate=${punctuate}&utterances=${utterances}&smart_format=${smart_format}`;
 
-      const response = await fetch("https://api.deepgram.com/v1/listen", {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Token ${deepgramKey}`,
@@ -71,21 +86,49 @@ export async function POST(request: Request) {
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Deepgram API error: ${error}`);
+        const errorText = await response.text().catch(() => "");
+        let errorMessage = `Deepgram API error: ${response.status}`;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error?.message || errorJson.message || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      // Deepgram returns results in this structure
       transcription = data.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
     } else {
-      return NextResponse.json({ error: "Unsupported provider" }, { status: 400 });
+      return NextResponse.json({ 
+        error: `Unsupported provider: ${provider}. Use "whisper" or "deepgram"`,
+        supported: ["whisper", "deepgram"],
+      }, { status: 400 });
     }
 
-    return NextResponse.json({ text: transcription });
+    if (!transcription || transcription.trim().length === 0) {
+      return NextResponse.json({ 
+        error: "Transcription returned empty result",
+        text: "",
+      }, { status: 200 }); // Still return success but with empty text
+    }
+
+    logger.info("Audio transcribed successfully", { 
+      provider, 
+      length: transcription.length,
+      userId: session.user.id,
+    });
+
+    return NextResponse.json({ text: transcription.trim(), provider });
   } catch (error) {
-    logger.error("Error transcribing audio", error);
+    logger.error("Error transcribing audio", error instanceof Error ? error : new Error(String(error)));
     const message = error instanceof Error ? error.message : "Transcription failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ 
+      error: message,
+      provider,
+      hint: "Check that your API key is valid and has sufficient credits/quota",
+    }, { status: 500 });
   }
 }
 

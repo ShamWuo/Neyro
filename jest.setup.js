@@ -1,6 +1,32 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
 
+// Mock Stripe package BEFORE any imports that use it
+jest.mock("stripe", () => {
+  return jest.fn().mockImplementation(() => ({
+    customers: {
+      create: jest.fn(),
+      retrieve: jest.fn(),
+    },
+    checkout: {
+      sessions: {
+        create: jest.fn(),
+      },
+    },
+    subscriptions: {
+      retrieve: jest.fn(),
+    },
+    webhooks: {
+      constructEvent: jest.fn(),
+    },
+    billingPortal: {
+      sessions: {
+        create: jest.fn(),
+      },
+    },
+  }));
+});
+
 // Mock Next.js router
 jest.mock("next/navigation", () => ({
   useRouter() {
@@ -72,17 +98,47 @@ Object.assign(navigator, {
   share: jest.fn(() => Promise.resolve()),
 });
 
-// Note: window.location is read-only in jsdom, so we can't mock it directly
-// Components should use typeof window !== "undefined" ? window.location.href : "" pattern
+// Mock global fetch for Stripe and other API calls
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    json: async () => ({}),
+    text: async () => "",
+  })
+) as jest.Mock;
 
-// Suppress console errors from React act() warnings in tests
+// Mock window.location - use Object.defineProperty instead of assignment
+Object.defineProperty(window, "location", {
+  value: {
+    href: "",
+    origin: "http://localhost:3001",
+    protocol: "http:",
+    host: "localhost:3001",
+    hostname: "localhost",
+    port: "3001",
+    pathname: "/",
+    search: "",
+    hash: "",
+    assign: jest.fn(),
+    replace: jest.fn(),
+    reload: jest.fn(),
+  },
+  writable: true,
+  configurable: true,
+});
+
+// Suppress console errors from React act() warnings and jsdom navigation errors in tests
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
+    const message = typeof args[0] === 'string' ? args[0] : String(args[0]);
     if (
-      typeof args[0] === 'string' &&
-      (args[0].includes('Warning: ReactDOM.render is no longer supported') ||
-       args[0].includes('The current testing environment is not configured to support act'))
+      message.includes('Warning: ReactDOM.render is no longer supported') ||
+      message.includes('The current testing environment is not configured to support act') ||
+      message.includes('Not implemented: navigation') ||
+      message.includes('Error: Not implemented') ||
+      message.includes('fetch() function not provided')
     ) {
       return;
     }

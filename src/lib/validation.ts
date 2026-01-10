@@ -21,7 +21,13 @@ export const dateSchema = z.string().datetime().or(z.date());
  * Sanitize string input to prevent XSS
  */
 export function sanitizeString(input: string, maxLength: number = 1000): string {
+  if (typeof input !== "string") {
+    return "";
+  }
+  
+  // Remove control characters except newlines, tabs, and carriage returns
   return input
+    .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, "")
     .trim()
     .slice(0, maxLength)
     .replace(/[<>]/g, ""); // Remove potential HTML tags
@@ -41,8 +47,34 @@ export function validateUrl(url: unknown): string | null {
   if (!url || typeof url !== "string" || url.trim() === "") {
     return null;
   }
+  
+  const trimmed = url.trim();
+  
+  // Enforce maximum URL length
+  if (trimmed.length > 2048) {
+    return null;
+  }
+  
   try {
-    return urlSchema.parse(url.trim());
+    const parsed = urlSchema.parse(trimmed);
+    
+    // Security: Only allow http and https protocols
+    if (parsed && parsed.length > 0) {
+      try {
+        const urlObj = new URL(parsed);
+        if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+          return null;
+        }
+      } catch {
+        // If URL parsing fails but schema passed, it might be a relative URL
+        // Only allow relative URLs starting with /
+        if (!parsed.startsWith("/") && !parsed.startsWith("#") && !parsed.startsWith("mailto:")) {
+          return null;
+        }
+      }
+    }
+    
+    return parsed;
   } catch {
     return null;
   }

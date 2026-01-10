@@ -35,7 +35,7 @@ export function ReviewShareButton({ reviewId }: ReviewShareButtonProps) {
       toast({
         title: "Failed to create share link",
         description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "danger",
+        variant: "error",
       });
     } finally {
       setLoading(false);
@@ -47,7 +47,7 @@ export function ReviewShareButton({ reviewId }: ReviewShareButtonProps) {
       <button
         onClick={handleShare}
         disabled={loading}
-        className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] disabled:opacity-50"
       >
         {loading ? "Generating..." : "Share Review Summary"}
       </button>

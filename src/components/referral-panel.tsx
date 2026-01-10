@@ -67,7 +67,7 @@ export function ReferralPanel() {
       toast({
         title: "Failed to send invite",
         description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "danger",
+        variant: "error",
       });
     } finally {
       setSending(false);

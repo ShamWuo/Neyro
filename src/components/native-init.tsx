@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { initNativeFeatures, isNative } from "@/lib/capacitor";
+import { logger } from "@/lib/logger";
 
 export function NativeInit() {
   useEffect(() => {

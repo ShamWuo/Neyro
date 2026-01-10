@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification } from "@prisma/client";
+import { takeToken } from "@/lib/rateLimiter";
+import { logger } from "@/lib/logger";
+import { canAccessFeature } from "@/lib/subscription";
 
 export const runtime = "nodejs";
 
@@ -12,9 +15,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Check if user has export access (Focus feature)
+  const hasExportAccess = await canAccessFeature(session.user.id, "exports");
+  if (!hasExportAccess) {
+    return NextResponse.json(
+      { 
+        error: "Exports require Focus plan. Upgrade to unlock advanced exports (PDF, CSV, JSON).",
+        upgradeRequired: true,
+        feature: "exports",
+      }, 
+      { status: 403 }
+    );
+  }
+
+  // Rate limiting for export (prevent abuse)
+  try {
+    takeToken(`user:${session.user.id}`);
+  } catch {
+    return NextResponse.json({ error: "Too many requests. Please wait before exporting again." }, { status: 429 });
+  }
+
   const userId = session.user.id;
   const { searchParams } = new URL(request.url);
-  const format = searchParams.get("format") || "json";
+  const formatRaw = searchParams.get("format");
+  const format = (formatRaw === "csv" || formatRaw === "json") ? formatRaw : "json";
 
   try {
     const [items, projects, areas, collections, reviews] = await Promise.all([
@@ -82,6 +106,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
+    logger.error("Error exporting data", error);
     const message = error instanceof Error ? error.message : "Export failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }

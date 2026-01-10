@@ -3,6 +3,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { takeToken } from "@/lib/rateLimiter";
+
+// Request size limit: 1MB
+const MAX_REQUEST_SIZE = 1024 * 1024;
 
 const settingsSchema = z.object({
   projectLimit: z.number().min(3).max(10).optional(),
@@ -42,6 +46,19 @@ export async function PATCH(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Rate limiting
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
+    // Check request size
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
 
     let body: unknown;
     try {

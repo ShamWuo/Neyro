@@ -59,6 +59,7 @@ export default async function Image() {
                 fontSize: "48px",
                 fontWeight: "bold",
                 color: "white",
+                display: "flex",
               }}
             >
               Neyro
@@ -71,17 +72,19 @@ export default async function Image() {
               color: "white",
               textAlign: "center",
               lineHeight: "1.2",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            One inbox. Seven projects max.
-            <br />
-            Ship the weekly review.
+            <span>One inbox. Seven projects max.</span>
+            <span>Ship the weekly review.</span>
           </div>
           <div
             style={{
               fontSize: "28px",
               color: "rgba(255, 255, 255, 0.8)",
               textAlign: "center",
+              display: "flex",
             }}
           >
             PARA productivity app with enforced guardrails

@@ -39,37 +39,61 @@ enum SharePermission {
   COMMENT
 }
 
+enum SubscriptionTier {
+  FREE
+  FOCUS
+  BRAIN_TRUST
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  INCOMPLETE
+}
+
 model User {
-  id                  String               @id @default(cuid())
-  name                String?
-  email               String?              @unique
-  emailVerified       DateTime?
-  image               String?
-  referralCode        String?              @unique
-  referredBy          String?
-  referralCount       Int                  @default(0)
-  accounts            Account[]
-  sessions            Session[]
-  items               Item[]
-  projects            Project[]
-  areas               Area[]
-  resourceCollections ResourceCollection[]
-  weeklyReviews       WeeklyReview[]
-  dailyFocuses        DailyFocus[]
-  focusPins           FocusPin[]
-  focusSessions       FocusSession[]
-  templates           Template[]
-  shareAccesses       ShareAccess[]        @relation("OwnerShares")
-  activityLogs        ActivityLog[]
-  tags                Tag[]
-  referrals           Referral[]           @relation("Referrer")
-  referredByUser      User?                @relation("Referrer", fields: [referredBy], references: [id])
-  referredUsers       User[]               @relation("Referrer")
-  settings            UserSettings?
-  areaHealthHistory   AreaHealthHistory[]
-  savedSearches       SavedSearch[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id                            String               @id @default(cuid())
+  name                          String?
+  email                         String?              @unique
+  emailVerified                 DateTime?
+  image                         String?
+  password                      String? // Hashed password for credentials auth
+  referralCode                  String?              @unique
+  referredBy                    String?
+  referralCount                 Int                  @default(0)
+  // Subscription fields
+  subscriptionTier              SubscriptionTier     @default(FREE)
+  subscriptionStatus            SubscriptionStatus?  @default(ACTIVE)
+  stripeCustomerId              String?              @unique
+  stripeSubscriptionId          String?              @unique
+  subscriptionCurrentPeriodEnd  DateTime?
+  subscriptionCancelAtPeriodEnd Boolean              @default(false)
+  trialEndsAt                   DateTime?
+  // Relations
+  accounts                      Account[]
+  sessions                      Session[]
+  items                         Item[]
+  projects                      Project[]
+  areas                         Area[]
+  resourceCollections           ResourceCollection[]
+  weeklyReviews                 WeeklyReview[]
+  dailyFocuses                  DailyFocus[]
+  focusPins                     FocusPin[]
+  focusSessions                 FocusSession[]
+  templates                     Template[]
+  shareAccesses                 ShareAccess[]        @relation("OwnerShares")
+  activityLogs                  ActivityLog[]
+  tags                          Tag[]
+  referrals                     Referral[]           @relation("Referrer")
+  referredByUser                User?                @relation("Referrer", fields: [referredBy], references: [id])
+  referredUsers                 User[]               @relation("Referrer")
+  settings                      UserSettings?
+  areaHealthHistory             AreaHealthHistory[]
+  savedSearches                 SavedSearch[]
+  createdAt                     DateTime             @default(now())
+  updatedAt                     DateTime             @updatedAt
 }
 
 model Account {

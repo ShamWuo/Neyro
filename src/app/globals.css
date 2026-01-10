@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --hue-primary: 228;
   --hue-accent: 18;
 
@@ -140,6 +141,10 @@
   text-rendering: optimizeLegibility;
 }
 
+html {
+  color-scheme: light;
+}
+
 body {
   background: var(--bg);
   color: var(--text-primary);
@@ -177,7 +182,9 @@ h5 { font-size: 1rem; }
 h6 { font-size: 0.9rem; }
 
 p {
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: 1em;
 }
 
 :where(button) {

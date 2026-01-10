@@ -1,13 +1,15 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { SocialShare } from "@/components/social-share";
 import { SocialProof } from "@/components/social-proof";
 import { StructuredData } from "@/components/structured-data";
-import { NewsletterSignup } from "@/components/newsletter-signup";
+import { NewsletterSignupWrapper } from "@/components/newsletter-signup-wrapper";
+import { SkipToMainContent } from "@/components/accessibility-skip-link";
 import type { Metadata } from "next";
-import { LoadingState } from "@/components/loading-state"; // Used in dynamic import loading prop
+import { LoadingState } from "@/components/loading-state";
 
-// Code splitting: Load heavy components dynamically
 const RadialOrbitalTimelineDemo = dynamic(
   () => import("@/components/ui/radial-orbital-timeline-demo"),
   {
@@ -16,319 +18,396 @@ const RadialOrbitalTimelineDemo = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Neyro – PARA Productivity App | One Inbox, Seven Projects Max",
-  description: "Neyro enforces the PARA workflow: capture everything once, classify to Projects/Areas/Resources, cap projects at seven, and ship weekly reviews. Opinionated productivity for people who want focus, not features.",
+  title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
+  description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise. Stop managing your system and start finishing your projects.",
   openGraph: {
-    title: "Neyro – PARA Productivity App | One Inbox, Seven Projects Max",
-    description: "Neyro enforces the PARA workflow: capture everything once, classify to Projects/Areas/Resources, cap projects at seven, and ship weekly reviews.",
+    title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
+    description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise.",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Neyro – PARA Productivity App" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Neyro – PARA Productivity App | One Inbox, Seven Projects Max",
-    description: "Neyro enforces the PARA workflow: capture everything once, classify to Projects/Areas/Resources, cap projects at seven, and ship weekly reviews.",
+    title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
+    description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise.",
     images: ["/og-image.png"],
   },
 };
 
-const pillars = [
+const features = [
   {
-    title: "Capture to Clarify",
-    description: "One inbox for every task, note, or resource. Batch classify to Projects, Areas, Resources, or Archive in seconds.",
-    actions: ["Quick capture", "Bulk classify", "Link enrichment"],
+    icon: "⚡",
+    title: "Instant Capture",
+    description: "Every idea, task, and link captured in seconds. No friction, no second-guessing. Your inbox is your command center.",
   },
   {
-    title: "Projects to Finish",
-    description: "Seven active projects max. Neyro enforces the cap, surfaces dormant work, and keeps the next actions visible.",
-    actions: ["Redline guardrail", "Nearest deadline row", "Templates"],
+    icon: "🎯",
+    title: "Organize by Outcome",
+    description: "Move items to projects, areas, or resources with one click. Smart classification helps you decide what matters.",
   },
   {
-    title: "Areas to Healthy",
-    description: "Areas carry standards and health scores. Touch an area and the score updates automatically so nothing decays unseen.",
-    actions: ["Time-since-touch", "Standards checklist", "Add one action prompts"],
+    icon: "✅",
+    title: "Finish What Matters",
+    description: "Seven projects max keeps you focused. See next actions and deadlines clearly—no endless lists, just results.",
   },
   {
-    title: "Weekly Review to Ship",
-    description: "A four-step wizard pulls stats, highlights, and exports a recap so PARA stays trusted and shareable.",
-    actions: ["Auto metrics", "Shareable summary", "Timeline streaks"],
+    icon: "🚀",
+    title: "Ship Weekly Goals",
+    description: "Weekly review that takes 15 minutes, not an hour. Export, share, and keep your system current—every week.",
   },
 ];
 
 const workflow = [
-  { title: "Inbox", copy: "Capture without friction and enforce classification." },
-  { title: "Projects", copy: "Stay under seven, see deadlines, never guess what&apos;s active." },
-  { title: "Areas", copy: "Standards, health scores, and prompts keep responsibilities alive." },
-  { title: "Resources", copy: "Reference libraries attached to the work so projects stay light." },
+  { 
+    step: "01",
+    title: "Capture",
+    description: "Every idea, task, and link goes straight to your inbox. Quick capture means nothing gets lost in the chaos.",
+  },
+  { 
+    step: "02",
+    title: "Organize",
+    description: "Move items to Projects, Areas, Resources, or Archive instantly. Smart classification helps you decide what matters most.",
+  },
+  { 
+    step: "03",
+    title: "Finish",
+    description: "Seven projects max keeps you focused. See next actions and deadlines clearly—no endless lists, just results.",
+  },
+  { 
+    step: "04",
+    title: "Ship",
+    description: "Weekly review closes the loop. Export your summary, share progress, and keep your system current—every single week.",
+  },
 ];
 
 const testimonials = [
   {
-    quote: "I stopped juggling five tools. Neyro keeps me honest about PARA and finally gives me a weekly review I ship.",
-    author: "Danica L., Creative Director",
+    quote: "I stopped managing my to-do list and started shipping weekly goals. Neyro transformed chaos into finished products.",
+    author: "Danica L.",
+    role: "Creative Director",
+    avatar: "DL",
   },
   {
-    quote: "The guardrails force focus. Project caps, streaks, and area health make PARA more than a theory.",
-    author: "Jordan M., Product Lead",
+    quote: "The workflow is direct and bold. Capture, organize, finish, ship—that's it. No features, just results.",
+    author: "Jordan M.",
+    role: "Product Lead",
+    avatar: "JM",
   },
 ];
-
-const roi = [
-  { title: "Save 2 hours weekly", copy: "Weekly review exports cut prep time and keep leaders aligned." },
-  { title: "Stay under 7 projects", copy: "Guardrails prevent overcommitment and improve completion rates." },
-  { title: "Inbox to action", copy: "Smart classification moves captures into PARA in seconds." },
-  { title: "Team accountability", copy: "Shared timelines and streaks keep everyone honest." },
-];
-
-const primaryCta =
-  "inline-flex items-center justify-center gap-2 rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-5 py-3 text-sm font-semibold text-[var(--text-inverse)] shadow-sm transition hover:-translate-y-[1px] hover:shadow-md";
-const secondaryCta =
-  "inline-flex items-center justify-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--border-strong)]";
 
 const pricing = [
   {
     name: "Capture",
     price: "$0",
-    blurb: "Personal PARA starter",
+    period: "forever",
+    description: "Start shipping today",
     cta: { label: "Start free", href: "/auth/register" },
-    features: ["Unlimited inbox capture", "7 project cap dashboard", "Area health scores", "Weekly review wizard preview"],
+    features: [
+      "Unlimited instant capture",
+      "Organize by outcome",
+      "7 project focus limit",
+      "Weekly review preview",
+    ],
   },
   {
     name: "Focus",
     price: "$18",
-    cadence: "per month",
-    blurb: "Full PARA enforcement",
+    period: "per month",
+    description: "Full high-output workflow",
     highlighted: true,
+    badge: "Most popular",
     cta: { label: "Upgrade to Focus", href: "/auth/register" },
-    features: ["Everything in Capture", "Smart Assist & Integrity views", "Timeline + Activity trail", "Templates & sharing"],
+    features: [
+      "Everything in Capture",
+      "Smart Assist & Integrity views",
+      "Timeline + Activity trail",
+      "Templates & sharing",
+    ],
   },
   {
     name: "Brain Trust",
     price: "$29",
-    cadence: "per month",
-    blurb: "For teams enforcing PARA",
+    period: "per month",
+    description: "For teams shipping weekly",
     cta: { label: "Book a walkthrough", href: "/auth/login" },
-    features: ["Everything in Focus", "Shared PARA workspaces", "Team streak & accountability", "Priority support"],
+    features: [
+      "Everything in Focus",
+      "Shared workspaces",
+      "Team accountability",
+      "Priority support",
+    ],
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // If user is authenticated, redirect to dashboard
+  const session = await auth();
+  if (session?.user?.id) {
+    redirect("/home");
+  }
+
   return (
-    <main className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)]" data-theme="light">
+    <main id="main-content" className="min-h-screen bg-[var(--bg)]" data-theme="light">
+      <SkipToMainContent />
       <StructuredData />
-      <div className="sticky top-0 z-20 border-b border-[var(--border-subtle)] bg-[var(--card)]/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3 text-sm font-semibold">
-          <span>Neyro :: PARA enforced</span>
-          <div className="flex gap-2">
-            <Link href="/pricing" className={`${secondaryCta} px-4 py-2`}>
+      
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--surface)_80%,transparent)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--primary-strong)] to-[#1e40af] text-sm font-bold text-white shadow-[var(--elev-1)] transition-transform group-hover:scale-105">
+              NE
+            </div>
+            <span className="text-lg font-semibold text-[var(--text-primary)]">
+              Neyro
+            </span>
+          </Link>
+          <div className="hidden items-center gap-2 md:flex">
+            <Link 
+              href="/pricing" 
+              className="rounded-md px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-muted)] hover:text-[var(--text-primary)]"
+            >
               Pricing
             </Link>
-            <Link href="/auth/register" className={`${primaryCta} px-4 py-2`}>
-              Build workspace
+            <Link 
+              href="/auth/login" 
+              className="rounded-md px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-muted)] hover:text-[var(--text-primary)]"
+            >
+              Sign in
             </Link>
-            <Link href="/auth/login" className={`${secondaryCta} px-4 py-2`}>
-              View demo
+            <Link 
+              href="/auth/register" 
+              className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-5 py-2 text-sm font-semibold text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]"
+            >
+              Get started
             </Link>
           </div>
         </div>
-      </div>
+      </nav>
 
-      <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-14 md:gap-14 md:py-20">
-        <header className="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--card-muted)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--primary-strong)]">
-              PARA, no theatrics
+      {/* Hero Section */}
+      <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/4 left-1/4 h-[32rem] w-[32rem] rounded-full bg-[var(--primary-weak)] blur-3xl opacity-20 md:opacity-30" />
+          <div className="absolute bottom-1/4 right-1/4 h-[32rem] w-[32rem] rounded-full bg-[var(--accent-weak)] blur-3xl opacity-20 md:opacity-30" />
+        </div>
+
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--card)] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-tertiary)] shadow-[var(--elev-1)] backdrop-blur-sm transition hover:shadow-[var(--elev-2)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-strong)] animate-pulse" aria-hidden="true" />
+              Built on PARA
             </div>
-            <div className="space-y-3">
-              <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] text-[var(--text-primary)] md:text-[44px]">
-                One inbox. Seven projects max. Ship the weekly review.
-              </h1>
-              <p className="text-lg text-[var(--text-secondary)]">
-                Neyro strips the PARA workflow to the essentials so people know exactly what to do: capture, classify, focus, and close the loop.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/auth/register" className={`${primaryCta} shadow-[var(--elev-2)]`}>
-                Start free
+            <h1 className="mb-6 text-4xl font-semibold leading-[1.1] tracking-tight text-[var(--text-primary)] md:text-5xl lg:text-6xl xl:text-7xl">
+              Instant clarity for all your goals.
+            </h1>
+            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-[var(--text-secondary)] md:mb-12 md:text-xl">
+              Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise. Stop managing your system and start finishing your projects.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4 mb-10">
+              <Link 
+                href="/auth/register" 
+                className="group relative w-full overflow-hidden rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-[var(--elev-2)] hover:scale-[1.02] active:scale-[0.98] sm:w-auto focus-visible:outline-2 focus-visible:outline-[var(--primary-strong)] focus-visible:outline-offset-2"
+              >
+                <span className="relative z-10">Start free — no credit card</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#1e40af] to-[var(--primary-strong)] opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
               </Link>
-              <Link href="/auth/login" className={secondaryCta}>
-                See product tour
+              <Link 
+                href="/auth/login" 
+                className="w-full rounded-md border-2 border-[var(--border-subtle)] bg-[var(--card)] px-8 py-3.5 text-sm font-semibold text-[var(--text-primary)] transition-all hover:border-[var(--primary-strong)] hover:bg-[var(--card-muted)] hover:shadow-sm active:scale-[0.98] sm:w-auto focus-visible:outline-2 focus-visible:outline-[var(--primary-strong)] focus-visible:outline-offset-2"
+              >
+                View demo
               </Link>
             </div>
-            <div className="grid gap-2 text-sm text-[var(--text-secondary)] sm:grid-cols-2">
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">What are you?</p>
-                <p className="font-semibold text-[var(--text-primary)]">PARA workspace with enforced guardrails</p>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-[var(--text-tertiary)]">
+              <div className="flex items-center gap-2">
+                <span className="text-base" aria-hidden="true">✨</span>
+                <span>No credit card required</span>
               </div>
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">What should I do?</p>
-                <p className="font-semibold text-[var(--text-primary)]">Capture now, classify, and cap projects at seven</p>
+              <div className="flex items-center gap-2">
+                <span className="text-base" aria-hidden="true">🚀</span>
+                <span>Set up in 2 minutes</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-base" aria-hidden="true">📱</span>
+                <span>Works everywhere</span>
               </div>
             </div>
           </div>
-          <div className="w-full max-w-md justify-self-end rounded-2xl border border-[var(--border-subtle)] bg-[var(--primary-strong)] p-5 text-[var(--text-inverse)] shadow-[var(--elev-2)]">
-            <div className="flex items-center justify-between text-sm font-semibold">
-              <span>Today&apos;s PARA loop</span>
-              <span className="rounded-full border border-[var(--text-inverse)]/25 px-2 py-1 text-[11px] text-[var(--text-inverse)]/80">Action first</span>
-            </div>
-            <div className="mt-4 space-y-3 text-sm text-[var(--text-inverse)]/85">
-              <div className="flex items-start gap-3">
-                <div className="mt-1 h-2 w-2 rounded-full bg-[var(--success)]" />
-                <div>
-                  <p className="font-semibold">Inbox → classify</p>
-                  <p className="text-[var(--text-inverse)]/70">Add anything and move it to Projects, Areas, Resources, or Archive in under 10 seconds.</p>
-                </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-semibold text-[var(--text-primary)] md:text-4xl">
+              How Neyro works
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm text-[var(--text-secondary)]">
+              Four core features that enforce the PARA method and keep your system current.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature, idx) => (
+              <div 
+                key={idx}
+                className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)] transition hover:shadow-[var(--elev-2)]"
+              >
+                <div className="mb-4 text-3xl">{feature.icon}</div>
+                <h3 className="mb-2 text-lg font-semibold text-[var(--text-primary)]">{feature.title}</h3>
+                <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{feature.description}</p>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="mt-1 h-2 w-2 rounded-full bg-[var(--primary)]" />
-                <div>
-                  <p className="font-semibold">Projects capped at 7</p>
-                  <p className="text-[var(--text-inverse)]/70">See next actions and deadlines without the clutter of endless lists.</p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Workflow Steps */}
+      <section className="py-12 md:py-20 bg-[var(--card-muted)]">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-semibold text-[var(--text-primary)] md:text-4xl">
+              The PARA workflow
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm text-[var(--text-secondary)]">
+              A continuous loop that keeps your system current and actionable.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {workflow.map((step, idx) => (
+              <div 
+                key={idx}
+                className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]"
+              >
+                <div className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary-strong)]">
+                  {step.step}
                 </div>
+                <h3 className="mb-3 text-xl font-semibold text-[var(--text-primary)]">{step.title}</h3>
+                <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{step.description}</p>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="mt-1 h-2 w-2 rounded-full bg-[var(--warning)]" />
-                <div>
-                  <p className="font-semibold">Weekly review wizard</p>
-                  <p className="text-[var(--text-inverse)]/70">A four-step recap that keeps PARA trusted and ship-ready.</p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PARA Visualization */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="rounded-3xl border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_10%_10%,rgba(87,114,255,0.16),transparent_35%),radial-gradient(circle_at_85%_0%,rgba(255,155,108,0.15),transparent_35%),linear-gradient(135deg,var(--card),var(--card-muted))] p-8 shadow-[var(--elev-2)] md:p-12">
+            <div className="grid gap-8 md:grid-cols-2 md:items-center">
+              <div>
+                <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
+                  PARA method
                 </div>
+                <h2 className="mb-4 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
+                  See how everything connects
+                </h2>
+                <p className="mb-6 text-sm leading-relaxed text-[var(--text-secondary)]">
+                  Capture flows to projects, projects reference areas, areas link to resources. The weekly review closes the loop and keeps the system current.
+                </p>
+                <Link 
+                  href="/auth/register"
+                  className="inline-flex items-center rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-3 text-sm font-semibold text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]"
+                >
+                  Try it free
+                </Link>
+              </div>
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[var(--elev-1)]">
+                <RadialOrbitalTimelineDemo />
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </section>
 
-        <section className="space-y-8 rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">System pillars</p>
-              <h2 className="text-2xl font-semibold text-[var(--text-primary)]">The PARA loop, automated.</h2>
-              <p className="text-sm text-[var(--text-secondary)]">Inbox &gt; Projects &gt; Areas &gt; Resources &gt; Weekly review in one uninterrupted loop.</p>
-            </div>
-            <Link href="/auth/register" className={secondaryCta}>
-              View PARA tour
-            </Link>
+      {/* Testimonials */}
+      <section className="py-12 md:py-20 bg-[var(--card-muted)]">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-semibold text-[var(--text-primary)] md:text-4xl">
+              Join productivity-focused teams
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm text-[var(--text-secondary)]">
+              See how Neyro helps teams and individuals stay focused and finish projects.
+            </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {pillars.map((pillar) => (
-              <div key={pillar.title} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-sm">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">{pillar.title}</div>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">{pillar.description}</p>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-[var(--text-tertiary)]">
-                  {pillar.actions.map((action) => (
-                    <span key={action} className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">
-                      {action}
-                    </span>
-                  ))}
+            {testimonials.map((testimonial, idx) => (
+              <div 
+                key={idx}
+                className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary-strong)] to-[#1e40af] text-xs font-bold text-white shadow-sm">
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">{testimonial.author}</div>
+                    <div className="text-xs text-[var(--text-secondary)]">{testimonial.role}</div>
+                  </div>
                 </div>
+                <p className="text-sm leading-relaxed text-[var(--text-primary)]">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </p>
               </div>
             ))}
           </div>
-        </section>
+          <div className="mt-8">
+            <SocialProof />
+          </div>
+        </div>
+      </section>
 
-        <section className="grid gap-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)] md:grid-cols-[0.55fr_0.45fr] md:items-center">
-          <div className="space-y-3">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Para method</p>
-            <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Orbit through Capture → Projects → Areas → Resources → Review.</h2>
-            <p className="text-sm text-[var(--text-secondary)]">
-              The radial PARA orbit shows how Neyro keeps the loop moving: capture everything once, promote to projects, sustain areas, attach resources, and close the loop with review.
+      {/* Pricing */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-semibold text-[var(--text-primary)] md:text-4xl">
+              Start free, upgrade when ready
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm text-[var(--text-secondary)]">
+              Every plan includes the core workflow. Cancel anytime.
             </p>
-            <p className="text-xs text-[var(--text-tertiary)]">Click any node to spotlight dependencies and see energy flowing through the PARA system.</p>
-          </div>
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-strong)] p-4 shadow-[var(--elev-2)]">
-            <RadialOrbitalTimelineDemo />
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2">
-          {workflow.map((step, index) => (
-            <div key={step.title} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-5 shadow-lg">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Step {index + 1}</p>
-                  <h3 className="text-lg font-semibold text-[var(--text-primary)]">{step.title}</h3>
-                </div>
-                <span className="rounded-full border border-[var(--border-subtle)] px-3 py-1 text-xs text-[var(--text-secondary)]">PARA</span>
-              </div>
-              <p className="mt-3 text-sm text-[var(--text-secondary)]">{step.copy}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="space-y-6">
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Social proof</p>
-            <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Join productivity-focused teams</h2>
-            <p className="text-sm text-[var(--text-secondary)]">See how Neyro helps teams and individuals stay focused.</p>
-          </div>
-          <SocialProof />
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2">
-          {testimonials.map((t) => (
-            <div key={t.author} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-5 shadow-[var(--elev-1)]">
-              <p className="text-lg font-semibold text-[var(--text-primary)]">&ldquo;{t.quote}&rdquo;</p>
-              <p className="mt-3 text-sm text-[var(--text-tertiary)]">{t.author}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="space-y-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">ROI</p>
-              <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Time back, fewer projects, cleaner reviews.</h2>
-              <p className="text-sm text-[var(--text-secondary)]">Focus plan pays for itself when you ship consistent weekly reviews and keep projects under control.</p>
-            </div>
-            <Link href="/pricing" className={secondaryCta}>
-              See plans
-            </Link>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            {roi.map((item) => (
-              <div key={item.title} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-sm">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">{item.title}</div>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">{item.copy}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="space-y-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Pricing</p>
-              <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Install PARA discipline at any stage.</h2>
-              <p className="text-sm text-[var(--text-secondary)]">Every plan enforces Inbox → Projects → Areas → Resources and the weekly review loop.</p>
-            </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary-strong)]">Cancel anytime</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {pricing.map((tier) => (
+            {pricing.map((tier, idx) => (
               <div
-                key={tier.name}
-                className={`rounded-2xl border px-5 py-6 shadow-sm ${
-                  tier.highlighted ? "border-[var(--primary-strong)] bg-[var(--primary-strong)] text-[var(--text-inverse)] shadow-[var(--elev-2)]" : "border-[var(--border-subtle)] bg-[var(--card)] text-[var(--text-primary)]"
+                key={idx}
+                className={`rounded-2xl border px-5 py-6 shadow-[var(--elev-1)] ${
+                  tier.highlighted
+                    ? "border-[var(--primary-strong)] bg-[color-mix(in_srgb,var(--primary-strong)_10%,var(--surface))]"
+                    : "border-[var(--border-subtle)] bg-[var(--surface)]"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold uppercase tracking-[0.2em]">{tier.name}</div>
-                  {tier.highlighted && <span className="rounded-full border border-[var(--text-inverse)]/50 px-2 py-1 text-[11px]">Most popular</span>}
+                  <div>
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">{tier.name}</p>
+                    <p className="text-lg font-semibold text-[var(--text-primary)]">{tier.description}</p>
+                  </div>
+                  {tier.badge && (
+                    <span className="rounded-full border border-[var(--primary-strong)] bg-[color-mix(in_srgb,var(--primary-strong)_12%,transparent)] px-2 py-1 text-[11px] font-semibold text-[var(--primary-strong)]">Best for most</span>
+                  )}
                 </div>
-                <div className="mt-3 text-3xl font-semibold">{tier.price}</div>
-                {tier.cadence && <div className="text-xs text-current/70">{tier.cadence}</div>}
-                <p className={`mt-2 text-sm ${tier.highlighted ? "text-[var(--text-inverse)]/80" : "text-[var(--text-secondary)]"}`}>{tier.blurb}</p>
-                <ul className={`mt-4 space-y-2 text-sm ${tier.highlighted ? "text-[var(--text-inverse)]/90" : "text-[var(--text-secondary)]"}`}>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-3xl font-semibold text-[var(--text-primary)]">{tier.price}</span>
+                  <span className="text-sm text-[var(--text-secondary)]">{tier.period}</span>
+                </div>
+                <ul className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
                   {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                    <li key={feature} className="flex items-start gap-2">
+                      <span className="mt-[6px] h-2 w-2 rounded-full bg-[var(--primary-strong)]" aria-hidden />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href={tier.cta.href}
-                  className={`mt-6 inline-flex w-full items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold transition hover:-translate-y-[1px] ${
-                    tier.highlighted ? "border-[var(--text-inverse)] bg-[var(--text-inverse)] text-[var(--primary-strong)] hover:shadow-sm" : "border-[var(--primary-strong)] text-[var(--primary-strong)] hover:bg-[var(--primary-weak)]"
+                  className={`mt-6 inline-flex w-full items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold transition ${
+                    tier.highlighted
+                      ? "border-[var(--primary-strong)] bg-[var(--primary-strong)] text-[var(--text-inverse)] shadow-sm hover:shadow-[var(--elev-2)]"
+                      : "border-[var(--border-subtle)] bg-[var(--card)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
                   }`}
                 >
                   {tier.cta.label}
@@ -336,53 +415,81 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--primary-strong)] p-6 text-[var(--text-inverse)] shadow-[var(--elev-2)]">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-inverse)]/70">Final CTA</p>
-              <h2 className="text-3xl font-semibold tracking-tight">Ready to install PARA discipline</h2>
-              <p className="text-sm text-[var(--text-inverse)]/80">Log in with Google, capture something into the inbox, and feel the guardrails immediately.</p>
-            </div>
-            <div className="flex flex-col gap-2 md:items-end">
-              <Link href="/auth/register" className="inline-flex items-center justify-center rounded-md border border-[var(--text-inverse)] bg-[var(--text-inverse)] px-5 py-3 text-sm font-semibold text-[var(--primary-strong)] shadow-sm transition hover:-translate-y-[1px] hover:shadow-md">
-                Create my Neyro workspace
-              </Link>
-              <Link href="/auth/login" className="inline-flex items-center justify-center rounded-md border border-[var(--text-inverse)]/50 px-5 py-2 text-sm font-semibold text-[var(--text-inverse)]/90 hover:border-[var(--text-inverse)]/70">
-                I already have access
-              </Link>
+      {/* CTA Section */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-r from-[color-mix(in_srgb,var(--primary-strong)_15%,var(--surface))] via-[var(--surface)] to-[var(--surface-muted)] px-6 py-8 shadow-[var(--elev-1)]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Next step</p>
+                <p className="text-lg font-semibold text-[var(--text-primary)]">Ship your first weekly review and cap projects at seven.</p>
+                <p className="text-sm text-[var(--text-secondary)]">Start free, upgrade when you need more AI credits, exports, or team accountability.</p>
+              </div>
+              <div className="flex flex-wrap gap-3 text-sm font-semibold">
+                <Link href="/auth/register" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-2)]">Start free</Link>
+                <Link href="/auth/login" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Book a walkthrough</Link>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
-            <div className="space-y-4">
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Stay updated</p>
-                <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Get PARA productivity tips</h2>
-                <p className="text-sm text-[var(--text-secondary)]">Weekly insights on staying focused and shipping more.</p>
+      {/* Newsletter & Social */}
+      <section className="py-12 md:py-20 bg-[var(--card-muted)]">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
+              <div className="mb-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">
+                Stay updated
               </div>
-              <NewsletterSignup />
+              <h3 className="mb-2 text-xl font-semibold text-[var(--text-primary)]">Get productivity tips</h3>
+              <p className="mb-6 text-sm text-[var(--text-secondary)]">
+                Weekly insights on shipping more and staying focused.
+              </p>
+              <NewsletterSignupWrapper />
             </div>
-          </div>
 
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
-            <div className="space-y-4">
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Share Neyro</p>
-                <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Help others discover PARA discipline</h2>
-                <p className="text-sm text-[var(--text-secondary)]">Share Neyro with your network and help them get more done with less.</p>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-6 shadow-[var(--elev-1)]">
+              <div className="mb-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-tertiary)]">
+                Share Neyro
               </div>
+              <h3 className="mb-2 text-xl font-semibold text-[var(--text-primary)]">Help others discover PARA</h3>
+              <p className="mb-6 text-sm text-[var(--text-secondary)]">
+                Share Neyro with your network and help them get more done with less.
+              </p>
               <SocialShare
                 title="Neyro – PARA Productivity App"
-                description="One inbox. Seven projects max. Ship the weekly review. Neyro enforces the PARA workflow so you can focus, not juggle tools."
+                description="Instant clarity for all your goals. Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework."
               />
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-[var(--border-subtle)] bg-[var(--card)] py-12">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--primary-strong)] to-[#1e40af] text-sm font-bold text-white shadow-sm">
+                NE
+              </div>
+              <span className="text-lg font-semibold text-[var(--text-primary)]">Neyro</span>
+            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-[var(--text-secondary)]">
+              <Link href="/pricing" className="transition-colors hover:text-[var(--text-primary)]">Pricing</Link>
+              <Link href="/auth/login" className="transition-colors hover:text-[var(--text-primary)]">Sign in</Link>
+              <Link href="/auth/register" className="transition-colors hover:text-[var(--text-primary)]">Get started</Link>
+            </div>
+          </div>
+          <div className="mt-8 text-center text-xs text-[var(--text-tertiary)]">
+            © {new Date().getFullYear()} Neyro. PARA productivity, enforced.
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

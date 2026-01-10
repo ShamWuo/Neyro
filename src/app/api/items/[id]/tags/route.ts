@@ -3,21 +3,46 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { takeToken } from "@/lib/rateLimiter";
+import { verifyOwnership, verifyBulkOwnership } from "@/lib/security";
+import { validateId } from "@/lib/validation";
+import { validateIdArray } from "@/lib/security";
+
+// Request size limit: 1MB
+const MAX_REQUEST_SIZE = 1024 * 1024;
 
 const updateTagsSchema = z.object({
-  tagIds: z.array(z.string()),
+  tagIds: z.array(z.string().min(1).max(100)).max(50), // Max 50 tags per item
 });
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // Rate limiting (prevent abuse)
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { id } = await params;
-    if (!id) return NextResponse.json({ error: "Item ID required" }, { status: 400 });
+    try {
+      validateId(id);
+    } catch {
+      return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
+    }
+
+    // Verify ownership
+    const ownsItem = await verifyOwnership("item", id, session.user.id);
+    if (!ownsItem) {
+      logger.warn(`User ${session.user.id} attempted to fetch tags for item ${id} without ownership`);
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    }
 
     const item = await prisma.item.findUnique({
       where: { id, userId: session.user.id },
@@ -50,8 +75,25 @@ export async function PATCH(
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // Rate limiting
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
+    // Check request size
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
+
     const { id } = await params;
-    if (!id) return NextResponse.json({ error: "Item ID required" }, { status: 400 });
+    try {
+      validateId(id);
+    } catch {
+      return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
+    }
 
     let body: unknown;
     try {
@@ -67,16 +109,22 @@ export async function PATCH(
     }
 
     // Verify item belongs to user
-    const item = await prisma.item.findUnique({
-      where: { id, userId: session.user.id },
-    });
-
-    if (!item) {
+    const ownsItem = await verifyOwnership("item", id, session.user.id);
+    if (!ownsItem) {
+      logger.warn(`User ${session.user.id} attempted to update tags for item ${id} without ownership`);
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
 
     // Verify all tags belong to user (if any tags provided)
     if (parsed.data.tagIds.length > 0) {
+      // Validate all tag IDs
+      try {
+        validateIdArray(parsed.data.tagIds, 50);
+      } catch {
+        return NextResponse.json({ error: "Invalid tag IDs" }, { status: 400 });
+      }
+
+      // Verify ownership of all tags
       const userTags = await prisma.tag.findMany({
         where: {
           id: { in: parsed.data.tagIds },
@@ -85,6 +133,7 @@ export async function PATCH(
       });
 
       if (userTags.length !== parsed.data.tagIds.length) {
+        logger.warn(`User ${session.user.id} attempted to use tags not owned by them`);
         return NextResponse.json({ error: "Invalid tags" }, { status: 400 });
       }
     }

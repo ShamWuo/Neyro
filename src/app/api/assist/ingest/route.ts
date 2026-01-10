@@ -5,6 +5,7 @@ import { analyzeParaCapture } from "@/lib/ai";
 import { ItemClassification, ItemType } from "@prisma/client";
 import { takeToken } from "@/lib/rateLimiter";
 import { validateText, validateImage } from "@/lib/validateAssist";
+import { trackAICredit, recordAICreditUsage } from "@/lib/ai-credits";
 
 export const runtime = "nodejs";
 
@@ -50,8 +51,41 @@ export async function POST(request: Request) {
   }
 
   try {
-    // prefer an externally-hosted imageUrl (e.g., S3 presigned upload) over base64 payload
-    const decision = await analyzeParaCapture({ text: text ?? undefined, imageDataUrl: imageDataUrl ?? undefined, imageUrl });
+    // Check AI credits before using AI
+    const creditCheck = await trackAICredit(session.user.id);
+    
+    let decision;
+    let aiEnabled = true;
+    
+    // Only use AI if credits available or unlimited
+    if (creditCheck.allowed || creditCheck.remaining === -1) {
+      try {
+        decision = await analyzeParaCapture({ text: text ?? undefined, imageDataUrl: imageDataUrl ?? undefined, imageUrl });
+        // Record credit usage after successful AI call
+        await recordAICreditUsage(session.user.id);
+        aiEnabled = true;
+      } catch (aiError) {
+        // If AI fails, fall back to basic classification
+        console.warn("AI classification failed, using fallback:", aiError);
+        aiEnabled = false;
+        decision = {
+          classification: ItemClassification.INBOX,
+          title: text?.slice(0, 80) || "Captured note",
+          details: text || null,
+          type: ItemType.NOTE,
+        };
+      }
+    } else {
+      // Out of credits - use fallback
+      aiEnabled = false;
+      decision = {
+        classification: ItemClassification.INBOX,
+        title: text?.slice(0, 80) || "Captured note",
+        details: text || null,
+        type: ItemType.NOTE,
+      };
+    }
+
     const classification = decision.classification ?? ItemClassification.INBOX;
     const created = await prisma.item.create({
       data: {
@@ -63,9 +97,21 @@ export async function POST(request: Request) {
       },
     });
 
-    return new NextResponse(JSON.stringify({ ok: true, item: created, decision }), { status: 200, headers: { "Content-Type": "application/json" } });
+    return new NextResponse(
+      JSON.stringify({ 
+        ok: true, 
+        item: created, 
+        decision,
+        aiEnabled, // Indicate if AI was used
+        message: aiEnabled ? "Item classified with AI" : (creditCheck.remaining === 0 ? "AI credits exhausted. Upgrade for unlimited AI." : "Item captured (AI unavailable, using default classification)"),
+        creditsRemaining: creditCheck.remaining,
+        creditsLimit: creditCheck.limit,
+      }), 
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error in assist/ingest:", error);
     return new NextResponse(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

@@ -23,6 +23,10 @@ const eslintConfig = defineConfig([
     "**/__tests__/**",
     "**/*.test.ts",
     "**/*.test.tsx",
+    // Build artifacts and generated files
+    "scripts/dist/**",
+    "scripts/**/*.js",
+    "jest.config.js",
   ]),
 ]);
 

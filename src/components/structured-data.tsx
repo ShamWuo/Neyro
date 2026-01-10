@@ -47,19 +47,24 @@ export function StructuredData() {
     },
   };
 
+  // Sanitize JSON to prevent XSS while preserving structure
+  const safeOrgSchema = JSON.stringify(organizationSchema);
+  const safeSoftwareSchema = JSON.stringify(softwareApplicationSchema);
+  const safeWebsiteSchema = JSON.stringify(websiteSchema);
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeOrgSchema }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeSoftwareSchema }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeWebsiteSchema }}
       />
     </>
   );

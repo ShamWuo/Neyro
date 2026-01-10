@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { createItem } from "@/app/(dashboard)/inbox/actions";
 import { showToast } from "./ui/toast";
 import { NativeCameraButton } from "./native-camera-button";
 import { isNative } from "@/lib/capacitor";
+import { useRouter } from "next/navigation";
 
 type InboxCaptureFormEnhancedProps = {
   onSuccess?: () => void;
@@ -16,6 +16,7 @@ export function InboxCaptureFormEnhanced({ onSuccess, className }: InboxCaptureF
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false); // Used in disabled prop and button text
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,17 +26,37 @@ export function InboxCaptureFormEnhanced({ onSuccess, className }: InboxCaptureF
     try {
       const formData = new FormData();
       formData.append("text", text);
+      
+      // Convert data URL to File if we have an image
       if (imageDataUrl) {
-        formData.append("imageDataUrl", imageDataUrl);
+        try {
+          const response = await fetch(imageDataUrl);
+          const blob = await response.blob();
+          const file = new File([blob], "capture.jpg", { type: blob.type });
+          formData.append("image", file);
+        } catch {
+          // If conversion fails, try sending as imageUrl parameter
+          formData.append("imageUrl", imageDataUrl);
+        }
       }
 
-      await createItem(formData);
+      const res = await fetch("/api/assist/ingest", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || "Failed to capture item");
+      }
+
       setText("");
       setImageDataUrl(null);
       showToast("Item captured!", "success");
+      router.refresh();
       onSuccess?.();
-    } catch {
-      showToast("Failed to capture item", "error");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Failed to capture item", "error");
     } finally {
       setLoading(false);
     }

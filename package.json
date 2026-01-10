@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "build:native": "BUILD_FOR_NATIVE=true next build",
     "start": "next start",
@@ -28,6 +28,9 @@
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@prisma/client": "^6.1.0",
     "@radix-ui/react-slot": "^1.2.4",
+    "@stripe/stripe-js": "^8.6.1",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.560.0",
@@ -35,6 +38,7 @@
     "next-auth": "^5.0.0-beta.30",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "stripe": "^20.1.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {

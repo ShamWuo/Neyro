@@ -83,7 +83,7 @@ export async function Sidebar() {
               <li>• Advanced templates and exports</li>
               <li>• Activity trail and timeline</li>
             </ul>
-            <Link href="/pricing" className="mt-3 inline-flex w-full items-center justify-center rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-center text-[11px] font-semibold text-white transition hover:shadow-[var(--elev-2)]">
+            <Link href="/pricing" className="mt-3 inline-flex w-full items-center justify-center rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-center text-[11px] font-semibold text-[var(--text-inverse)] transition hover:shadow-[var(--elev-2)]">
               See plans
             </Link>
           </div>
@@ -99,7 +99,7 @@ export async function Sidebar() {
                   await signOut();
                 }}
               >
-                <button type="submit" className="w-full rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-white shadow-sm transition hover:shadow-[var(--elev-1)]">
+                <button type="submit" className="w-full rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-1)]">
                   Sign out
                 </button>
               </form>

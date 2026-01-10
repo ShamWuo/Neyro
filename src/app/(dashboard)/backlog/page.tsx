@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import { ensureProjectLimit, touchCollection } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
-import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { convertAction } from "./actions";
 
 export default async function BacklogPage() {
   const session = await auth();
@@ -10,20 +9,6 @@ export default async function BacklogPage() {
   const userId = session.user.id;
 
   const collections = await prisma.resourceCollection.findMany({ where: { userId, archivedAt: null }, include: { _count: { select: { items: true } } } });
-
-  async function convert(collectionId: string) {
-    "use server";
-    if (!collectionId) return;
-    await ensureProjectLimit(userId);
-    const collection = await prisma.resourceCollection.findUnique({ where: { id: collectionId, userId }, include: { items: true } });
-    if (!collection) return;
-    const project = await prisma.project.create({ data: { userId, name: collection.name, outcome: collection.description ?? "Outcome", status: ProjectStatus.ACTIVE } });
-    if (collection.items.length) {
-      await prisma.item.updateMany({ where: { id: { in: collection.items.map((i) => i.id) }, userId }, data: { classification: ItemClassification.PROJECT, projectId: project.id, resourceCollectionId: null } });
-    }
-    await touchCollection(userId, collectionId);
-    redirect(`/projects/${project.id}`);
-  }
 
   return (
     <div className="space-y-10">
@@ -39,7 +24,8 @@ export default async function BacklogPage() {
               <div className="text-xs text-[var(--text-secondary)]">{c._count.items} items</div>
             </div>
             {c._count.items >= 5 && (
-              <form action={() => convert(c.id)}>
+              <form action={convertAction}>
+                <input type="hidden" name="collectionId" value={c.id} />
                 <button className="rounded-md border border-[var(--text-primary)] bg-[var(--text-primary)] px-3 py-1 text-xs font-semibold text-[var(--text-inverse)]">Convert to project</button>
               </form>
             )}

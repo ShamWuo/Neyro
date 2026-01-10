@@ -13,8 +13,14 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-// Test database connection on startup
-if (typeof window === "undefined") {
+// Test database connection on startup (only in Node.js runtime, not Edge)
+// This check is skipped in Edge runtime to avoid Prisma Client validation errors
+// EdgeRuntime is a global that exists only in Edge runtime environments
+type GlobalEdgeRuntime = {
+  EdgeRuntime?: unknown;
+};
+const globalEdgeRuntime = globalThis as unknown as GlobalEdgeRuntime;
+if (typeof window === "undefined" && !globalEdgeRuntime.EdgeRuntime) {
   prisma.$connect().catch((error) => {
     logger.error("Failed to connect to database", error);
     if (process.env.NODE_ENV === "development") {

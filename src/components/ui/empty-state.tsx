@@ -17,7 +17,7 @@ export function EmptyState({ title, description, action, icon = "📭" }: EmptyS
       {action && (
         <a
           href={action.href}
-          className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:shadow-[var(--elev-2)]"
+          className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-sm font-semibold text-[var(--text-inverse)] transition hover:shadow-[var(--elev-2)]"
         >
           {action.label}
         </a>

@@ -58,6 +58,12 @@ export default async function AnalyticsPage() {
       where: { userId }, 
       select: {
         id: true,
+        userId: true,
+        inboxCount: true,
+        activeProjectsCount: true,
+        areaHealthAverage: true,
+        shareToken: true,
+        sharedAt: true,
         completedAt: true,
       },
       orderBy: { completedAt: "desc" }, 

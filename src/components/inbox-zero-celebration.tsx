@@ -15,22 +15,27 @@ export function InboxZeroCelebration({ show, onComplete }: InboxZeroCelebrationP
       return;
     }
 
-    // Generate confetti particles with all random values computed once
-    const newParticles = Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 0.5,
-      hue: Math.random() * 360,
-      duration: 1 + Math.random(),
-    }));
-    setParticles(newParticles);
+    // Use setTimeout to defer state updates and avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      // Generate confetti particles with all random values computed once
+      const newParticles = Array.from({ length: 50 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        delay: Math.random() * 0.5,
+        hue: Math.random() * 360,
+        duration: 1 + Math.random(),
+      }));
+      setParticles(newParticles);
 
-    const hideTimer = setTimeout(() => {
-      if (onComplete) onComplete();
-    }, 3000);
+      const hideTimer = setTimeout(() => {
+        if (onComplete) onComplete();
+      }, 3000);
 
-    return () => clearTimeout(hideTimer);
+      return () => clearTimeout(hideTimer);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [show, onComplete]);
 
   if (!show) return null;

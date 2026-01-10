@@ -8,21 +8,24 @@ const REFILL_INTERVAL_MS = 60 * 1000; // refill period
 const REFILL_TOKENS = 10; // tokens per interval
 
 // Type augmentation for dev-only global store
-declare global {
-  // eslint-disable-next-line no-var
-  var __rateLimitStore: Map<string, Bucket> | undefined;
-}
+type GlobalRateLimitStore = {
+  __rateLimitStore?: Map<string, Bucket>;
+};
+
+const getGlobalStore = (): GlobalRateLimitStore => {
+  if (typeof globalThis === "undefined") {
+    return {};
+  }
+  return globalThis as unknown as GlobalRateLimitStore;
+};
 
 function getStore(): Map<string, Bucket> {
   // persist across HMR in development
-  if (typeof globalThis !== "undefined") {
-    if (!globalThis.__rateLimitStore) {
-      globalThis.__rateLimitStore = new Map<string, Bucket>();
-    }
-    return globalThis.__rateLimitStore;
+  const global = getGlobalStore();
+  if (!global.__rateLimitStore) {
+    global.__rateLimitStore = new Map<string, Bucket>();
   }
-  // Fallback for environments where globalThis is not available
-  return new Map<string, Bucket>();
+  return global.__rateLimitStore;
 }
 
 export function takeToken(key: string, cost = 1) {

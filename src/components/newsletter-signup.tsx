@@ -2,7 +2,7 @@
 
 import { useState, memo, useCallback } from "react";
 
-export const NewsletterSignup = memo(function NewsletterSignup() {
+const NewsletterSignupComponent = memo(function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -77,3 +77,6 @@ export const NewsletterSignup = memo(function NewsletterSignup() {
   );
 });
 
+// Named export for dynamic import compatibility
+export const NewsletterSignup = NewsletterSignupComponent;
+export default NewsletterSignupComponent;

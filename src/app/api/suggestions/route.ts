@@ -4,11 +4,19 @@ import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { subDays } from "date-fns";
 import { logger } from "@/lib/logger";
+import { takeToken } from "@/lib/rateLimiter";
 
 export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Rate limiting (prevent abuse of suggestion generation)
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
 
     const userId = session.user.id;
     const suggestions: Array<{ id: string; type: string; message: string; href?: string; action?: string }> = [];
@@ -37,6 +45,11 @@ export async function GET() {
         archivedAt: null,
         lastActivityAt: { lt: weekAgo },
       },
+      select: {
+        id: true,
+        name: true,
+        lastActivityAt: true,
+      },
       take: 3,
     });
 
@@ -63,6 +76,11 @@ export async function GET() {
         archivedAt: null,
         deadline: { not: null, lte: threeDaysFromNow, gte: new Date() },
       },
+      select: {
+        id: true,
+        name: true,
+        deadline: true,
+      },
       take: 3,
     });
 
@@ -83,6 +101,11 @@ export async function GET() {
         archivedAt: null,
         lastHealthScore: { lte: 2 },
       },
+      select: {
+        id: true,
+        name: true,
+        lastHealthScore: true,
+      },
       take: 3,
     });
 
@@ -99,6 +122,9 @@ export async function GET() {
     // Check for missed reviews
     const lastReview = await prisma.weeklyReview.findFirst({
       where: { userId },
+      select: {
+        completedAt: true,
+      },
       orderBy: { completedAt: "desc" },
     });
 

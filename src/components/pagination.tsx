@@ -56,7 +56,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           onClick={() => onPageChange(page)}
           className={`rounded-md border px-3 py-2 text-sm font-semibold transition ${
             page === currentPage
-              ? "border-[var(--primary-strong)] bg-[var(--primary-strong)] text-white"
+              ? "border-[var(--primary-strong)] bg-[var(--primary-strong)] text-[var(--text-inverse)]"
               : "border-[var(--border-subtle)] bg-[var(--card)] hover:border-[var(--border-strong)]"
           }`}
           aria-label={`Page ${page}`}

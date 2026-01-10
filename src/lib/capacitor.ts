@@ -1,5 +1,6 @@
 // Capacitor native bridge utilities
 // These imports are optional - only available in native builds
+import { logger } from "./logger";
 let Capacitor: typeof import('@capacitor/core').Capacitor | null = null;
 let Camera: typeof import('@capacitor/camera').Camera | null = null;
 let CameraResultType: typeof import('@capacitor/camera').CameraResultType | null = null;
@@ -44,8 +45,8 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export const isNative = Capacitor?.isNativePlatform() ?? false;
-export const platform = Capacitor?.getPlatform() ?? 'web';
+export const isNative = (Capacitor && 'isNativePlatform' in Capacitor && typeof (Capacitor as { isNativePlatform?: () => boolean }).isNativePlatform === "function" && (Capacitor as { isNativePlatform: () => boolean }).isNativePlatform()) ?? false;
+export const platform = (Capacitor && 'getPlatform' in Capacitor && typeof (Capacitor as { getPlatform?: () => string }).getPlatform === "function" && (Capacitor as { getPlatform: () => string }).getPlatform()) ?? 'web';
 
 // Initialize native features
 export async function initNativeFeatures() {
@@ -59,7 +60,7 @@ export async function initNativeFeatures() {
     Keyboard.setAccessoryBarVisible({ isVisible: true });
     
     // Handle app state changes
-    App.addListener('appStateChange', ({ isActive }) => {
+    App.addListener('appStateChange', () => {
       // Log app state changes for debugging
       if (process.env.NODE_ENV === 'development') {
         // Using logger would require importing it, but this is optional native code

@@ -5,6 +5,10 @@ import { ItemClassification } from "@prisma/client";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { sanitizeString, validateUrl } from "@/lib/validation";
+import { takeToken } from "@/lib/rateLimiter";
+
+// Request size limit: 1MB
+const MAX_REQUEST_SIZE = 1024 * 1024;
 
 const createSchema = z.object({
   title: z.string().min(1).max(500),
@@ -13,19 +17,37 @@ const createSchema = z.object({
 });
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const items = await prisma.item.findMany({
-    where: { userId: session.user.id, classification: ItemClassification.INBOX, archivedAt: null },
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(items);
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const items = await prisma.item.findMany({
+      where: { userId: session.user.id, classification: ItemClassification.INBOX, archivedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(items);
+  } catch (error) {
+    logger.error("Error fetching items", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // Rate limiting
+    try {
+      takeToken(`user:${session.user.id}`);
+    } catch {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+    
+    // Check request size
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
     
     const contentType = request.headers.get("content-type");
     let body: Record<string, unknown>;

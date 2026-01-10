@@ -34,16 +34,20 @@ export const TagInput = memo(function TagInput({
   const availableTags = useMemo(() => tags.filter((t) => t && t.id && !selectedTagIds.includes(t.id)), [tags, selectedTagIds]);
 
   useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = availableTags.filter((tag) =>
-        tag.name && tag.name.toLowerCase().includes(inputValue.toLowerCase())
-      );
-      setFilteredTags(filtered);
-      setIsOpen(true);
-    } else {
-      setFilteredTags(availableTags.slice(0, 5));
-      setIsOpen(false);
-    }
+    // Use setTimeout to defer state updates and avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      if (inputValue.trim()) {
+        const filtered = availableTags.filter((tag) =>
+          tag.name && tag.name.toLowerCase().includes(inputValue.toLowerCase())
+        );
+        setFilteredTags(filtered);
+        setIsOpen(true);
+      } else {
+        setFilteredTags(availableTags.slice(0, 5));
+        setIsOpen(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [inputValue, availableTags]);
 
   useEffect(() => {
@@ -127,6 +131,7 @@ export const TagInput = memo(function TagInput({
           ref={inputRef}
           type="text"
           value={inputValue}
+          role="combobox"
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
@@ -172,7 +177,7 @@ export const TagInput = memo(function TagInput({
                 className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--surface-muted)] transition-colors flex items-center gap-2 text-[var(--primary-strong)]"
               >
                 <span>+</span>
-                <span>Create "{inputValue.trim()}"</span>
+                <span>Create &quot;{inputValue.trim()}&quot;</span>
               </button>
             )}
         </div>

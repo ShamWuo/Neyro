@@ -4,6 +4,8 @@ import { ensureProjectLimit, MAX_ACTIVE_PROJECTS, projectHealth } from "@/lib/pa
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { checkSubscriptionLimit } from "@/lib/subscription";
+import { UpgradePromptMobile } from "@/components/upgrade-prompt-mobile";
 
 export default async function ProjectsPage() {
   const session = await auth();
@@ -12,6 +14,7 @@ export default async function ProjectsPage() {
 
   const projects = await prisma.project.findMany({ where: { userId, archivedAt: null }, orderBy: { createdAt: "desc" }, include: { _count: { select: { items: true } } } });
   const activeCount = projects.filter((p) => p.status === ProjectStatus.ACTIVE).length;
+  const projectLimit = await checkSubscriptionLimit(userId, "maxProjects");
 
   async function createProject(formData: FormData) {
     "use server";
@@ -19,10 +22,21 @@ export default async function ProjectsPage() {
     const outcome = String(formData.get("outcome") ?? "").trim();
     const deadlineRaw = String(formData.get("deadline") ?? "").trim();
     const status = (String(formData.get("status") ?? ProjectStatus.ACTIVE) as ProjectStatus) || ProjectStatus.ACTIVE;
-    if (status === ProjectStatus.ACTIVE) {
-      await ensureProjectLimit(userId);
+    
+    if (!name || !outcome) {
+      redirect("/projects?error=missing_fields");
+      return;
     }
-    if (!name || !outcome) return;
+
+    if (status === ProjectStatus.ACTIVE) {
+      try {
+        await ensureProjectLimit(userId);
+      } catch (error) {
+        redirect(`/projects?error=project_limit`);
+        return;
+      }
+    }
+
     await prisma.project.create({
       data: {
         userId,
@@ -32,6 +46,8 @@ export default async function ProjectsPage() {
         deadline: deadlineRaw ? new Date(deadlineRaw) : null,
       },
     });
+
+    redirect("/projects");
   }
 
   async function updateProjectStatus(id: string, status: ProjectStatus) {
@@ -47,30 +63,65 @@ export default async function ProjectsPage() {
     await prisma.project.update({ where: { id, userId }, data: { archivedAt: new Date(), status: ProjectStatus.COMPLETED } });
   }
 
+  const showUpgradePrompt = !projectLimit.allowed && activeCount >= (projectLimit.limit || 3);
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
-          <p className={`text-sm ${activeCount >= MAX_ACTIVE_PROJECTS ? "text-[var(--danger)]" : "text-[var(--text-secondary)]"}`}>
-            Active projects: {activeCount} / {MAX_ACTIVE_PROJECTS}
+          <p className={`text-sm ${activeCount >= (projectLimit.limit || MAX_ACTIVE_PROJECTS) ? "text-[var(--danger)] font-semibold" : "text-[var(--text-secondary)]"}`}>
+            Active projects: {activeCount} / {projectLimit.limit || MAX_ACTIVE_PROJECTS}
           </p>
         </div>
       </div>
 
-      <form action={createProject} className="panel grid gap-3 md:grid-cols-2">
-        <input name="name" placeholder="Name" className="rounded-md border border-[var(--border-default)] bg-[var(--surface)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]" required />
-        <input name="outcome" placeholder="Outcome sentence" className="rounded-md border border-[var(--border-default)] bg-[var(--surface)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] md:col-span-2" required />
-        <input name="deadline" type="date" className="rounded-md border border-[var(--border-default)] bg-[var(--surface)] px-3 py-2 text-[var(--text-primary)]" />
-        <label className="flex flex-col text-sm text-[var(--text-secondary)]">
-          Status
-          <select name="status" className="rounded-md border border-[var(--border-default)] bg-[var(--surface)] px-3 py-2 text-[var(--text-primary)]">
-            {Object.values(ProjectStatus).map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </label>
-        <button type="submit" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] md:col-span-2">New Project</button>
+      {showUpgradePrompt && (
+        <UpgradePromptMobile
+          trigger="project_limit"
+          current={activeCount}
+          limit={projectLimit.limit || 3}
+        />
+      )}
+
+      <form action={createProject} className="panel space-y-4 p-4 md:p-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <input 
+            name="name" 
+            placeholder="Project name" 
+            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation" 
+            required 
+          />
+          <input 
+            name="outcome" 
+            placeholder="Outcome sentence" 
+            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] md:col-span-2 focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation" 
+            required 
+          />
+          <input 
+            name="deadline" 
+            type="date" 
+            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation" 
+          />
+          <label className="flex flex-col gap-2 text-sm text-[var(--text-secondary)]">
+            Status
+            <select 
+              name="status" 
+              className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation"
+            >
+              {Object.values(ProjectStatus).map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <button 
+          type="submit" 
+          disabled={activeCount >= (projectLimit.limit || 3) && !projectLimit.allowed}
+          className="w-full rounded-lg border-2 border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-4 text-base font-semibold text-white shadow-sm transition-all active:scale-95 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+        >
+          {activeCount >= (projectLimit.limit || 3) && !projectLimit.allowed ? "Project limit reached — Upgrade to create more" : "Create Project"}
+        </button>
       </form>
 
       <div className="space-y-5">

@@ -1,6 +1,8 @@
 // Voice processing utilities
 // Supports both browser Web Speech API and external services (Whisper, Deepgram)
 
+import type { SpeechRecognition } from "@/types/voice-recognition";
+
 export type VoiceConfig = {
   language?: string;
   continuous?: boolean;
@@ -14,12 +16,14 @@ export class VoiceRecorder {
   constructor(config: VoiceConfig = {}) {
     this.isSupported = typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window);
     
-    if (this.isSupported) {
-      const SpeechRecognition = (window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
-      this.recognition = new SpeechRecognition();
-      this.recognition.lang = config.language || "en-US";
-      this.recognition.continuous = config.continuous ?? false;
-      this.recognition.interimResults = config.interimResults ?? true;
+    if (this.isSupported && typeof window !== "undefined") {
+      const SpeechRecognitionConstructor = (window as Window & { SpeechRecognition?: { new (): SpeechRecognition }; webkitSpeechRecognition?: { new (): SpeechRecognition } }).SpeechRecognition || (window as Window & { webkitSpeechRecognition?: { new (): SpeechRecognition } }).webkitSpeechRecognition;
+      if (SpeechRecognitionConstructor) {
+        this.recognition = new SpeechRecognitionConstructor();
+        this.recognition.lang = config.language || "en-US";
+        this.recognition.continuous = config.continuous ?? false;
+        this.recognition.interimResults = config.interimResults ?? true;
+      }
     }
   }
 

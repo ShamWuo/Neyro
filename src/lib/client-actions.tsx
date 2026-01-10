@@ -15,7 +15,7 @@ export function useClientAction() {
       await action();
       showToast(successMessage, "success");
       router.refresh();
-    } catch (error) {
+    } catch {
       showToast(errorMessage, "error");
     }
   }

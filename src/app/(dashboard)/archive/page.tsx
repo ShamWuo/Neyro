@@ -1,8 +1,9 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { ItemClassification, ProjectStatus, ItemType, Prisma } from "@prisma/client";
+import { ItemClassification, ItemType, Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { ArchiveFilters } from "@/components/archive-filters";
+import { restoreItem, deleteItemAction, restoreProjectAction, restoreAreaAction } from "./actions";
 
 export default async function ArchivePage({ searchParams }: { searchParams?: Promise<{ q?: string; classification?: string; type?: string }> }) {
   const session = await auth();
@@ -49,44 +50,6 @@ export default async function ArchivePage({ searchParams }: { searchParams?: Pro
   ]);
 
   const [totalArchivedItems, totalArchivedProjects, totalArchivedAreas, archivedLast30Days] = stats;
-
-  async function restoreItem(formData: FormData) {
-    "use server";
-    const itemId = String(formData.get("itemId") ?? "");
-    const target = String(formData.get("target") ?? "");
-    const projectId = String(formData.get("projectId") ?? "");
-    const areaId = String(formData.get("areaId") ?? "");
-    const collectionId = String(formData.get("collectionId") ?? "");
-    if (!itemId) return;
-    if (target === "project" && projectId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.PROJECT, projectId, areaId: null, resourceCollectionId: null, archivedAt: null } });
-    } else if (target === "area" && areaId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.AREA, areaId, projectId: null, resourceCollectionId: null, archivedAt: null } });
-    } else if (target === "resource" && collectionId) {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.RESOURCE, resourceCollectionId: collectionId, projectId: null, areaId: null, archivedAt: null } });
-    } else {
-      await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.INBOX, archivedAt: null, projectId: null, areaId: null, resourceCollectionId: null } });
-    }
-    redirect("/archive");
-  }
-
-  async function deleteItem(itemId: string) {
-    "use server";
-    await prisma.item.delete({ where: { id: itemId, userId } });
-    redirect("/archive");
-  }
-
-  async function restoreProject(id: string) {
-    "use server";
-    await prisma.project.update({ where: { id, userId }, data: { archivedAt: null, status: ProjectStatus.PAUSED } });
-    redirect("/archive");
-  }
-
-  async function restoreArea(id: string) {
-    "use server";
-    await prisma.area.update({ where: { id, userId }, data: { archivedAt: null } });
-    redirect("/archive");
-  }
 
   return (
     <div className="space-y-10">
@@ -137,7 +100,8 @@ export default async function ArchivePage({ searchParams }: { searchParams?: Pro
                   {item.url && <a className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]" href={item.url} target="_blank" rel="noreferrer">{item.url}</a>}
                   <div className="text-xs text-[var(--text-secondary)]">Type: {item.classification}</div>
                 </div>
-                <form action={() => deleteItem(item.id)}>
+                <form action={deleteItemAction}>
+                  <input type="hidden" name="itemId" value={item.id} />
                   <button className="text-xs font-semibold text-[var(--danger)] hover:text-[var(--danger)]">Delete permanently</button>
                 </form>
               </div>
@@ -190,7 +154,8 @@ export default async function ArchivePage({ searchParams }: { searchParams?: Pro
                 <div className="font-medium text-[var(--text-primary)]">{p.name}</div>
                 <div className="text-sm text-[var(--text-secondary)]">Outcome: {p.outcome}</div>
               </div>
-              <form action={() => restoreProject(p.id)}>
+              <form action={restoreProjectAction}>
+                <input type="hidden" name="id" value={p.id} />
                 <button className="text-sm font-semibold text-[var(--primary-strong)] hover:text-[var(--primary)]">Restore</button>
               </form>
             </div>
@@ -211,7 +176,8 @@ export default async function ArchivePage({ searchParams }: { searchParams?: Pro
                 <div className="font-medium text-[var(--text-primary)]">{a.name}</div>
                 <div className="text-sm text-[var(--text-secondary)]">{a.standard}</div>
               </div>
-              <form action={() => restoreArea(a.id)}>
+              <form action={restoreAreaAction}>
+                <input type="hidden" name="id" value={a.id} />
                 <button className="text-sm font-semibold text-[var(--primary-strong)] hover:text-[var(--primary)]">Restore</button>
               </form>
             </div>

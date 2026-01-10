@@ -29,11 +29,11 @@ if (Test-Path .env) {
     # Check NEXTAUTH_URL
     $nextAuthUrl = $envContent | Select-String "^NEXTAUTH_URL="
     if ($nextAuthUrl) {
-        if ($nextAuthUrl.Line -match "localhost:3000") {
+        if ($nextAuthUrl.Line -match "localhost:3001") {
             Write-Host "✅ NEXTAUTH_URL is set for local development" -ForegroundColor Green
         } elseif ($nextAuthUrl.Line -match "vercel|neyro\.app") {
             Write-Host "⚠️  NEXTAUTH_URL is set to production URL" -ForegroundColor Yellow
-            Write-Host "   For local dev, change to: NEXTAUTH_URL=http://localhost:3000" -ForegroundColor Yellow
+            Write-Host "   For local dev, change to: NEXTAUTH_URL=http://localhost:3001" -ForegroundColor Yellow
         } else {
             Write-Host "✅ NEXTAUTH_URL is set" -ForegroundColor Green
         }
@@ -89,9 +89,9 @@ if (Test-Path "node_modules\.prisma\client\index.js") {
 
 Write-Host ""
 Write-Host "=== Summary ===" -ForegroundColor Cyan
-Write-Host "If all checks pass, try signing in at: http://localhost:3000/auth/login" -ForegroundColor Cyan
+Write-Host "If all checks pass, try signing in at: http://localhost:3001/auth/login" -ForegroundColor Cyan
 Write-Host "If sign-in fails, check:" -ForegroundColor Yellow
-Write-Host "1. Google OAuth redirect URI is configured for http://localhost:3000/api/auth/callback/google" -ForegroundColor Yellow
+Write-Host "1. Google OAuth redirect URI is configured for http://localhost:3001/api/auth/callback/google" -ForegroundColor Yellow
 Write-Host "2. Dev server is restarted after .env changes" -ForegroundColor Yellow
 Write-Host "3. Browser console for OAuth errors" -ForegroundColor Yellow
 
