@@ -64,13 +64,26 @@ Notes:
 
 ## Scripts
 - `npm run dev` – start dev server
+- `npm run lint` – ESLint (warnings fail CI)
+- `npm run typecheck` – TypeScript with no emit
+- `npm run test` – Jest suite
+- `npm run check` – lint + typecheck + test
+- `npm run ci` – lint + typecheck + test + build (CI parity)
 - `npm run build` – build
 - `npm run build:native` – build for native apps (static export)
 - `npm run start` – prod start
-- `npm run lint` – ESLint
 - `npm run prisma:generate` – Prisma client
 - `npm run prisma:migrate` – create migration
 - `npm run prisma:studio` – Prisma Studio
+- `npm run setup:hooks` – point git to use `.githooks`
+
+## Git hooks
+- Run `npm run setup:hooks` once per clone to set `core.hooksPath` to `.githooks`.
+- The pre-commit hook runs `npm run lint` and `npm run typecheck`; keep commits green by running `npm run check` before staging.
+
+## CI
+- Workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml) (Node 20, npm cache).
+- Steps: install deps, lint, typecheck, test (`--passWithNoTests`), then build. Mirror locally with `npm run ci`.
 
 ### Native App Scripts (Capacitor)
 - `npm run cap:sync` – sync web assets to native projects

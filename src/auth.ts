@@ -160,12 +160,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         logger.error("LinkAccount Event Error", { error, user, account });
       }
     },
-    signInError: async ({ error }) => {
-      logger.error("SignIn Error Event", { 
-        error: error.message || error,
-        stack: error instanceof Error ? error.stack : undefined 
-      });
-    },
   },
 
 });
