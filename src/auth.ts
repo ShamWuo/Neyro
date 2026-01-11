@@ -10,7 +10,7 @@ import { authConfig } from "./auth.config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   debug: true,
-  // adapter: PrismaAdapter(prisma), // Temporarily disabled to isolate DB issues
+  adapter: PrismaAdapter(prisma),
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       logger.info("SignIn Callback", { user, account, profile });
