@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { lazyLoadImage } from "../lib/lazy-loading";
 
 type LazyImageProps = {
   src: string;
