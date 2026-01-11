@@ -1,5 +1,8 @@
+import NextAuth from "next-auth";
+import { authConfig } from "./auth.config";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+
+const { auth } = NextAuth(authConfig);
 
 // Security headers helper
 function addSecurityHeaders(response: NextResponse): NextResponse {
@@ -11,40 +14,27 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   return response;
 }
 
-// Lightweight session check - checks for NextAuth session cookie without importing Prisma
-function hasSession(request: NextRequest): boolean {
-  // Check for NextAuth session cookie (authjs.session-token or next-auth.session-token)
-  const sessionToken = 
-    request.cookies.get("authjs.session-token")?.value ||
-    request.cookies.get("__Secure-authjs.session-token")?.value ||
-    request.cookies.get("next-auth.session-token")?.value ||
-    request.cookies.get("__Secure-next-auth.session-token")?.value;
-  
-  return !!sessionToken;
-}
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
-export async function middleware(request: NextRequest) {
   // Allow public routes
   const publicRoutes = ["/", "/auth", "/pricing", "/api/auth", "/share", "/blog"];
-  const isPublicRoute = publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some((route) => nextUrl.pathname.startsWith(route));
 
   if (isPublicRoute) {
     return addSecurityHeaders(NextResponse.next());
   }
 
-  // Lightweight authentication check - just verify session cookie exists
-  // Full auth validation happens at route level where we can use Prisma
-  if (!hasSession(request)) {
-    const loginUrl = new URL("/auth/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+  // Redirect unauthenticated users to login
+  if (!isLoggedIn) {
+    const loginUrl = new URL("/auth/login", nextUrl.origin);
+    loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Subscription checks are handled at the route level (API routes and pages)
-  // This prevents Prisma Client usage in Edge runtime
-  
   return addSecurityHeaders(NextResponse.next());
-}
+});
 
 export const config = {
   matcher: [
