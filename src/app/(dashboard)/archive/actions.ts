@@ -1,10 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
-import { ItemClassification } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { requireAuth, verifyOwnership, validateIdArray } from "@/lib/security";
+import { requireAuth, verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { logger } from "@/lib/logger";
 
@@ -18,7 +15,7 @@ export async function restoreItem(formData: FormData) {
     if (!itemIdRaw) return;
     const itemId = String(itemIdRaw).trim();
     validateId(itemId);
-    
+
     // Verify ownership of archived item
     const item = await prisma.item.findUnique({ where: { id: itemId, userId } });
     if (!item || !item.archivedAt) {
@@ -30,17 +27,17 @@ export async function restoreItem(formData: FormData) {
     const projectIdRaw = formData.get("projectId");
     const areaIdRaw = formData.get("areaId");
     const collectionIdRaw = formData.get("collectionId");
-    
+
     // Validate target is a valid classification
     const validTargets = ["project", "area", "resource", "inbox"];
     if (!validTargets.includes(target) && target !== "") {
       redirect("/archive?error=invalid_target");
     }
-    
+
     let projectId: string | null = null;
     let areaId: string | null = null;
     let collectionId: string | null = null;
-    
+
     if (projectIdRaw && target === "project") {
       projectId = String(projectIdRaw).trim();
       if (projectId) {
@@ -51,7 +48,7 @@ export async function restoreItem(formData: FormData) {
         }
       }
     }
-    
+
     if (areaIdRaw && target === "area") {
       areaId = String(areaIdRaw).trim();
       if (areaId) {
@@ -62,7 +59,7 @@ export async function restoreItem(formData: FormData) {
         }
       }
     }
-    
+
     if (collectionIdRaw && target === "resource") {
       collectionId = String(collectionIdRaw).trim();
       if (collectionId) {
@@ -100,14 +97,14 @@ export async function deleteItemAction(formData: FormData) {
     if (!itemIdRaw) return;
     const itemId = String(itemIdRaw).trim();
     validateId(itemId);
-    
+
     // Verify ownership before deleting
     const ownsItem = await verifyOwnership("item", itemId, userId);
     if (!ownsItem) {
       logger.warn(`User ${userId} attempted to delete item ${itemId} without ownership`);
       redirect("/archive?error=unauthorized");
     }
-    
+
     await prisma.item.delete({ where: { id: itemId, userId } });
     redirect("/archive");
   } catch (error) {
@@ -126,14 +123,14 @@ export async function restoreProjectAction(formData: FormData) {
     if (!idRaw) return;
     const id = String(idRaw).trim();
     validateId(id);
-    
+
     // Verify ownership and that project is archived
     const project = await prisma.project.findUnique({ where: { id, userId } });
     if (!project || !project.archivedAt) {
       logger.warn(`User ${userId} attempted to restore non-existent or non-archived project ${id}`);
       redirect("/archive?error=unauthorized");
     }
-    
+
     const { ProjectStatus } = await import("@prisma/client");
     await prisma.project.update({ where: { id, userId }, data: { archivedAt: null, status: ProjectStatus.PAUSED } });
     redirect("/archive");
@@ -153,14 +150,14 @@ export async function restoreAreaAction(formData: FormData) {
     if (!idRaw) return;
     const id = String(idRaw).trim();
     validateId(id);
-    
+
     // Verify ownership and that area is archived
     const area = await prisma.area.findUnique({ where: { id, userId } });
     if (!area || !area.archivedAt) {
       logger.warn(`User ${userId} attempted to restore non-existent or non-archived area ${id}`);
       redirect("/archive?error=unauthorized");
     }
-    
+
     await prisma.area.update({ where: { id, userId }, data: { archivedAt: null } });
     redirect("/archive");
   } catch (error) {

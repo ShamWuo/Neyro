@@ -36,7 +36,7 @@ export function UpgradePromptMobile({
     // Check if dismissed recently
     const dismissedUntil = localStorage.getItem(`upgrade-prompt-dismissed-${trigger}`);
     if (dismissedUntil && parseInt(dismissedUntil, 10) > Date.now()) {
-      setIsVisible(false);
+      if (isVisible) setIsVisible(false);
     }
   }, [trigger]);
 
