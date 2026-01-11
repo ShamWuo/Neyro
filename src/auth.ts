@@ -9,7 +9,24 @@ import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
+  debug: true,
+  // adapter: PrismaAdapter(prisma), // Temporarily disabled to isolate DB issues
+  callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      logger.info("SignIn Callback", { user, account, profile });
+      return true;
+    },
+    async jwt({ token, user, account, profile }) {
+      if (user) {
+        logger.info("JWT Callback Initial", { user, account });
+      }
+      return token;
+    },
+    async session({ session, token, user }) {
+      logger.info("Session Callback", { session, token });
+      return session;
+    },
+  },
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
@@ -86,5 +103,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         provider: account?.provider,
       });
     },
+    createUser: async ({ user }) => {
+      logger.info("User created", { user });
+    },
+    linkAccount: async ({ user, account }) => {
+      logger.info("Account linked", { user, account });
+    },
   },
+
 });
