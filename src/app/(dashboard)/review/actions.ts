@@ -1,12 +1,11 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { analyzeParaCapture } from "@/lib/ai";
-import { requireAuth, verifyOwnership, verifyBulkOwnership, validateAndSanitizeString, validateUrlSafe } from "@/lib/security";
+import { requireAuth, verifyOwnership, verifyBulkOwnership, validateAndSanitizeString } from "@/lib/security";
 import { sanitizeString, validateUrl, validateId } from "@/lib/validation";
 
 export async function classifyInboxItem(formData: FormData) {

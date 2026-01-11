@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { sendEmail, sendWelcomeEmail, sendWeeklyReviewReminder, sendUpgradePrompt } from "@/lib/email";
+import { sendWelcomeEmail, sendWeeklyReviewReminder, sendUpgradePrompt } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";

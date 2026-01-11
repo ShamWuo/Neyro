@@ -5,13 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface OnboardingWizardProps {
-  userId: string;
   onComplete?: () => void;
 }
 
-export function OnboardingWizard({ userId, onComplete }: OnboardingWizardProps) {
+export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   const [step, setStep] = useState(1);
-  const [completed, setCompleted] = useState<string[]>([]);
   const router = useRouter();
 
   const steps = [

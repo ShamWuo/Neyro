@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { logger } from "@/lib/logger";
 import { takeToken } from "@/lib/rateLimiter";
 
-export async function PUT(_request: Request) {
+export async function PUT() {
   try {
     const session = await auth();
     if (!session?.user?.id) {

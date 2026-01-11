@@ -18,6 +18,7 @@ function LoginForm() {
   useEffect(() => {
     const errorParam = searchParams?.get("error");
     if (errorParam) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError(errorParam);
     }
   }, [searchParams]);

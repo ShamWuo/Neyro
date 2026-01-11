@@ -31,7 +31,7 @@ export default async function ProjectsPage() {
     if (status === ProjectStatus.ACTIVE) {
       try {
         await ensureProjectLimit(userId);
-      } catch (error) {
+      } catch {
         redirect(`/projects?error=project_limit`);
         return;
       }

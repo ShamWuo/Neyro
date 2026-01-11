@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { lazyLoadImage } from "@/lib/lazy-loading";
 
 type LazyImageProps = {
   src: string;
@@ -47,12 +46,15 @@ export function LazyImage({
   return (
     <div className={`relative overflow-hidden ${className}`} style={{ width, height }}>
       {!isLoaded && !error && placeholder && (
-        <img
-          src={placeholder}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover blur-sm"
-          aria-hidden="true"
-        />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={placeholder}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover blur-sm"
+            aria-hidden="true"
+          />
+        </>
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

@@ -1,8 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getUserSubscription } from "@/lib/subscription";
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import { BillingSettings } from "@/components/billing-settings";
 
 export const metadata = {

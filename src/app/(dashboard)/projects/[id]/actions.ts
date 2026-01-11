@@ -1,12 +1,11 @@
 "use server";
 
-import { auth } from "@/auth";
 import { ensureProjectLimit, touchProject } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { ItemClassification, ItemType, ProjectStatus, SharePermission } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { requireAuth, verifyOwnership, validateAndSanitizeString, validateEmail, validateUrlSafe } from "@/lib/security";
+import { requireAuth, verifyOwnership, validateAndSanitizeString, validateEmail } from "@/lib/security";
 import { sanitizeString, validateUrl, validateId } from "@/lib/validation";
 
 export async function updateProject(projectId: string, formData: FormData) {

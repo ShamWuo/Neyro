@@ -94,38 +94,6 @@ export function AreaGoals({ areaId, initialGoals = [], onGoalUpdate }: AreaGoals
     }
   };
 
-  const handleUpdateProgress = async (goalId: string, newCurrent: number) => {
-    if (newCurrent < 0) {
-      showToast("Progress cannot be negative", "error");
-      return;
-    }
-
-    const previousGoals = goals;
-    const updated = goals.map((g) => (g.id === goalId ? { ...g, current: newCurrent } : g));
-    setGoals(updated);
-
-    try {
-      const res = await fetch(`/api/areas/${areaId}/goals/${goalId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ current: newCurrent }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(errorData.error || "Failed to update goal");
-      }
-
-      onGoalUpdate?.(updated);
-      showToast("Progress updated", "success");
-    } catch (error) {
-      // Revert on error
-      setGoals(previousGoals);
-      const message = error instanceof Error ? error.message : "Failed to update goal progress";
-      showToast(message, "error");
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

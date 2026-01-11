@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import { ensureProjectLimit, touchCollection } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";

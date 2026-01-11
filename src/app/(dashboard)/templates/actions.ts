@@ -1,11 +1,10 @@
 "use server";
 
-import { auth } from "@/auth";
 import { ensureProjectLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { TemplateType, ProjectStatus, ItemClassification, ItemType } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { requireAuth, verifyOwnership, validateAndSanitizeString } from "@/lib/security";
+import { requireAuth, validateAndSanitizeString } from "@/lib/security";
 import { sanitizeString, validateId } from "@/lib/validation";
 import { logger } from "@/lib/logger";
 

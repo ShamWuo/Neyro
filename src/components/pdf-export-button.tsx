@@ -6,14 +6,12 @@ import { showToast } from "./ui/toast";
 type PDFExportButtonProps = {
   content: React.ReactNode;
   title: string;
-  filename?: string;
   onExport?: () => void;
 };
 
 export function PDFExportButton({
   content,
   title,
-  filename,
   onExport,
 }: PDFExportButtonProps) {
   const [exporting, setExporting] = useState(false);

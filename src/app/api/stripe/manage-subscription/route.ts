@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { createPortalSession } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const session = await auth();
     if (!session?.user?.id) {

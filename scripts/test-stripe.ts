@@ -14,7 +14,6 @@ import {
   getOrCreateStripeCustomer,
   createCheckoutSession,
   createPortalSession,
-  updateSubscriptionFromStripe,
   STRIPE_PRICE_IDS
 } from "../src/lib/stripe";
 import { logger } from "../src/lib/logger";
@@ -312,7 +311,7 @@ async function testDatabaseSchema() {
 
   try {
     // Check if User model has all required Stripe fields
-    const testUser = await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       select: {
         id: true,
         stripeCustomerId: true,
@@ -325,14 +324,18 @@ async function testDatabaseSchema() {
       },
     });
 
-    log("✅ Database schema includes all Stripe fields:", "success");
-    log("   → stripeCustomerId", "info");
-    log("   → stripeSubscriptionId", "info");
-    log("   → subscriptionTier", "info");
-    log("   → subscriptionStatus", "info");
-    log("   → subscriptionCurrentPeriodEnd", "info");
-    log("   → subscriptionCancelAtPeriodEnd", "info");
-    log("   → trialEndsAt", "info");
+    if (user) {
+      log("✅ Database schema includes all Stripe fields:", "success");
+      log("   → stripeCustomerId", "info");
+      log("   → stripeSubscriptionId", "info");
+      log("   → subscriptionTier", "info");
+      log("   → subscriptionStatus", "info");
+      log("   → subscriptionCurrentPeriodEnd", "info");
+      log("   → subscriptionCancelAtPeriodEnd", "info");
+      log("   → trialEndsAt", "info");
+    } else {
+      log("✅ Database schema check passed (no users yet)", "success");
+    }
 
     return true;
   } catch (error: unknown) {

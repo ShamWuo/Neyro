@@ -71,20 +71,6 @@ export function InAppNotifications({
     }
   };
 
-  const typeIcons = {
-    info: "ℹ️",
-    success: "✅",
-    warning: "⚠️",
-    error: "❌",
-  };
-
-  const typeColors = {
-    info: "border-[var(--info)] bg-[var(--info-weak)]",
-    success: "border-[var(--success)] bg-[var(--success-weak)]",
-    warning: "border-[var(--warning)] bg-[var(--warning-weak)]",
-    error: "border-[var(--danger)] bg-[var(--danger-weak)]",
-  };
-
   return (
     <>
       <button

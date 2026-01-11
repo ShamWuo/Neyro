@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { requireAuth, verifyOwnership, validateAndSanitizeString, validateUrlSafe, validateIdArray } from "@/lib/security";
+import { requireAuth, verifyOwnership, validateAndSanitizeString, validateIdArray } from "@/lib/security";
 import { sanitizeString, validateUrl } from "@/lib/validation";
 
 export async function createItem(formData: FormData) {

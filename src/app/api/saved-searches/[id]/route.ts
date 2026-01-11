@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
-import { takeToken } from "@/lib/rateLimiter";
-import { verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { sanitizeString } from "@/lib/validation";
 

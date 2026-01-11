@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { requireAuth, validateAndSanitizeString } from "@/lib/security";

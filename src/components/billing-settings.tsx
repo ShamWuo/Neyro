@@ -1,16 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { getUserSubscription } from "@/lib/subscription";
-import { SubscriptionTier, SubscriptionStatus } from "@prisma/client";
 
 interface BillingSettingsProps {
   subscription: Awaited<ReturnType<typeof getUserSubscription>>;
-  userId: string;
 }
 
-export function BillingSettings({ subscription, userId }: BillingSettingsProps) {
+export function BillingSettings({ subscription }: BillingSettingsProps) {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleCheckout = async (tier: "FOCUS" | "BRAIN_TRUST", billingCycle: "monthly" | "yearly" = "monthly") => {

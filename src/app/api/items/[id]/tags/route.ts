@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { takeToken } from "@/lib/rateLimiter";
-import { verifyOwnership, verifyBulkOwnership } from "@/lib/security";
+import { verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { validateIdArray } from "@/lib/security";
 

@@ -6,7 +6,6 @@ import { logger } from "@/lib/logger";
 import { takeToken } from "@/lib/rateLimiter";
 import { verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
-import { validateIdArray } from "@/lib/security";
 
 // Request size limit: 1MB
 const MAX_REQUEST_SIZE = 1024 * 1024;

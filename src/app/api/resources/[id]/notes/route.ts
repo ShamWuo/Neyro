@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { takeToken } from "@/lib/rateLimiter";
 import { verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
-import { sanitizeString } from "@/lib/validation";
 
 // Request size limit: 1MB
 const MAX_REQUEST_SIZE = 1024 * 1024;
@@ -68,9 +66,6 @@ export async function PUT(
         { status: 400 }
       );
     }
-
-    // Sanitize notes if provided
-    const notes = parsed.data.notes !== undefined ? (parsed.data.notes ? sanitizeString(parsed.data.notes, 10000) : null) : undefined;
 
     // TODO: Update resource collection notes when notes field is added
     // For now, we'll just return success

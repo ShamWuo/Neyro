@@ -40,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: process.env.NODE_ENV === "development",
   adapter: PrismaAdapter(prisma),
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       try {
         logger.info("SignIn Callback", { 
           userId: user?.id, 
@@ -54,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return false;
       }
     },
-    async jwt({ token, user, account, profile, trigger }) {
+    async jwt({ token, user, account }) {
       try {
         if (user) {
           logger.info("JWT Callback Initial", { 
@@ -70,7 +70,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return token;
       }
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       try {
         logger.info("Session Callback", { 
           userId: session.user?.id || token.id,

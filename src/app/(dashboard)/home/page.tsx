@@ -6,6 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import dynamic from "next/dynamic";
 import { LoadingState } from "@/components/loading-state";
+import { CapturePlus } from "@/components/capture-plus";
 
 // Code splitting: Load suggestions component dynamically
 const SmartSuggestions = dynamic(
@@ -167,6 +168,8 @@ export default async function Home() {
           </div>
         </div>
       </div>
+
+      <CapturePlus />
 
       <div className="panel space-y-3">
         <div className="flex items-center justify-between">
@@ -500,7 +503,7 @@ export default async function Home() {
               <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Run weekly review</Link>
               <Link href="/focus" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Start focus block</Link>
             </div>
-            <p className="text-xs text-[var(--text-secondary)]">Need a shortcut? Press Cmd/Ctrl + K then type "capture" to jump straight into the inbox form.</p>
+            <p className="text-xs text-[var(--text-secondary)]">Need a shortcut? Press Cmd/Ctrl + K then type &quot;capture&quot; to jump straight into the inbox form.</p>
           </div>
 
           <div className="panel space-y-3">

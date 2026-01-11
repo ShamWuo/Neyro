@@ -20,7 +20,6 @@ type ProjectHealthScoreProps = {
 export function ProjectHealthScore({ project }: ProjectHealthScoreProps) {
   const healthScore = useMemo(() => {
     let score = 0;
-    const maxScore = 100;
 
     // Completion rate (0-40 points)
     score += (project.completionRate / 100) * 40;
