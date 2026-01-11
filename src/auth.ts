@@ -16,67 +16,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       logger.info("SignIn Callback", { user, account, profile });
 
       if (account?.provider === "google" && user.email) {
-        try {
-          if (!process.env.DATABASE_URL) {
-            throw new Error("DATABASE_URL is missing");
-          }
-
-          // 1. Check if user exists
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email },
-          });
-
-          let userId = existingUser?.id;
-
-          // 2. Create user if not exists
-          if (!existingUser) {
-            const newUser = await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name,
-                image: user.image,
-                emailVerified: new Date(),
-              },
-            });
-            userId = newUser.id;
-            logger.info("Manually created new user", { userId });
-          }
-
-          // 3. Link account if not exists
-          if (userId) {
-            const existingAccount = await prisma.account.findUnique({
-              where: {
-                provider_providerAccountId: {
-                  provider: account.provider,
-                  providerAccountId: account.providerAccountId,
-                },
-              },
-            });
-
-            if (!existingAccount) {
-              await prisma.account.create({
-                data: {
-                  userId: userId,
-                  type: account.type,
-                  provider: account.provider,
-                  providerAccountId: account.providerAccountId,
-                  refresh_token: account.refresh_token,
-                  access_token: account.access_token,
-                  expires_at: account.expires_at,
-                  token_type: account.token_type,
-                  scope: account.scope,
-                  id_token: account.id_token,
-                  session_state: account.session_state as string | undefined, // Cast if needed
-                },
-              });
-              logger.info("Manually linked Google account to user", { userId });
-            }
-          }
-          return true;
-        } catch (error) {
-          logger.error("Error in manual user creation/linking", { error });
-          return false; // Prevent sign-in if DB fails
-        }
+        // BYPASSDB: Testing pure JWT flow
+        return true;
       }
 
       return true;
