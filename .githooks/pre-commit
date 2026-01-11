@@ -1,4 +1,11 @@
 #!/bin/sh
+# Simple pre-commit hook: run lint and typecheck. Exit non-zero to block commit on failures.
+echo "Running pre-commit checks: lint + typecheck"
+npm run lint || { echo "Lint failed"; exit 1; }
+npm run typecheck || { echo "Typecheck failed"; exit 1; }
+echo "Pre-commit checks passed"
+exit 0
+#!/bin/sh
 # Fail fast on first error
 set -e
 

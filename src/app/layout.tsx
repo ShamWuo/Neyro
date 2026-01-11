@@ -4,6 +4,12 @@ import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Analytics } from "@/components/analytics";
+import dynamic from "next/dynamic";
+
+// Load QuickCaptureButton dynamically to avoid adding client bundle to server layout
+const QuickCaptureButton = dynamic(() => import("@/components/quick-capture-button"), { ssr: false });
+const ActiveProjectsBadge = dynamic(() => import("@/components/active-projects-badge"), { ssr: false });
+const QuickCaptureHint = dynamic(() => import("@/components/quick-capture-hint"), { ssr: false });
 
 // Force light theme script - runs before React hydrates
 const forceLightThemeScript = (
@@ -120,8 +126,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
         <Providers>
-          {children}
-          <Analytics />
+          <div className="app-shell">
+            <header className="app-header">
+              <div className="header-inner">
+                <div className="brand">Neyro</div>
+                <div className="header-actions">
+                  <ActiveProjectsBadge />
+                  <QuickCaptureButton />
+                  <QuickCaptureHint />
+                </div>
+              </div>
+            </header>
+            {children}
+            <Analytics />
+          </div>
         </Providers>
       </body>
     </html>

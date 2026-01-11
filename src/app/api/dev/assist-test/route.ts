@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 type WithStatus = { status?: number };
-import { analyzeParaCapture } from "@/lib/ai";
+import { analyzeParaCaptureSafe } from "@/lib/ai-safe";
 import { ItemClassification, ItemType } from "@prisma/client";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { validateText } from "@/lib/validateAssist";
 
 export const runtime = "nodejs";
@@ -11,7 +11,8 @@ export async function POST(request: Request) {
   // rate-limit by IP for dev route
   try {
     const ip = request.headers.get("x-forwarded-for") ?? "dev:anonymous";
-    takeToken(`ip:${ip}`);
+    const allowed = await isAllowed(`ip:${ip}`, 10, 60_000);
+    if (!allowed) return new NextResponse.json({ error: "Too many requests" }, { status: 429 });
   } catch (err: unknown) {
     const status = (err && typeof err === "object" && (err as unknown as WithStatus).status) || 429;
     const message = err instanceof Error ? err.message : String(err);
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
   
   if (process.env.GEMINI_API_KEY) {
     try {
-      decision = await analyzeParaCapture({ text, imageUrl: imageUrlRaw });
+      decision = await analyzeParaCaptureSafe({ text, imageUrl: imageUrlRaw });
       aiEnabled = true;
       return NextResponse.json({ ok: true, decision, aiEnabled });
     } catch (err) {

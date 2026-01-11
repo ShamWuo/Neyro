@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { analyzeParaCapture } from "@/lib/ai";
+import { analyzeParaCaptureSafe } from "@/lib/ai-safe";
 import { requireAuth, verifyOwnership, verifyBulkOwnership, validateAndSanitizeString } from "@/lib/security";
 import { sanitizeString, validateUrl, validateId } from "@/lib/validation";
 
@@ -99,7 +99,7 @@ export async function classifyInboxItem(formData: FormData) {
       }
       
       try {
-        const decision = await analyzeParaCapture({ text: textInput });
+        const decision = await analyzeParaCaptureSafe({ text: textInput });
         
         // Sanitize AI response before storing
         const sanitizedTitle = decision.title ? sanitizeString(decision.title, 500) : item.title;

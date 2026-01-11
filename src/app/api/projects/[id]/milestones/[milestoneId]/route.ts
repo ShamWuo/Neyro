@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { sanitizeString } from "@/lib/validation";
@@ -26,11 +26,12 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Rate limiting
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing milestone request:", e?.message || e);
     }
 
     // Check request size

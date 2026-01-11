@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { sanitizeString } from "@/lib/validation";
 
 export async function GET(request: Request) {
@@ -14,9 +14,11 @@ export async function GET(request: Request) {
 
     // Rate limiting
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing items/duplicates request:", e?.message || e);
     }
 
     const { searchParams } = new URL(request.url);

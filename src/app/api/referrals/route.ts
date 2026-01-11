@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { generateReferralCode, trackReferral } from "@/lib/referral";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { validateEmail } from "@/lib/validation";
 
 // Request size limit: 1MB
@@ -16,9 +16,11 @@ export async function GET() {
 
     // Rate limiting (prevent abuse)
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 6, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing referrals request:", e?.message || e);
     }
 
     const code = await generateReferralCode(session.user.id);

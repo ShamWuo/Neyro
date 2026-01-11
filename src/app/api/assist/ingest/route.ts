@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { analyzeParaCapture } from "@/lib/ai";
+import { analyzeParaCaptureSafe } from "@/lib/ai-safe";
 import { ItemClassification, ItemType } from "@prisma/client";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { validateText, validateImage } from "@/lib/validateAssist";
 import { trackAICredit, recordAICreditUsage } from "@/lib/ai-credits";
 
@@ -16,18 +16,16 @@ export async function POST(request: Request) {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
-  // rate limit per-user
+  // rate limit per-user (Redis-capable)
   try {
-    takeToken(`user:${session.user.id}`);
+    const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
+    if (!allowed) {
+      return new NextResponse(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json" } });
+    }
   } catch (err: unknown) {
-    type WithStatus = { status?: number; retryAfter?: number };
-    const status = (err && typeof err === "object" && (err as unknown as WithStatus).status) || 429;
-    const retryAfter = (err && typeof err === "object" && (err as unknown as WithStatus).retryAfter) || undefined;
-    const message = err instanceof Error ? err.message : String(err);
-    return new NextResponse(JSON.stringify({ error: message }), {
-      status: Number(status),
-      headers: retryAfter ? { "Retry-After": String(retryAfter), "Content-Type": "application/json" } : { "Content-Type": "application/json" },
-    });
+    // On limiter failure, log and allow (do not block core capture flow)
+    // eslint-disable-next-line no-console
+    console.warn("Rate limiter check failed for assist/ingest, allowing request:", (err as Error)?.message ?? String(err));
   }
   const form = await request.formData();
   const textRaw = String(form.get("text") ?? "");
@@ -60,7 +58,7 @@ export async function POST(request: Request) {
     // Only use AI if credits available or unlimited
     if (creditCheck.allowed || creditCheck.remaining === -1) {
       try {
-        decision = await analyzeParaCapture({ text: text ?? undefined, imageDataUrl: imageDataUrl ?? undefined, imageUrl });
+        decision = await analyzeParaCaptureSafe({ text: text ?? undefined, imageDataUrl: imageDataUrl ?? undefined, imageUrl });
         // Record credit usage after successful AI call
         await recordAICreditUsage(session.user.id);
         aiEnabled = true;

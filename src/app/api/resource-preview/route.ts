@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { validateUrl } from "@/lib/validation";
 import { logger } from "@/lib/logger";
+
+import safeFetchUrlChecked from "@/lib/safe-fetch-url";
 
 /**
  * Resource preview API
@@ -17,9 +19,11 @@ export async function GET(request: Request) {
 
     // Rate limiting (prevent abuse of preview fetching)
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 8, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing resource-preview request:", e?.message || e);
     }
 
     const { searchParams } = new URL(request.url);
@@ -47,27 +51,46 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Invalid protocol. Only http and https are allowed." }, { status: 400 });
     }
 
-    // Fetch the page HTML with security limits
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    // Additional safety: disallow IP-literal hostnames and private IP ranges
+    const hostname = targetUrl.hostname;
+    if (hostname === "localhost" || hostname === "::1") {
+      return NextResponse.json({ error: "Hostname not allowed" }, { status: 400 });
+    }
 
-    let response: Response;
+    const ipMatch = hostname.match(/^\d+\.\d+\.\d+\.\d+$/);
+    if (ipMatch) {
+      // Basic IPv4 private range checks
+      const parts = hostname.split('.').map((p) => parseInt(p, 10));
+      if (
+        parts[0] === 10 ||
+        (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+        (parts[0] === 192 && parts[1] === 168) ||
+        parts[0] === 127
+      ) {
+        return NextResponse.json({ error: "IP range not allowed" }, { status: 400 });
+      }
+    } else {
+      // If hostname is not an IP literal, avoid resolving to local addresses by refusing plain 'localhost' via DNS name above.
+      // Optionally could perform DNS resolution and check addresses, but avoid DNS lookup to reduce latency.
+    }
+
+    // Fetch the page HTML with security limits using URL-checked safeFetch (centralized timeouts/retries)
+    let response: any;
     try {
-      response = await fetch(targetUrl.toString(), {
+      response = await safeFetchUrlChecked(targetUrl.toString(), {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; NeyroBot/1.0)",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         },
-        signal: controller.signal,
         redirect: "follow",
-      });
+        timeoutMs: 5000,
+      } as any);
     } catch (error) {
-      clearTimeout(timeoutId);
       if (error instanceof Error && error.name === "AbortError") {
         return NextResponse.json({ error: "Request timeout" }, { status: 408 });
       }
-      throw error;
-    } finally {
-      clearTimeout(timeoutId);
+      logger.warn(`Resource preview fetch failed for ${targetUrl.toString()}: ${(error as Error).message}`);
+      return NextResponse.json({ error: "Failed to fetch preview" }, { status: 502 });
     }
 
     if (!response.ok) {

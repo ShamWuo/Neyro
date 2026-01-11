@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { ensureProjectLimit, MAX_ACTIVE_PROJECTS, projectHealth } from "@/lib/para";
+import { ensureProjectLimit, MAX_ACTIVE_PROJECTS, projectHealth, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -37,15 +37,13 @@ export default async function ProjectsPage() {
       }
     }
 
-    await prisma.project.create({
-      data: {
-        userId,
-        name,
-        outcome,
-        status,
-        deadline: deadlineRaw ? new Date(deadlineRaw) : null,
-      },
-    });
+    await createProjectWithLimit(userId, {
+      userId,
+      name,
+      outcome,
+      status,
+      deadline: deadlineRaw ? new Date(deadlineRaw) : null,
+    } as any);
 
     redirect("/projects");
   }

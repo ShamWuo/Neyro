@@ -1,3 +1,32 @@
+/**
+ * Simple AI hardening utilities.
+ * - sanitizePrompt: removes emails and likely secrets before sending to AI.
+ */
+
+export function sanitizePrompt(input: string): string {
+  if (!input) return input;
+
+  // Remove emails
+  let out = input.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[REDACTED_EMAIL]");
+
+  // Remove common API key patterns (stripe, sk_live, sk_test, sk-... etc)
+  out = out.replace(/sk_live_[A-Za-z0-9]+/g, "[REDACTED_API_KEY]");
+  out = out.replace(/sk_test_[A-Za-z0-9]+/g, "[REDACTED_API_KEY]");
+  out = out.replace(/(api_key|apikey|token)[:=]\s*[A-Za-z0-9\-_.]+/gi, "$1: [REDACTED]");
+
+  // Remove long sequences of hex/base64-like characters
+  out = out.replace(/\b[a-f0-9]{32,}\b/gi, "[REDACTED]");
+  out = out.replace(/\b[A-Za-z0-9\-_]{64,}\b/g, "[REDACTED]");
+
+  // Trim excessive whitespace
+  out = out.replace(/\s{2,}/g, " ").trim();
+
+  return out;
+}
+
+export default sanitizePrompt;
+// Use exported sanitizer within this module to harden AI requests
+
 import { ItemClassification, ItemType } from "@prisma/client";
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
@@ -25,7 +54,8 @@ function coerceClassification(value: string | undefined): ItemClassification {
 }
 
 export async function analyzeParaCapture(params: { text?: string; imageDataUrl?: string; imageUrl?: string }) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Prefer a single configured key name but accept legacy/alternate env names
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GAI_API_KEY || process.env.GEMINI_KEY;
   if (!apiKey) {
     // Return a basic fallback classification instead of throwing
     // This allows the app to work without AI configured
@@ -40,9 +70,9 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
   // Build Gemini API request parts
   const parts: GeminiPart[] = [];
 
-  // User input text
+  // User input text (sanitize before sending)
   if (params.text) {
-    parts.push({ text: `User input: ${params.text}` });
+    parts.push({ text: `User input: ${sanitizePrompt(params.text)}` });
   }
 
   // Handle image data URL (base64)
@@ -76,41 +106,20 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
     // For external URLs, we need to use fileData format, but Gemini requires the file to be uploaded first
     // For simplicity, we'll just include the URL in text and let Gemini fetch it
     parts.push({
-      text: `Image URL: ${params.imageUrl}`,
+      text: `Image URL: ${sanitizePrompt(params.imageUrl)}`,
     });
   }
 
   // Helper: fetch with retries for transient errors
-  async function fetchWithRetry(input: RequestInfo, init: RequestInit, attempts = 3) {
-    const delays = [500, 1000, 2000];
-    for (let i = 0; i < attempts; i++) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30_000); // Gemini can take longer
-      try {
-        const res = await fetch(input, { ...init, signal: controller.signal });
-        clearTimeout(timeout);
-        if (res.ok) return res;
-        // Retry on 5xx
-        if (res.status >= 500 && i < attempts - 1) {
-          await new Promise((r) => setTimeout(r, delays[i]));
-          continue;
-        }
-        return res;
-      } catch (e) {
-        clearTimeout(timeout);
-        if (i === attempts - 1) throw e;
-        await new Promise((r) => setTimeout(r, delays[i]));
-      }
-    }
-    throw new Error("Failed to fetch after retries");
-  }
+  // Use safeFetch helper for retries and timeouts
+  const { default: safeFetch } = await import("./safe-fetch");
+  const geminiUrl = `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent`;
 
-  const geminiUrl = `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-  
-  const resp = await fetchWithRetry(geminiUrl, {
+  const resp = await safeFetch(geminiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       contents: [
@@ -131,7 +140,8 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
         responseMimeType: "application/json",
       },
     }),
-  });
+    timeoutMs: 30000,
+  } as any);
 
   if (!resp.ok) {
     const text = await resp.text().catch(() => "");

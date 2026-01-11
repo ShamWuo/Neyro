@@ -10,61 +10,52 @@ jest.mock("../prisma", () => ({
   },
 }));
 
-// Mock Stripe completely - avoid importing actual SDK
-const mockGetOrCreateStripeCustomer = jest.fn();
-const mockCreateCheckoutSession = jest.fn();
-const mockUpdateSubscriptionFromStripe = jest.fn();
-
-jest.mock("../stripe", () => ({
-  stripe: {
-    customers: {
-      create: jest.fn(),
-      retrieve: jest.fn(),
-    },
-    checkout: {
-      sessions: {
-        create: jest.fn(),
-      },
-    },
-  },
-  getOrCreateStripeCustomer: mockGetOrCreateStripeCustomer,
-  createCheckoutSession: mockCreateCheckoutSession,
-  createPortalSession: jest.fn(),
-  updateSubscriptionFromStripe: mockUpdateSubscriptionFromStripe,
-  STRIPE_PRICE_IDS: {
-    FOCUS_MONTHLY: "price_focus_monthly",
-    FOCUS_YEARLY: "price_focus_yearly",
-    BRAIN_TRUST_MONTHLY: "price_brain_trust_monthly",
-    BRAIN_TRUST_YEARLY: "price_brain_trust_yearly",
-  },
-}));
-
 import { getOrCreateStripeCustomer, createCheckoutSession, updateSubscriptionFromStripe } from "../stripe";
+const stripeModule = require("../stripe");
 
 describe("Stripe utilities", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Ensure prisma user.findUnique returns a user with email for createCheckoutSession
+    const { prisma } = require("../prisma");
+    if (prisma && prisma.user && prisma.user.findUnique) {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ email: "test@example.com", name: "Test User", stripeCustomerId: null });
+    }
+    // Ensure stripe package mocks from jest.setup are initialized
+    if (stripeModule && stripeModule.stripe) {
+      // default implementations for stripe client methods used in tests
+      stripeModule.stripe.customers = stripeModule.stripe.customers || {};
+      stripeModule.stripe.customers.create = jest.fn().mockResolvedValue({ id: "cus_test123" });
+      stripeModule.stripe.checkout = stripeModule.stripe.checkout || { sessions: { create: jest.fn().mockResolvedValue({ id: "cs_test", url: "https://checkout.test" }) } };
+      stripeModule.stripe.checkout.sessions.create = jest.fn().mockResolvedValue({ id: "cs_test", url: "https://checkout.test" });
+      stripeModule.stripe.billingPortal = stripeModule.stripe.billingPortal || { sessions: { create: jest.fn().mockResolvedValue({ url: "https://portal.test" }) } };
+      stripeModule.stripe.billingPortal.sessions.create = jest.fn().mockResolvedValue({ url: "https://portal.test" });
+    }
   });
 
   describe("getOrCreateStripeCustomer", () => {
     it("returns existing customer ID", async () => {
       const existingCustomerId = "cus_existing123";
-      mockGetOrCreateStripeCustomer.mockResolvedValue(existingCustomerId);
+      const { prisma } = require("../prisma");
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ stripeCustomerId: existingCustomerId });
 
       const customerId = await getOrCreateStripeCustomer("user-123", "test@example.com");
 
       expect(customerId).toBe(existingCustomerId);
-      expect(mockGetOrCreateStripeCustomer).toHaveBeenCalledWith("user-123", "test@example.com", undefined);
     });
 
     it("creates new customer if user doesn't have one", async () => {
       const newCustomerId = "cus_new123";
-      mockGetOrCreateStripeCustomer.mockResolvedValue(newCustomerId);
+      const { prisma } = require("../prisma");
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      const stripeModule = require("../stripe");
+      stripeModule.stripe.customers.create = jest.fn().mockResolvedValue({ id: newCustomerId });
 
       const customerId = await getOrCreateStripeCustomer("user-123", "test@example.com", "Test User");
 
       expect(customerId).toBe(newCustomerId);
-      expect(mockGetOrCreateStripeCustomer).toHaveBeenCalledWith("user-123", "test@example.com", "Test User");
+      const { prisma: p } = require("../prisma");
+      expect(p.user.update).toHaveBeenCalledWith({ where: { id: "user-123" }, data: { stripeCustomerId: newCustomerId } });
     });
   });
 
@@ -75,11 +66,12 @@ describe("Stripe utilities", () => {
         url: "https://checkout.stripe.com/test",
       };
 
-      mockCreateCheckoutSession.mockResolvedValue(mockSession);
+      const stripeModule = require("../stripe");
+      stripeModule.stripe.checkout.sessions.create = jest.fn().mockResolvedValue(mockSession);
 
       const session = await createCheckoutSession("user-123", "FOCUS", "monthly");
 
-      expect(mockCreateCheckoutSession).toHaveBeenCalledWith("user-123", "FOCUS", "monthly");
+      expect(stripeModule.stripe.checkout.sessions.create).toHaveBeenCalled();
       expect(session).toEqual(mockSession);
     });
 
@@ -89,11 +81,12 @@ describe("Stripe utilities", () => {
         url: "https://checkout.stripe.com/test",
       };
 
-      mockCreateCheckoutSession.mockResolvedValue(mockSession);
+      const stripeModule = require("../stripe");
+      stripeModule.stripe.checkout.sessions.create = jest.fn().mockResolvedValue(mockSession);
 
       const session = await createCheckoutSession("user-123", "BRAIN_TRUST", "yearly");
 
-      expect(mockCreateCheckoutSession).toHaveBeenCalledWith("user-123", "BRAIN_TRUST", "yearly");
+      expect(stripeModule.stripe.checkout.sessions.create).toHaveBeenCalled();
       expect(session).toEqual(mockSession);
     });
   });
@@ -108,16 +101,20 @@ describe("Stripe utilities", () => {
           tier: "FOCUS",
         },
       };
-
-      mockUpdateSubscriptionFromStripe.mockResolvedValue(undefined);
+      const { prisma } = require("../prisma");
+      (prisma.user.update as jest.Mock).mockResolvedValue({});
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await updateSubscriptionFromStripe(mockSubscription as any, "customer.subscription.updated");
 
-      expect(mockUpdateSubscriptionFromStripe).toHaveBeenCalledWith(
-        mockSubscription,
-        "customer.subscription.updated"
-      );
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: "user-123" },
+        data: expect.objectContaining({
+          subscriptionTier: "FOCUS",
+          subscriptionStatus: expect.any(String),
+          stripeSubscriptionId: "sub_test123",
+        }),
+      });
     });
 
     it("handles canceled subscription", async () => {
@@ -126,16 +123,19 @@ describe("Stripe utilities", () => {
         status: "canceled",
         metadata: { userId: "user-123" },
       };
-
-      mockUpdateSubscriptionFromStripe.mockResolvedValue(undefined);
+      const { prisma } = require("../prisma");
+      (prisma.user.update as jest.Mock).mockResolvedValue({});
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await updateSubscriptionFromStripe(mockSubscription as any, "customer.subscription.deleted");
 
-      expect(mockUpdateSubscriptionFromStripe).toHaveBeenCalledWith(
-        mockSubscription,
-        "customer.subscription.deleted"
-      );
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: "user-123" },
+        data: expect.objectContaining({
+          subscriptionStatus: expect.any(String),
+          stripeSubscriptionId: "sub_test123",
+        }),
+      });
     });
   });
 });

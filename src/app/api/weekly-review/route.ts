@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { z } from "zod";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { verifyBulkOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { logger } from "@/lib/logger";
@@ -20,11 +20,14 @@ export async function POST(request: Request) {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Rate limiting
+    // Rate limiting (Redis-backed if available)
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 6, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // Allow request on limiter failure but log
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing weekly-review request:", e?.message || e);
     }
 
     // Check request size

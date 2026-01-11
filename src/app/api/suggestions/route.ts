@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { subDays } from "date-fns";
 import { logger } from "@/lib/logger";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 
 export async function GET() {
   try {
@@ -13,9 +13,12 @@ export async function GET() {
 
     // Rate limiting (prevent abuse of suggestion generation)
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 8, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // Gracefully allow on limiter failure but log
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing suggestions request:", e?.message || e);
     }
 
     const userId = session.user.id;

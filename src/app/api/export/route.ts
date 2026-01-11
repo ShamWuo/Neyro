@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification } from "@prisma/client";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { logger } from "@/lib/logger";
 import { canAccessFeature } from "@/lib/subscription";
 
@@ -29,10 +29,12 @@ export async function GET(request: Request) {
   }
 
   // Rate limiting for export (prevent abuse)
-  try {
-    takeToken(`user:${session.user.id}`);
-  } catch {
-    return NextResponse.json({ error: "Too many requests. Please wait before exporting again." }, { status: 429 });
+    try {
+      const allowed = await isAllowed(`user:${session.user.id}`, 4, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing export request:", e?.message || e);
   }
 
   const userId = session.user.id;

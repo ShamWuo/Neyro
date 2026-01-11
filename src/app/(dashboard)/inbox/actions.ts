@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { ensureProjectLimit, touchArea, touchCollection, touchProject } from "@/lib/para";
+import { ensureProjectLimit, touchArea, touchCollection, touchProject, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
@@ -135,9 +135,7 @@ export async function moveToProject(formData: FormData) {
           deadline = null;
         }
       }
-      const created = await prisma.project.create({
-        data: { userId, name: newName, outcome: newOutcome, deadline, status: ProjectStatus.ACTIVE },
-      });
+      const created = await createProjectWithLimit(userId, { userId, name: newName, outcome: newOutcome, deadline, status: ProjectStatus.ACTIVE } as any);
       projectId = created.id;
     }
 
@@ -239,14 +237,12 @@ export async function saveClassifiedItem(formData: FormData) {
     if (category === "project") {
       console.log(`[CAPTURE] Routing to PROJECT: "${title}"`);
       await ensureProjectLimit(userId);
-      const project = await prisma.project.create({
-        data: {
-          userId,
-          name: title,
-          outcome: `From ${sourceMode} capture: ${details.substring(0, 100)}`,
-          status: ProjectStatus.ACTIVE,
-        },
-      });
+      const project = await createProjectWithLimit(userId, {
+        userId,
+        name: title,
+        outcome: `From ${sourceMode} capture: ${details.substring(0, 100)}`,
+        status: ProjectStatus.ACTIVE,
+      } as any);
       await prisma.item.update({
         where: { id: item.id },
         data: {

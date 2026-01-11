@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = process.env.GEMINI_API_KEY
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
+import { analyzeParaCaptureSafe } from "@/lib/ai-safe";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,18 +14,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid text" }, { status: 400 });
     }
 
-    // Try AI classification first, fallback to heuristic
+    // Try AI classification first (sanitized via ai-safe), fallback to heuristic
     let classification;
-    if (genAI) {
-      try {
-        classification = await classifyWithAI(text);
-        console.log("[CLASSIFY] AI classification:", classification);
-      } catch (error) {
-        console.error("[CLASSIFY] AI failed, using fallback:", error);
-        classification = classifyIntoPARA(text);
-      }
-    } else {
-      console.warn("[CLASSIFY] No AI configured, using heuristic fallback");
+    try {
+      const decision = await analyzeParaCaptureSafe({ text });
+      classification = {
+        category: (decision.classification || "INBOX").toLowerCase(),
+        title: decision.title || (text.substring(0, 50) || ""),
+        explanation: decision.details ? String(decision.details).slice(0, 100) : "AI classified item",
+      };
+      console.info("[CLASSIFY] AI classification via ai-safe:", classification);
+    } catch (error) {
+      console.warn("[CLASSIFY] AI failed or not configured, using heuristic fallback:", (error as Error)?.message || error);
       classification = classifyIntoPARA(text);
     }
 

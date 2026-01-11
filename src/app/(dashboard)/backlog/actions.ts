@@ -1,6 +1,6 @@
 "use server";
 
-import { ensureProjectLimit, touchCollection } from "@/lib/para";
+import { ensureProjectLimit, touchCollection, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -51,7 +51,7 @@ export async function convertAction(formData: FormData) {
     const sanitizedName = sanitizeString(collection.name, 500);
     const sanitizedOutcome = collection.description ? sanitizeString(collection.description, 2000) : "Outcome";
     
-    const project = await prisma.project.create({ data: { userId, name: sanitizedName, outcome: sanitizedOutcome, status: ProjectStatus.ACTIVE } });
+    const project = await createProjectWithLimit(userId, { userId, name: sanitizedName, outcome: sanitizedOutcome, status: ProjectStatus.ACTIVE } as any);
     
     if (collection.items.length) {
       await prisma.item.updateMany({ where: { id: { in: collection.items.map((i) => i.id) }, userId }, data: { classification: ItemClassification.PROJECT, projectId: project.id, resourceCollectionId: null } });

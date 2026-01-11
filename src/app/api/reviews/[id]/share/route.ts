@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { generateShareToken, getSharedReview } from "@/lib/review-share";
 import { logger } from "@/lib/logger";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { validateId } from "@/lib/validation";
 
 export async function POST(
@@ -16,9 +16,11 @@ export async function POST(
 
     // Rate limiting (prevent abuse of share token generation)
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 8, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing review share request:", e?.message || e);
     }
 
     const { id } = await params;

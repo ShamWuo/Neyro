@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prepare": "husky install",
     "dev": "next dev -p 3001",
     "build": "next build",
     "build:native": "BUILD_FOR_NATIVE=true next build",
@@ -15,6 +16,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:integration": "jest --runInBand src/lib/__tests__/rate-limiter.redis.test.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:deploy": "prisma migrate deploy",
@@ -25,7 +27,12 @@
     "cap:add:ios": "cap add ios",
     "cap:add:android": "cap add android",
     "ios:build": "npm run build:native && npm run cap:sync && cd ios && xcodebuild -workspace App.xcworkspace -scheme App -configuration Release archive -archivePath build/App.xcarchive",
-    "android:build": "npm run build:native && npm run cap:sync && cd android && ./gradlew assembleRelease"
+    "android:build": "npm run build:native && npm run cap:sync && cd android && ./gradlew assembleRelease",
+    "scan:secrets": "node scripts/scan-secrets.js",
+    "audit:ai": "node scripts/audit-ai-calls.js",
+    "audit:ai:check": "node scripts/audit-ai-calls.js && node scripts/check-ai-audit.js",
+    "audit:client-ai": "node scripts/check-client-ai-domains.js",
+    "health": "npm run lint && npm test && npm run scan:secrets"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.3",
@@ -45,9 +52,12 @@
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "stripe": "^20.1.2",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "ioredis": "^5.3.2"
   },
   "devDependencies": {
+    "husky": "^8.0.4",
+    "lint-staged": "^14.0.0",
     "@capacitor/android": "^6.2.1",
     "@capacitor/app": "^6.0.3",
     "@capacitor/camera": "^6.1.3",
@@ -77,5 +87,11 @@
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.+(js|jsx|ts|tsx)": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

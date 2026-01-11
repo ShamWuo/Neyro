@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ensureProjectLimit, touchArea, touchCollection, touchProject } from "@/lib/para";
+import { ensureProjectLimit, touchArea, touchCollection, touchProject, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -64,7 +64,7 @@ export default async function AssistPage() {
     await ensureProjectLimit(userId);
     const collection = await prisma.resourceCollection.findUnique({ where: { id: collectionId, userId }, include: { items: true } });
     if (!collection) return;
-    const project = await prisma.project.create({ data: { userId, name: collection.name, outcome: collection.description ?? "Outcome TBD", status: ProjectStatus.ACTIVE } });
+    const project = await createProjectWithLimit(userId, { userId, name: collection.name, outcome: collection.description ?? "Outcome TBD", status: ProjectStatus.ACTIVE } as any);
     if (collection.items.length) {
       await prisma.item.updateMany({ where: { id: { in: collection.items.map((i) => i.id) }, userId }, data: { classification: ItemClassification.PROJECT, projectId: project.id, resourceCollectionId: null } });
     }

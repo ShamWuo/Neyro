@@ -14,7 +14,9 @@ const mockConstructEvent = jest.fn();
 const mockRetrieveSubscription = jest.fn();
 const mockUpdateSubscriptionFromStripe = jest.fn();
 
-jest.mock("@/lib/stripe", () => ({
+// Use doMock to avoid Jest hoisting the factory before our mock declarations
+jest.doMock("@/lib/stripe", () => ({
+  // Export `stripe` as an object matching runtime shape
   stripe: {
     webhooks: {
       constructEvent: mockConstructEvent,
@@ -45,11 +47,12 @@ describe("Stripe Webhook Handler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
-    // Mock stripe to be truthy (configured)
-    jest.spyOn(require("@/lib/stripe"), "stripe").mockReturnValue({
-      webhooks: { constructEvent: mockConstructEvent },
-      subscriptions: { retrieve: mockRetrieveSubscription },
-    });
+    // Ensure the mocked stripe module shape is used
+    const stripeModule = require("@/lib/stripe");
+    if (stripeModule && stripeModule.stripe) {
+      stripeModule.stripe.webhooks = { constructEvent: mockConstructEvent };
+      stripeModule.stripe.subscriptions = { retrieve: mockRetrieveSubscription };
+    }
   });
 
   const createMockRequest = (body: string) => {

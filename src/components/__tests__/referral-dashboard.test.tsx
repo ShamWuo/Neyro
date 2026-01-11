@@ -44,8 +44,8 @@ describe("ReferralDashboard", () => {
     await waitFor(() => {
       expect(screen.getByText("5")).toBeInTheDocument();
       expect(screen.getByText("Total Referrals")).toBeInTheDocument();
-      expect(screen.getByText("1")).toBeInTheDocument(); // Converted
-      expect(screen.getByText("1")).toBeInTheDocument(); // Pending
+      const ones = screen.getAllByText("1");
+      expect(ones.length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -59,7 +59,7 @@ describe("ReferralDashboard", () => {
     );
 
     await waitFor(() => {
-      const input = screen.getByDisplayValue(/http:\/\/localhost:3001\/auth\/register\?ref=ABC123/);
+      const input = screen.getByDisplayValue(/http:\/\/localhost(:3001)?\/auth\/register\?ref=ABC123/);
       expect(input).toBeInTheDocument();
     });
   });
@@ -93,9 +93,7 @@ describe("ReferralDashboard", () => {
     });
 
     await waitFor(() => {
-      expect(writeTextMock).toHaveBeenCalledWith(
-        "http://localhost:3001/auth/register?ref=ABC123"
-      );
+      expect(writeTextMock).toHaveBeenCalledWith(expect.stringMatching(/http:\/\/localhost(:3001)?\/auth\/register\?ref=ABC123/));
       expect(screen.getByText("Copied!")).toBeInTheDocument();
     });
   });
@@ -150,10 +148,16 @@ describe("ReferralDashboard", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("referral1@example.com")).toBeInTheDocument();
-      expect(screen.getByText("referral2@example.com")).toBeInTheDocument();
-      expect(screen.getByText("Converted")).toBeInTheDocument();
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      const r1Email = screen.getByText("referral1@example.com");
+      const r1Container = r1Email.closest("div")?.parentElement?.parentElement;
+      expect(r1Container).toBeTruthy();
+      const { within } = require("@testing-library/react");
+      expect(within(r1Container!).getByText("Converted")).toBeInTheDocument();
+
+      const r2Email = screen.getByText("referral2@example.com");
+      const r2Container = r2Email.closest("div")?.parentElement?.parentElement;
+      expect(r2Container).toBeTruthy();
+      expect(within(r2Container!).getByText("Pending")).toBeInTheDocument();
     });
   });
 

@@ -1,0 +1,594 @@
+{
+  "timestamp": "2026-01-11T22:52:11.738Z",
+  "rawCalls": [
+    {
+      "file": "src\\app\\(dashboard)\\assist\\ai-capture.tsx",
+      "matches": [
+        {
+          "line": 18,
+          "text": "fetch(\"/api/ai-credits\")",
+          "term": "fetch("
+        },
+        {
+          "line": 40,
+          "text": "const res = await fetch(\"/api/assist/ingest\", { method: \"POST\", body: form });",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\app\\api\\voice\\transcribe\\route.ts",
+      "matches": [
+        {
+          "line": 28,
+          "text": "const openaiKey = process.env.OPENAI_API_KEY;",
+          "term": "openai"
+        },
+        {
+          "line": 29,
+          "text": "if (!openaiKey) {",
+          "term": "openai"
+        },
+        {
+          "line": 30,
+          "text": "return NextResponse.json({ error: \"OpenAI API key not configured\" }, { status: 500 });",
+          "term": "openai"
+        },
+        {
+          "line": 36,
+          "text": "const response = await safeFetch(\"https://api.openai.com/v1/audio/transcriptions\", {",
+          "term": "openai"
+        },
+        {
+          "line": 36,
+          "text": "const response = await safeFetch(\"https://api.openai.com/v1/audio/transcriptions\", {",
+          "term": "api.openai.com"
+        },
+        {
+          "line": 36,
+          "text": "const response = await safeFetch(\"https://api.openai.com/v1/audio/transcriptions\", {",
+          "term": "fetch("
+        },
+        {
+          "line": 39,
+          "text": "Authorization: `Bearer ${openaiKey}`,",
+          "term": "openai"
+        },
+        {
+          "line": 80,
+          "text": "const response = await safeFetch(url, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\ai-status-indicator.tsx",
+      "matches": [
+        {
+          "line": 17,
+          "text": "const res = await fetch(\"/api/dev/assist-test\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\area-goals.tsx",
+      "matches": [
+        {
+          "line": 62,
+          "text": "const res = await fetch(`/api/areas/${areaId}/goals`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\billing-settings.tsx",
+      "matches": [
+        {
+          "line": 16,
+          "text": "const response = await fetch(\"/api/stripe/create-checkout\", {",
+          "term": "fetch("
+        },
+        {
+          "line": 40,
+          "text": "const response = await fetch(\"/api/stripe/manage-subscription\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\bulk-restore.tsx",
+      "matches": [
+        {
+          "line": 20,
+          "text": "const res = await fetch(\"/api/archive/bulk-restore\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\classification-preview.tsx",
+      "matches": [
+        {
+          "line": 32,
+          "text": "const response = await fetch(\"/api/classify\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\duplicate-detection.tsx",
+      "matches": [
+        {
+          "line": 25,
+          "text": "const res = await fetch(`/api/items/duplicates?title=${encodeURIComponent(title)}${details ? `&details=${encodeURIComponent(details)}` : \"\"}`);",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\focus-time-tracker.tsx",
+      "matches": [
+        {
+          "line": 59,
+          "text": "const res = await fetch(\"/api/focus-sessions\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\in-app-notifications.tsx",
+      "matches": [
+        {
+          "line": 50,
+          "text": "await fetch(`/api/notifications/${id}/read`, {",
+          "term": "fetch("
+        },
+        {
+          "line": 68,
+          "text": "await fetch(\"/api/notifications/read-all\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\inbox-capture-form-enhanced.tsx",
+      "matches": [
+        {
+          "line": 32,
+          "text": "const response = await fetch(imageDataUrl);",
+          "term": "fetch("
+        },
+        {
+          "line": 42,
+          "text": "const res = await fetch(\"/api/assist/ingest\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\inbox-client-actions.tsx",
+      "matches": [
+        {
+          "line": 14,
+          "text": "const res = await fetch(`/api/items/${itemId}`, { method: \"DELETE\" });",
+          "term": "fetch("
+        },
+        {
+          "line": 28,
+          "text": "const res = await fetch(`/api/items/${itemId}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\inbox-item-actions.tsx",
+      "matches": [
+        {
+          "line": 20,
+          "text": "const res = await fetch(`/api/items/${itemId}`, { method: \"DELETE\" });",
+          "term": "fetch("
+        },
+        {
+          "line": 39,
+          "text": "const res = await fetch(`/api/items/${itemId}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\inbox-item-tags.tsx",
+      "matches": [
+        {
+          "line": 28,
+          "text": "const res = await fetch(`/api/items/${itemId}/tags`, {",
+          "term": "fetch("
+        },
+        {
+          "line": 54,
+          "text": "const res = await fetch(\"/api/tags\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\item-completion-toggle.tsx",
+      "matches": [
+        {
+          "line": 22,
+          "text": "const res = await fetch(`/api/items/${itemId}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\kanban-board.tsx",
+      "matches": [
+        {
+          "line": 54,
+          "text": "const response = await fetch(`/api/items/${itemId}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\mobile-capture-sheet.tsx",
+      "matches": [
+        {
+          "line": 53,
+          "text": "const res = await fetch(\"/api/items\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\newsletter-signup.tsx",
+      "matches": [
+        {
+          "line": 15,
+          "text": "const response = await fetch(\"/api/newsletter\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\notification-preferences.tsx",
+      "matches": [
+        {
+          "line": 53,
+          "text": "const res = await fetch(\"/api/notification-preferences\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\onboarding-wizard.tsx",
+      "matches": [
+        {
+          "line": 54,
+          "text": "fetch(\"/api/onboarding/complete\", { method: \"POST\" })",
+          "term": "fetch("
+        },
+        {
+          "line": 64,
+          "text": "fetch(\"/api/onboarding/complete\", { method: \"POST\" })",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\project-milestones.tsx",
+      "matches": [
+        {
+          "line": 42,
+          "text": "const res = await fetch(`/api/projects/${projectId}/milestones`, {",
+          "term": "fetch("
+        },
+        {
+          "line": 77,
+          "text": "const res = await fetch(`/api/projects/${projectId}/milestones/${milestoneId}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\project-notes-editor.tsx",
+      "matches": [
+        {
+          "line": 34,
+          "text": "const res = await fetch(`/api/projects/${projectId}/notes`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\quick-capture-modal.tsx",
+      "matches": [
+        {
+          "line": 107,
+          "text": "const res = await fetch(\"/api/items\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\referral-panel.tsx",
+      "matches": [
+        {
+          "line": 18,
+          "text": "const res = await fetch(\"/api/referrals\");",
+          "term": "fetch("
+        },
+        {
+          "line": 50,
+          "text": "const res = await fetch(\"/api/referrals\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\resource-collection-tags.tsx",
+      "matches": [
+        {
+          "line": 32,
+          "text": "const res = await fetch(`/api/resources/${resourceCollectionId}/tags`, {",
+          "term": "fetch("
+        },
+        {
+          "line": 58,
+          "text": "const res = await fetch(\"/api/tags\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\resource-notes-editor.tsx",
+      "matches": [
+        {
+          "line": 29,
+          "text": "const res = await fetch(`/api/resources/${resourceId}/notes`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\resource-preview.tsx",
+      "matches": [
+        {
+          "line": 45,
+          "text": "const res = await fetch(`/api/resource-preview?url=${encodeURIComponent(url)}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\review-share-button.tsx",
+      "matches": [
+        {
+          "line": 18,
+          "text": "const res = await fetch(`/api/reviews/${reviewId}/share`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\sample-data-generator.tsx",
+      "matches": [
+        {
+          "line": 15,
+          "text": "const res = await fetch(\"/api/sample-data\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\saved-searches.tsx",
+      "matches": [
+        {
+          "line": 33,
+          "text": "const res = await fetch(\"/api/saved-searches\");",
+          "term": "fetch("
+        },
+        {
+          "line": 66,
+          "text": "const res = await fetch(\"/api/saved-searches\", {",
+          "term": "fetch("
+        },
+        {
+          "line": 114,
+          "text": "const res = await fetch(`/api/saved-searches/${id}`, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\settings-form.tsx",
+      "matches": [
+        {
+          "line": 36,
+          "text": "const res = await fetch(\"/api/settings\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\sidebar-nav.tsx",
+      "matches": [
+        {
+          "line": 177,
+          "text": "router.prefetch(item.href);",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\smart-suggestions.tsx",
+      "matches": [
+        {
+          "line": 21,
+          "text": "const res = await fetch(\"/api/suggestions\");",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\components\\voice-transcription-button.tsx",
+      "matches": [
+        {
+          "line": 90,
+          "text": "const response = await fetch(\"/api/voice/transcribe\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\ai-safe.ts",
+      "matches": [
+        {
+          "line": 14,
+          "text": "if (params.imageUrl && !isUrlSafeForExternalFetch(params.imageUrl)) {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\ai.ts",
+      "matches": [
+        {
+          "line": 105,
+          "text": "const resp = await safeFetch(geminiUrl, {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\safe-fetch-url.ts",
+      "matches": [
+        {
+          "line": 14,
+          "text": "if (!isUrlSafeForExternalFetch(urlStr)) {",
+          "term": "fetch("
+        },
+        {
+          "line": 18,
+          "text": "return safeFetch(input, init, attempts);",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\safe-fetch.ts",
+      "matches": [
+        {
+          "line": 3,
+          "text": "export async function safeFetch(input: RequestInfo, init?: SafeFetchInit, attempts = 3) {",
+          "term": "fetch("
+        },
+        {
+          "line": 10,
+          "text": "const res = await fetch(input, merged);",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\url-safety.ts",
+      "matches": [
+        {
+          "line": 28,
+          "text": "export function isUrlSafeForExternalFetch(urlStr: string | null | undefined): boolean {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\useProjectQuota.ts",
+      "matches": [
+        {
+          "line": 20,
+          "text": "const res = await fetch(\"/api/para/active-status\", { credentials: \"include\" });",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\voice.ts",
+      "matches": [
+        {
+          "line": 84,
+          "text": "const response = await fetch(\"/api/voice/transcribe\", {",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\__tests__\\safe-fetch.test.ts",
+      "matches": [
+        {
+          "line": 15,
+          "text": "const res: any = await safeFetch(\"https://example.com/test\", { method: \"GET\" }, 2);",
+          "term": "fetch("
+        },
+        {
+          "line": 26,
+          "text": "await expect(safeFetch(\"https://example.com/fail\", { method: \"GET\" }, 2)).rejects.toThrow();",
+          "term": "fetch("
+        }
+      ]
+    },
+    {
+      "file": "src\\lib\\__tests__\\url-safety.test.ts",
+      "matches": [
+        {
+          "line": 5,
+          "text": "expect(isUrlSafeForExternalFetch('http://localhost/test')).toBe(false);",
+          "term": "fetch("
+        },
+        {
+          "line": 6,
+          "text": "expect(isUrlSafeForExternalFetch('http://127.0.0.1/')).toBe(false);",
+          "term": "fetch("
+        },
+        {
+          "line": 7,
+          "text": "expect(isUrlSafeForExternalFetch('http://10.0.0.5/')).toBe(false);",
+          "term": "fetch("
+        },
+        {
+          "line": 8,
+          "text": "expect(isUrlSafeForExternalFetch('http://192.168.0.1/')).toBe(false);",
+          "term": "fetch("
+        },
+        {
+          "line": 12,
+          "text": "expect(isUrlSafeForExternalFetch('https://example.com/path')).toBe(true);",
+          "term": "fetch("
+        },
+        {
+          "line": 13,
+          "text": "expect(isUrlSafeForExternalFetch('http://sub.domain.com/')).toBe(true);",
+          "term": "fetch("
+        },
+        {
+          "line": 17,
+          "text": "expect(isUrlSafeForExternalFetch('ftp://example.com')).toBe(false);",
+          "term": "fetch("
+        },
+        {
+          "line": 18,
+          "text": "expect(isUrlSafeForExternalFetch('not-a-url')).toBe(false);",
+          "term": "fetch("
+        }
+      ]
+    }
+  ],
+  "safeWrapperFiles": [
+    "src\\app\\api\\voice\\transcribe\\route.ts",
+    "src\\lib\\ai-safe.ts",
+    "src\\lib\\ai.ts",
+    "src\\lib\\safe-fetch-url.ts",
+    "src\\lib\\safe-fetch.ts",
+    "src\\lib\\__tests__\\safe-fetch.test.ts"
+  ],
+  "unwrappedServerCalls": []
+}

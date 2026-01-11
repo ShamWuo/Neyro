@@ -1,6 +1,6 @@
 "use server";
 
-import { ensureProjectLimit } from "@/lib/para";
+import { ensureProjectLimit, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { TemplateType, ProjectStatus, ItemClassification, ItemType } from "@prisma/client";
 import { redirect } from "next/navigation";
@@ -127,7 +127,7 @@ export async function applyTemplate(formData: FormData) {
       const name = templateData.name ? sanitizeString(templateData.name, 500) : sanitizeString(template.name, 500);
       const outcome = templateData.outcome ? sanitizeString(templateData.outcome, 2000) : (template.description ? sanitizeString(template.description, 2000) : "Outcome");
       
-      await prisma.project.create({ data: { userId, name, outcome, status: ProjectStatus.ACTIVE } });
+      await createProjectWithLimit(userId, { userId, name, outcome, status: ProjectStatus.ACTIVE });
       redirect("/projects");
       return;
     }

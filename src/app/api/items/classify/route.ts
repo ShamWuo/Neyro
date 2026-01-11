@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { classifyItem } from "@/lib/para";
 import { ItemClassification } from "@prisma/client";
 import { z } from "zod";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { logger } from "@/lib/logger";
@@ -26,9 +26,11 @@ export async function POST(request: Request) {
 
     // Rate limiting
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing items/classify request:", e?.message || e);
     }
 
     // Check request size

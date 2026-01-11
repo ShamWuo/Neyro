@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// Validate environment early during build/start
+import "./src/lib/env";
 
 const nextConfig: NextConfig = {
   /* config options here */

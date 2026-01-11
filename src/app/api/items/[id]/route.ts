@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { validateId } from "@/lib/validation";
 import { ItemClassification } from "@prisma/client";
-import { takeToken } from "@/lib/rateLimiter";
+import { isAllowed } from "@/lib/rate-limiter";
 import { verifyOwnership } from "@/lib/security";
 
 // Request size limit: 1MB
@@ -20,9 +20,11 @@ export async function PATCH(
     
     // Rate limiting
     try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      const allowed = await isAllowed(`user:${session.user.id}`, 20, 60_000);
+      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("Rate limiter check failed, allowing item detail request:", e?.message || e);
     }
     
     // Check request size

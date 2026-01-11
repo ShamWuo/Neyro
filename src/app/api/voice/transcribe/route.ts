@@ -33,7 +33,8 @@ export async function POST(request: Request) {
 
       const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
 
-      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      const safeFetch = (await import("@/lib/safe-fetch-url")).default;
+      const response = await safeFetch("https://api.openai.com/v1/audio/transcriptions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${openaiKey}`,
@@ -45,7 +46,8 @@ export async function POST(request: Request) {
           fd.append("language", "en");
           return fd;
         })(),
-      });
+        timeoutMs: 20000,
+      } as any);
 
       if (!response.ok) {
         const error = await response.text();
@@ -76,14 +78,16 @@ export async function POST(request: Request) {
 
       const url = `https://api.deepgram.com/v1/listen?model=${model}&language=${language}&punctuate=${punctuate}&utterances=${utterances}&diarize=${diarize}&smart_format=${smart_format}`;
 
-      const response = await fetch(url, {
+      const safeFetch = (await import("@/lib/safe-fetch-url")).default;
+      const response = await safeFetch(url, {
         method: "POST",
         headers: {
           Authorization: `Token ${deepgramKey}`,
           "Content-Type": audioFile.type || "audio/webm",
         },
         body: audioBuffer,
-      });
+        timeoutMs: 20000,
+      } as any);
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "");
