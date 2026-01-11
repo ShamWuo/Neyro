@@ -80,7 +80,7 @@ function RegisterForm() {
         formData.name || undefined
       );
 
-      if (result.error) {
+      if (result?.error) {
         setCredentialsError(result.error);
         setIsLoading(false);
         return;
@@ -100,8 +100,13 @@ function RegisterForm() {
         router.push("/inbox");
         router.refresh();
       }
-    } catch {
-      setCredentialsError("Failed to create account. Please try again.");
+    } catch (error) {
+      // Handle Server Action hash mismatch errors
+      if (error instanceof Error && error.message.includes("Failed to find Server Action")) {
+        setCredentialsError("Please refresh the page and try again. If the problem persists, try clearing your browser cache.");
+      } else {
+        setCredentialsError("Failed to create account. Please try again.");
+      }
       setIsLoading(false);
     }
   }

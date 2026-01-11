@@ -9,22 +9,53 @@ import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
   adapter: PrismaAdapter(prisma),
   callbacks: {
     async signIn({ user, account, profile }) {
-      logger.info("SignIn Callback", { user, account, profile });
-      return true;
-    },
-    async jwt({ token, user, account, profile }) {
-      if (user) {
-        logger.info("JWT Callback Initial", { user, account });
+      try {
+        logger.info("SignIn Callback", { 
+          userId: user?.id, 
+          email: user?.email,
+          provider: account?.provider,
+          accountId: account?.providerAccountId 
+        });
+        return true;
+      } catch (error) {
+        logger.error("SignIn Callback Error", { error, user, account });
+        return false;
       }
-      return token;
+    },
+    async jwt({ token, user, account, profile, trigger }) {
+      try {
+        if (user) {
+          logger.info("JWT Callback Initial", { 
+            userId: user.id, 
+            email: user.email,
+            provider: account?.provider 
+          });
+          token.id = user.id;
+        }
+        return token;
+      } catch (error) {
+        logger.error("JWT Callback Error", { error, token, user });
+        return token;
+      }
     },
     async session({ session, token, user }) {
-      logger.info("Session Callback", { session, token });
-      return session;
+      try {
+        logger.info("Session Callback", { 
+          userId: session.user?.id || token.id,
+          email: session.user?.email 
+        });
+        if (token.id) {
+          session.user.id = token.id as string;
+        }
+        return session;
+      } catch (error) {
+        logger.error("Session Callback Error", { error, session, token });
+        return session;
+      }
     },
   },
   session: { strategy: "jwt" },
@@ -97,17 +128,43 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   events: {
-    signIn: async ({ user, account }) => {
-      logger.info("User signed in successfully", {
-        email: user.email,
-        provider: account?.provider,
-      });
+    signIn: async ({ user, account, isNewUser }) => {
+      try {
+        logger.info("User signed in successfully", {
+          userId: user.id,
+          email: user.email,
+          provider: account?.provider,
+          isNewUser,
+        });
+      } catch (error) {
+        logger.error("SignIn Event Error", { error, user, account });
+      }
     },
     createUser: async ({ user }) => {
-      logger.info("User created", { user });
+      try {
+        logger.info("User created", { 
+          userId: user.id,
+          email: user.email 
+        });
+      } catch (error) {
+        logger.error("CreateUser Event Error", { error, user });
+      }
     },
     linkAccount: async ({ user, account }) => {
-      logger.info("Account linked", { user, account });
+      try {
+        logger.info("Account linked", { 
+          userId: user.id,
+          provider: account?.provider 
+        });
+      } catch (error) {
+        logger.error("LinkAccount Event Error", { error, user, account });
+      }
+    },
+    signInError: async ({ error }) => {
+      logger.error("SignIn Error Event", { 
+        error: error.message || error,
+        stack: error instanceof Error ? error.stack : undefined 
+      });
     },
   },
 

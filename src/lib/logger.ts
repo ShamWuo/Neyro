@@ -12,9 +12,8 @@ export const logger = {
     }
   },
   info: (message: string, ...args: unknown[]) => {
-    if (isDevelopment) {
-      console.info(`[INFO] ${message}`, ...args);
-    }
+    // Always log info in production for debugging auth issues
+    console.info(`[INFO] ${message}`, ...args);
     // In production, send to logging service
   },
   warn: (message: string, ...args: unknown[]) => {
