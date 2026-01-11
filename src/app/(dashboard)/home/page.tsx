@@ -1,53 +1,10 @@
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
-import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
-import { logger } from "@/lib/logger";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import dynamic from "next/dynamic";
-import { LoadingState } from "@/components/loading-state";
-import { CapturePlus } from "@/components/capture-plus";
-
-// Code splitting: Load suggestions component dynamically
-const SmartSuggestions = dynamic(
-  () => import("@/components/smart-suggestions").then((mod) => ({ default: mod.SmartSuggestions })),
-  {
-    loading: () => <LoadingState type="default" />,
-    ssr: true,
-  }
-);
 
 export default async function Home() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/auth/login");
-  const userId = session.user.id;
-  const name = session.user.name ?? session.user.email ?? "there";
+  // Redirect to inbox - inbox is now the home page
+  redirect("/inbox");
+}
 
-  const [inboxCount, activeProjects, areasCount, resourcesCount, archiveCount, lastReview, recentReviews, activeProjectsList] = await Promise.all([
-    prisma.item.count({ where: { userId, classification: ItemClassification.INBOX, archivedAt: null } }),
-    prisma.project.count({ where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null } }),
-    prisma.area.count({ where: { userId, archivedAt: null } }),
-    prisma.resourceCollection.count({ where: { userId, archivedAt: null } }),
-    prisma.item.count({ where: { userId, classification: ItemClassification.ARCHIVE } }),
-    prisma.weeklyReview.findFirst({ where: { userId }, orderBy: { completedAt: "desc" } }),
-    prisma.weeklyReview.findMany({ where: { userId }, orderBy: { completedAt: "desc" }, take: 6 }),
-    prisma.project.findMany({
-      where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null },
-      orderBy: [{ deadline: "asc" }, { createdAt: "asc" }],
-      take: 3,
-    }),
-  ]);
-
-  async function quickCapture(formData: FormData) {
-    "use server";
-    try {
-      const title = String(formData.get("title") ?? "").trim();
-      const url = String(formData.get("url") ?? "").trim() || null;
-      if (!title) return;
-      await prisma.item.create({
-        data: {
-          userId,
-          title,
           url,
           type: ItemType.NOTE,
           classification: ItemClassification.INBOX,

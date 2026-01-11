@@ -2,11 +2,8 @@
 const CACHE_NAME = 'neyro-v1';
 const RUNTIME_CACHE = 'neyro-runtime-v1';
 
-// Assets to cache on install
+// Only cache static assets, not HTML pages
 const PRECACHE_ASSETS = [
-  '/',
-  '/home',
-  '/inbox',
   '/manifest.json',
 ];
 
@@ -36,7 +33,7 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - network-first for documents, cache-first for assets
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
@@ -48,6 +45,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Network-first for HTML documents (routes)
+  if (event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Cache successful document responses
+          if (response.status === 200) {
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(event.request, response.clone());
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache if offline
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
