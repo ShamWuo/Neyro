@@ -12,15 +12,19 @@ import { InboxItemTags } from "@/components/inbox-item-tags";
 import { InboxCaptureForm } from "@/components/inbox-capture-form";
 import { InboxZeroCelebration } from "@/components/inbox-zero-celebration";
 import { InboxWithRefresh } from "@/components/inbox-with-refresh";
+import { VoiceCaptureInput } from "@/components/voice-capture-input";
+import { PhotoCaptureInput } from "@/components/photo-capture-input";
+import { MoreCaptureInput } from "@/components/more-capture-input";
 import { createItem, updateItem, moveToProject, moveToArea, moveToResource, bulkClassify } from "./actions";
 
-export default async function InboxPage({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
+export default async function InboxPage({ searchParams }: { searchParams?: Promise<{ page?: string; mode?: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
   const userId = session.user.id;
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params?.page || "1", 10));
+  const mode = params?.mode || "text";
   const pageSize = 20;
   const skip = (page - 1) * pageSize;
 
@@ -64,6 +68,24 @@ export default async function InboxPage({ searchParams }: { searchParams?: Promi
       </div>
 
       <InboxCaptureForm createItemAction={createItem} />
+
+      {mode === "voice" && (
+        <div className="panel">
+          <VoiceCaptureInput onCapture={() => {}} />
+        </div>
+      )}
+
+      {mode === "photo" && (
+        <div className="panel">
+          <PhotoCaptureInput onCapture={() => {}} />
+        </div>
+      )}
+
+      {mode === "more" && (
+        <div className="panel">
+          <MoreCaptureInput onCapture={() => {}} />
+        </div>
+      )}
 
       <form action={bulkClassify} className="panel space-y-4">
         <div className="flex flex-wrap gap-3 text-sm">

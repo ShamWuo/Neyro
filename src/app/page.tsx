@@ -19,7 +19,7 @@ const RadialOrbitalTimelineDemo = dynamic(
 
 export const metadata: Metadata = {
   title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
-  description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise. Stop managing your system and start finishing your projects.",
+  description: "Neyro is the productivity app that enforces what actually works. Built on The Para Method—a verified and efficient framework created by Neyro helps you capture everything once, classify it instantly, and cut through the noise. Stop managing your system and start finishing your projects.",
   openGraph: {
     title: "Neyro – Instant Clarity for All Your Goals | PARA Productivity App",
     description: "Neyro is the productivity app that enforces what actually works. Built on PARA—a verified and efficient framework—Neyro helps you capture everything once, classify it instantly, and cut through the noise.",
