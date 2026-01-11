@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { ItemClassification } from "@prisma/client";
 import { requireAuth, verifyOwnership } from "@/lib/security";
 import { validateId } from "@/lib/validation";
 import { logger } from "@/lib/logger";

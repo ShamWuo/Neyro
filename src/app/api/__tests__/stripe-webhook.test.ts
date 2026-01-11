@@ -58,6 +58,7 @@ describe("Stripe Webhook Handler", () => {
       url: "http://localhost:3001/api/stripe/webhook",
       method: "POST",
       headers: new Map([["stripe-signature", "test-signature"]]),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   };
 

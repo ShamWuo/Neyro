@@ -1,4 +1,4 @@
-import { ensureProjectLimit, getActiveProjectCount, checkSubscriptionLimit } from "../para";
+import { ensureProjectLimit, getActiveProjectCount } from "../para";
 import { prisma } from "../prisma";
 import { ProjectStatus } from "@prisma/client";
 

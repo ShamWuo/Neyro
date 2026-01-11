@@ -111,6 +111,7 @@ describe("Stripe utilities", () => {
 
       mockUpdateSubscriptionFromStripe.mockResolvedValue(undefined);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await updateSubscriptionFromStripe(mockSubscription as any, "customer.subscription.updated");
 
       expect(mockUpdateSubscriptionFromStripe).toHaveBeenCalledWith(
@@ -128,6 +129,7 @@ describe("Stripe utilities", () => {
 
       mockUpdateSubscriptionFromStripe.mockResolvedValue(undefined);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await updateSubscriptionFromStripe(mockSubscription as any, "customer.subscription.deleted");
 
       expect(mockUpdateSubscriptionFromStripe).toHaveBeenCalledWith(

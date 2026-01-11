@@ -1,0 +1,332 @@
+﻿
+> para@0.1.0 lint
+> eslint
+
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\scripts\test-stripe-api.ts
+    6:10  warning  'auth' is defined but never used          @typescript-eslint/no-unused-vars
+   53:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   79:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\scripts\test-stripe.ts
+   11:8   warning  'Stripe' is defined but never used                        @typescript-eslint/no-unused-vars
+   18:3   warning  'updateSubscriptionFromStripe' is defined but never used  @typescript-eslint/no-unused-vars
+   55:19  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+   94:25  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  114:25  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  181:19  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  226:19  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  261:19  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  296:21  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  309:11  warning  'testUser' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  332:19  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  431:19  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\areas\[id]\actions.ts
+  3:10  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\backlog\actions.ts
+  3:10  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\focus\actions.ts
+  3:10  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\inbox\actions.ts
+  9:67  warning  'validateUrlSafe' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\projects\[id]\actions.ts
+  3:10  warning  'auth' is defined but never used             @typescript-eslint/no-unused-vars
+  9:82  warning  'validateUrlSafe' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\projects\page.tsx
+  34:16  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\resources\actions.ts
+  3:10  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\review\actions.ts
+  3:10  warning  'auth' is defined but never used             @typescript-eslint/no-unused-vars
+  9:88  warning  'validateUrlSafe' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\settings\billing\page.tsx
+  4:10  warning  'prisma' is defined but never used  @typescript-eslint/no-unused-vars
+  5:8   warning  'Link' is defined but never used    @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\(dashboard)\templates\actions.ts
+  3:10  warning  'auth' is defined but never used             @typescript-eslint/no-unused-vars
+  8:23  warning  'verifyOwnership' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\areas\[id]\goals\[goalId]\route.ts
+  3:10  warning  'prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\areas\[id]\goals\route.ts
+  3:10  warning  'prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\debug\db\route.ts
+  36:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\email\send\route.ts
+  3:10  warning  'sendEmail' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\items\[id]\tags\route.ts
+  7:27  warning  'verifyBulkOwnership' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\notifications\read-all\route.ts
+  6:27  warning  '_request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\projects\[id]\milestones\[milestoneId]\route.ts
+  3:10  warning  'prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\projects\[id]\milestones\route.ts
+  3:10  warning  'prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\projects\[id]\notes\route.ts
+  3:10  warning  'prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\resources\[id]\notes\route.ts
+   3:10  warning  'prisma' is defined but never used          @typescript-eslint/no-unused-vars
+  73:11  warning  'notes' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\resources\[id]\tags\route.ts
+  9:10  warning  'validateIdArray' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\saved-searches\[id]\route.ts
+  8:10  warning  'verifyOwnership' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\stripe\manage-subscription\route.ts
+  7:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\api\voice\transcribe\route.ts
+  74:13  warning  'diarize' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\auth\login\page.tsx
+  17:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  23:9  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\auth\login\page.tsx:23:9
+  21 |       const errorParam = params.get("error");
+  22 |       if (errorParam) {
+> 23 |         setError(errorParam);
+     |         ^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |       }
+  25 |     }
+  26 |   }, []);  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\auth\register\page.tsx
+  23:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  29:9  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\app\auth\register\page.tsx:29:9
+  27 |       const errorParam = params.get("error");
+  28 |       if (errorParam) {
+> 29 |         setError(errorParam);
+     |         ^^^^^^^^ Avoid calling setState() directly within an effect
+  30 |       }
+  31 |     }
+  32 |   }, []);  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\auth.ts
+   4:10  warning  'PrismaAdapter' is defined but never used  @typescript-eslint/no-unused-vars
+  25:39  warning  'profile' is defined but never used        @typescript-eslint/no-unused-vars
+  31:37  warning  'user' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\ai-credits-warning.tsx
+  28:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\ai-credits-warning.tsx:28:7
+  26 |     const dismissed = localStorage.getItem("ai-credits-warning-dismissed");
+  27 |     if (dismissed && parseInt(dismissed, 10) > Date.now()) {
+> 28 |       setIsVisible(false);
+     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |       return;
+  30 |     }
+  31 |  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\area-goals.tsx
+  97:9  warning  'handleUpdateProgress' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\billing-settings.tsx
+   4:8   warning  'Link' is defined but never used                @typescript-eslint/no-unused-vars
+   6:10  warning  'SubscriptionTier' is defined but never used    @typescript-eslint/no-unused-vars
+   6:28  warning  'SubscriptionStatus' is defined but never used  @typescript-eslint/no-unused-vars
+  13:49  warning  'userId' is defined but never used              @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\collapsible-sidebar.tsx
+   9:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  13:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\collapsible-sidebar.tsx:13:7
+  11 |     const saved = localStorage.getItem("sidebar-collapsed");
+  12 |     if (saved !== null) {
+> 13 |       setIsCollapsed(saved === "true");
+     |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  14 |     }
+  15 |   }, []);
+  16 |  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\custom-filters.tsx
+  33:9  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\custom-filters.tsx:33:9
+  31 |       try {
+  32 |         const parsed = JSON.parse(saved);
+> 33 |         setSavedFilters(Array.isArray(parsed) ? parsed : []);
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  34 |       } catch {
+  35 |         setSavedFilters([]);
+  36 |       }  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\density-settings.tsx
+  42:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\density-settings.tsx:42:7
+  40 |     const saved = localStorage.getItem("density-setting");
+  41 |     if (saved && ["compact", "normal", "comfortable"].includes(saved)) {
+> 42 |       setDensity(saved as Density);
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  43 |       onDensityChange(saved as Density);
+  44 |     }
+  45 |   }, [onDensityChange]);  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\in-app-notifications.tsx
+  81:9  warning  'typeColors' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\layout-options.tsx
+  37:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\layout-options.tsx:37:7
+  35 |     const saved = localStorage.getItem("preferred-layout");
+  36 |     if (saved && availableLayouts.includes(saved as LayoutOption)) {
+> 37 |       setLayout(saved as LayoutOption);
+     |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  38 |       onLayoutChange(saved as LayoutOption);
+  39 |     }
+  40 |   }, [availableLayouts, onLayoutChange]);  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\lazy-image.tsx
+  50:9  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  57:7  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\onboarding-checklist.tsx
+  26:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  32:9  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\onboarding-checklist.tsx:32:9
+  30 |       try {
+  31 |         const parsed = JSON.parse(saved);
+> 32 |         setChecklist(parsed);
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  33 |       } catch {
+  34 |         // Invalid saved data, use default
+  35 |         setChecklist([]);  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\onboarding-wizard.tsx
+  12:36  warning  'userId' is defined but never used                 @typescript-eslint/no-unused-vars
+  14:10  warning  'completed' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  14:21  warning  'setCompleted' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\pdf-export-button.tsx
+  16:3  warning  'filename' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\project-deadline-calendar.tsx
+  23:9  warning  'groupedDeadlines' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\project-health-score.tsx
+  23:11  warning  'maxScore' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\referral-dashboard.tsx
+  4:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\resource-preview.tsx
+  19:47  warning  'onClose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\search-history.tsx
+  13:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  19:9  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\search-history.tsx:19:9
+  17 |       try {
+  18 |         const parsed = JSON.parse(saved);
+> 19 |         setHistory(Array.isArray(parsed) ? parsed : []);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |       } catch {
+  21 |         // Invalid saved data, use default
+  22 |         setHistory([]);  react-hooks/set-state-in-effect
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\ui\tooltip.tsx
+  66:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  68:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\abcde\OneDrive\Desktop\codes\Apps\para\src\components\ui\tooltip.tsx:68:7
+  66 |       // eslint-disable-next-line react-hooks/set-state-in-effect
+  67 |       // Updating tooltip position after DOM measurements is intentional
+> 68 |       setTooltipPosition({ top, left });
+     |       ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  69 |     }
+  70 |   }, [isVisible, position]);
+  71 |  react-hooks/set-state-in-effect
+
+Γ£û 80 problems (13 errors, 67 warnings)
+  0 errors and 6 warnings potentially fixable with the `--fix` option.
+

@@ -10,12 +10,14 @@ describe("Analytics", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock gtag
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gtag = jest.fn();
     process.env.NEXT_PUBLIC_GA_ID = "G-TEST123";
   });
 
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_GA_ID;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (window as any).gtag;
   });
 
@@ -46,6 +48,7 @@ describe("Analytics", () => {
   });
 
   it("does not track if gtag is not available", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (window as any).gtag;
     render(<Analytics />);
     // Should not throw

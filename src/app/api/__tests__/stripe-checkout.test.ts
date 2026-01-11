@@ -16,6 +16,7 @@ describe("Stripe Checkout API", () => {
     jest.clearAllMocks();
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createMockRequest = (body: any) => {
     return new NextRequest("http://localhost:3001/api/stripe/create-checkout", {
       method: "POST",

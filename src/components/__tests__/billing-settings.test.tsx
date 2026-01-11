@@ -23,7 +23,8 @@ describe("BillingSettings", () => {
       calendarSync: false,
       teamFeatures: false,
     },
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -117,7 +118,7 @@ describe("BillingSettings", () => {
     render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
 
     const upgradeButton = screen.getByText("Upgrade to Focus");
-    
+
     await act(async () => {
       await user.click(upgradeButton);
     });
@@ -160,7 +161,7 @@ describe("BillingSettings", () => {
     render(<BillingSettings subscription={activeSubscription} userId="user-123" />);
 
     const manageButton = screen.getByText("Manage Subscription");
-    
+
     await act(async () => {
       await user.click(manageButton);
     });
@@ -194,7 +195,7 @@ describe("BillingSettings", () => {
     render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
 
     const upgradeButton = screen.getByText("Upgrade to Focus");
-    
+
     await act(async () => {
       await user.click(upgradeButton);
     });
