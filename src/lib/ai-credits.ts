@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { getUserSubscription } from "./subscription";
 
 /**
@@ -6,14 +5,14 @@ import { getUserSubscription } from "./subscription";
  */
 export async function trackAICredit(userId: string): Promise<{ allowed: boolean; remaining: number; limit: number }> {
   const subscription = await getUserSubscription(userId);
-  
+
   if (!subscription || !subscription.isActive) {
     // Free tier - check monthly limit
     const limit = 50; // Free tier limit
     const currentMonth = new Date();
     currentMonth.setDate(1);
     currentMonth.setHours(0, 0, 0, 0);
-    
+
     // TODO: When AI credit tracking model is added to schema, implement:
     // const usage = await prisma.aiCreditUsage.count({
     //   where: {
@@ -21,17 +20,17 @@ export async function trackAICredit(userId: string): Promise<{ allowed: boolean;
     //     usedAt: { gte: currentMonth },
     //   },
     // });
-    
+
     // For now, return mock data until schema is updated
     const usage = 0; // Placeholder
-    
+
     return {
       allowed: usage < limit,
       remaining: Math.max(0, limit - usage),
       limit,
     };
   }
-  
+
   // Paid tier - unlimited
   if (subscription.limits.maxAiCredits === -1) {
     return {
@@ -40,7 +39,7 @@ export async function trackAICredit(userId: string): Promise<{ allowed: boolean;
       limit: -1,
     };
   }
-  
+
   // For other paid tiers with limits (shouldn't happen currently)
   return {
     allowed: true,
@@ -60,7 +59,7 @@ export async function recordAICreditUsage(userId: string): Promise<void> {
   //     usedAt: new Date(),
   //   },
   // });
-  
+
   // For now, just log - schema update needed for full tracking
   console.log(`AI credit used by user ${userId} at ${new Date().toISOString()}`);
 }
@@ -70,10 +69,10 @@ export async function recordAICreditUsage(userId: string): Promise<void> {
  */
 export async function getAICreditUsage(userId: string): Promise<{ used: number; limit: number; remaining: number }> {
   const subscription = await getUserSubscription(userId);
-  
+
   if (!subscription || !subscription.isActive) {
     const limit = 50;
-    
+
     // TODO: When AI credit tracking model is added:
     // const currentMonth = new Date();
     // currentMonth.setDate(1);
@@ -84,16 +83,16 @@ export async function getAICreditUsage(userId: string): Promise<{ used: number; 
     //     usedAt: { gte: currentMonth },
     //   },
     // });
-    
+
     const used = 0; // Placeholder
-    
+
     return {
       used,
       limit,
       remaining: Math.max(0, limit - used),
     };
   }
-  
+
   if (subscription.limits.maxAiCredits === -1) {
     return {
       used: 0,
@@ -101,7 +100,7 @@ export async function getAICreditUsage(userId: string): Promise<{ used: number; 
       remaining: -1,
     };
   }
-  
+
   return {
     used: 0,
     limit: subscription.limits.maxAiCredits,

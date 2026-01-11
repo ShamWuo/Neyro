@@ -11,11 +11,10 @@ export async function getActiveProjectCount(userId: string) {
 
 export async function ensureProjectLimit(userId: string) {
   const limitCheck = await checkSubscriptionLimit(userId, "maxProjects");
-  
+
   if (!limitCheck.allowed) {
-    const current = limitCheck.current ?? 0;
     const limit = limitCheck.limit;
-    
+
     if (limit === MAX_ACTIVE_PROJECTS_FREE) {
       throw new Error(
         `You've reached the free tier limit of ${limit} active projects. Upgrade to Focus to unlock 7 active projects.`

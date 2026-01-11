@@ -10,7 +10,7 @@ interface UpgradePromptProps {
   onDismiss?: () => void;
 }
 
-export function UpgradePrompt({ reason, current, limit, onDismiss }: UpgradePromptProps) {
+export function UpgradePrompt({ reason, current: _current, limit, onDismiss }: UpgradePromptProps) {
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;

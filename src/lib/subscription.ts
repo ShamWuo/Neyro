@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { SubscriptionTier, SubscriptionStatus } from "@prisma/client";
+import { SubscriptionStatus } from "@prisma/client";
 
 export const SUBSCRIPTION_LIMITS = {
   FREE: {
@@ -48,9 +48,9 @@ export async function getUserSubscription(userId: string) {
     user.subscriptionStatus === SubscriptionStatus.ACTIVE ||
     user.subscriptionStatus === SubscriptionStatus.TRIALING;
 
-  const isTrial = user.subscriptionStatus === SubscriptionStatus.TRIALING && 
-                  user.trialEndsAt && 
-                  new Date() < user.trialEndsAt;
+  const isTrial = user.subscriptionStatus === SubscriptionStatus.TRIALING &&
+    user.trialEndsAt &&
+    new Date() < user.trialEndsAt;
 
   return {
     tier: user.subscriptionTier,
