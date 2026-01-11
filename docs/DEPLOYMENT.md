@@ -84,18 +84,42 @@ Native features automatically detect platform and fall back to web when needed.
 
 ## Production Checklist
 
-- [ ] All environment variables set
-- [ ] Database migrations applied
-- [ ] SSL certificate configured
-- [ ] Error tracking configured (Sentry)
-- [ ] Analytics configured
+See [PRE_LAUNCH_CHECKLIST.md](./PRE_LAUNCH_CHECKLIST.md) for comprehensive pre-launch verification.
+
+Quick Checklist:
+- [ ] All environment variables set (see ENV_VARIABLES.md)
+- [ ] Database migrations applied (`npx prisma migrate deploy`)
+- [ ] Prisma Client generated (`npx prisma generate`)
+- [ ] Application builds successfully (`npm run build`)
+- [ ] SSL certificate configured (HTTPS required)
+- [ ] Error tracking configured (Sentry recommended)
+- [ ] Analytics configured (optional)
 - [ ] Monitoring set up
 - [ ] Database backups configured
-- [ ] App icons created
-- [ ] OG images configured
+- [ ] Security headers verified
+- [ ] Rate limiting active
+
+## Environment Variables
+
+See [ENV_VARIABLES.md](./ENV_VARIABLES.md) for complete list.
+
+**Required:**
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_SECRET` or `AUTH_SECRET` - Authentication secret
+- `NEXTAUTH_URL` - Your production domain (https://yourdomain.com)
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+
+**Optional:**
+- `GEMINI_API_KEY` - For AI features
+- `STRIPE_SECRET_KEY` - For payments
+- `S3_*` - For file storage
 
 ## Status
 
 ✅ **Production Ready**  
-✅ **App Store Ready**
+✅ **App Store Ready**  
+✅ **Security Hardened**  
+✅ **Database Migrations Applied**  
+📋 **See PRE_LAUNCH_CHECKLIST.md for deployment steps**
 
