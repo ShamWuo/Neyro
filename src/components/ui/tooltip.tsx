@@ -10,12 +10,12 @@ type TooltipProps = {
   disabled?: boolean;
 };
 
-export function Tooltip({ 
-  content, 
-  children, 
-  position = "top", 
+export function Tooltip({
+  content,
+  children,
+  position = "top",
   delay = 300,
-  disabled = false 
+  disabled = false
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -27,7 +27,7 @@ export function Tooltip({
     if (isVisible && triggerRef.current && tooltipRef.current) {
       const triggerRect = triggerRef.current.getBoundingClientRect();
       const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      
+
       let top = 0;
       let left = 0;
 
@@ -63,9 +63,10 @@ export function Tooltip({
         top = viewportHeight - tooltipRect.height - 8;
       }
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       // Updating tooltip position after DOM measurements is intentional
-      setTooltipPosition({ top, left });
+      setTimeout(() => {
+        setTooltipPosition({ top, left });
+      }, 0);
     }
   }, [isVisible, position]);
 
@@ -92,7 +93,7 @@ export function Tooltip({
   }, []);
 
   return (
-    <div 
+    <div
       ref={triggerRef}
       className="relative inline-block"
       onMouseEnter={handleMouseEnter}
@@ -105,9 +106,8 @@ export function Tooltip({
         <div
           ref={tooltipRef}
           role="tooltip"
-          className={`fixed z-50 rounded-md border border-[var(--border-subtle)] bg-[var(--surface)] px-2 py-1 text-xs font-medium text-[var(--text-primary)] shadow-[var(--elev-2)] pointer-events-none transition-opacity ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
+          className={`fixed z-50 rounded-md border border-[var(--border-subtle)] bg-[var(--surface)] px-2 py-1 text-xs font-medium text-[var(--text-primary)] shadow-[var(--elev-2)] pointer-events-none transition-opacity ${isVisible ? "opacity-100" : "opacity-0"
+            }`}
           style={{
             top: `${tooltipPosition.top}px`,
             left: `${tooltipPosition.left}px`,

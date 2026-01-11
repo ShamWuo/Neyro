@@ -26,15 +26,18 @@ export function CustomFilters({
   const [filterName, setFilterName] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem(`custom-filters-${filterType}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSavedFilters(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setSavedFilters([]);
+    const timer = setTimeout(() => {
+      const saved = localStorage.getItem(`custom-filters-${filterType}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setSavedFilters(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setSavedFilters([]);
+        }
       }
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [filterType]);
 
   const handleSave = () => {

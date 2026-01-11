@@ -13,7 +13,7 @@ type AICreditsWarningProps = {
 export function AICreditsWarning({ current, limit, className = "" }: AICreditsWarningProps) {
   const [isVisible, setIsVisible] = useState(true);
   const router = useRouter();
-  
+
   // Show warning when credits are at 80% or below
   const warningThreshold = Math.floor(limit * 0.8);
   const percentage = (current / limit) * 100;
@@ -22,17 +22,22 @@ export function AICreditsWarning({ current, limit, className = "" }: AICreditsWa
 
   // All hooks must be called before any early returns
   useEffect(() => {
-    // Check if dismissed recently
-    const dismissed = localStorage.getItem("ai-credits-warning-dismissed");
-    if (dismissed && parseInt(dismissed, 10) > Date.now()) {
-      setIsVisible(false);
-      return;
-    }
+    // Use setTimeout to defer state updates and avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      // Check if dismissed recently
+      const dismissed = localStorage.getItem("ai-credits-warning-dismissed");
+      if (dismissed && parseInt(dismissed, 10) > Date.now()) {
+        setIsVisible(false);
+        return;
+      }
 
-    // Only show if credits are low or exceeded
-    if (!isLow && !isExceeded) {
-      setIsVisible(false);
-    }
+      // Only show if credits are low or exceeded
+      if (!isLow && !isExceeded) {
+        setIsVisible(false);
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [isLow, isExceeded]);
 
   const handleDismiss = () => {
@@ -47,11 +52,10 @@ export function AICreditsWarning({ current, limit, className = "" }: AICreditsWa
 
   return (
     <div
-      className={`rounded-xl border-2 ${
-        isExceeded
+      className={`rounded-xl border-2 ${isExceeded
           ? "border-[var(--danger)] bg-[color-mix(in_srgb,var(--danger)_10%,var(--surface))]"
           : "border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_10%,var(--surface))]"
-      } p-4 ${className}`}
+        } p-4 ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 space-y-2">
@@ -69,13 +73,12 @@ export function AICreditsWarning({ current, limit, className = "" }: AICreditsWa
             </p>
             <div className="w-full rounded-full bg-[var(--overlay)] h-2 overflow-hidden">
               <div
-                className={`h-full transition-all ${
-                  isExceeded
+                className={`h-full transition-all ${isExceeded
                     ? "bg-[var(--danger)]"
                     : percentage >= 90
                       ? "bg-[var(--warning)]"
                       : "bg-[var(--primary-strong)]"
-                }`}
+                  }`}
                 style={{ width: `${Math.min(100, percentage)}%` }}
               />
             </div>

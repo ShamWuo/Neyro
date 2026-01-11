@@ -10,18 +10,20 @@ export function SearchHistory({ onSelect }: { onSelect?: (query: string) => void
   const router = useRouter();
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     // Loading from localStorage on mount is intentional
-    const saved = localStorage.getItem("search-history");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setHistory(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        // Invalid saved data, use default
-        setHistory([]);
+    const timer = setTimeout(() => {
+      const saved = localStorage.getItem("search-history");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setHistory(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          // Invalid saved data, use default
+          setHistory([]);
+        }
       }
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const addToHistory = (query: string) => {
@@ -83,7 +85,7 @@ export function SearchHistory({ onSelect }: { onSelect?: (query: string) => void
 export function addSearchToHistory(query: string) {
   const saved = localStorage.getItem("search-history");
   let history: string[] = [];
-  
+
   if (saved) {
     try {
       history = JSON.parse(saved);

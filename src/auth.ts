@@ -10,16 +10,10 @@ import { authConfig } from "./auth.config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   debug: true,
-  // adapter: PrismaAdapter(prisma), // Disabled to fix Configuration Error
+  adapter: PrismaAdapter(prisma),
   callbacks: {
     async signIn({ user, account, profile }) {
       logger.info("SignIn Callback", { user, account, profile });
-
-      if (account?.provider === "google" && user.email) {
-        // BYPASSDB: Testing pure JWT flow
-        return true;
-      }
-
       return true;
     },
     async jwt({ token, user, account, profile }) {

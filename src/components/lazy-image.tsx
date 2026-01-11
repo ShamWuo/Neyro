@@ -54,15 +54,15 @@ export function LazyImage({
           aria-hidden="true"
         />
       )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={imgRef}
         src={isLoaded ? src : placeholder}
         alt={alt}
         onLoad={handleLoad}
         onError={handleError}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
+          }`}
         width={width}
         height={height}
         loading="lazy"

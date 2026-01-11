@@ -6,12 +6,14 @@ export function CollapsibleSidebar({ children }: { children: React.ReactNode }) 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     // Loading from localStorage on mount is intentional
-    const saved = localStorage.getItem("sidebar-collapsed");
-    if (saved !== null) {
-      setIsCollapsed(saved === "true");
-    }
+    const timer = setTimeout(() => {
+      const saved = localStorage.getItem("sidebar-collapsed");
+      if (saved !== null) {
+        setIsCollapsed(saved === "true");
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleSidebar = () => {

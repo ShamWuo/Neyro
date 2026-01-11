@@ -23,24 +23,26 @@ export function OnboardingChecklist() {
   const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     // Loading from localStorage on mount is intentional
-    const saved = localStorage.getItem("onboarding-checklist");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setChecklist(parsed);
-      } catch {
-        // Invalid saved data, use default
-        setChecklist([]);
+    const timer = setTimeout(() => {
+      const saved = localStorage.getItem("onboarding-checklist");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setChecklist(parsed);
+        } catch {
+          // Invalid saved data, use default
+          setChecklist([]);
+        }
       }
-    }
 
-    // Check if onboarding is complete
-    const completed = localStorage.getItem("onboarding-complete");
-    if (completed === "true") {
-      setIsOpen(false);
-    }
+      // Check if onboarding is complete
+      const completed = localStorage.getItem("onboarding-complete");
+      if (completed === "true") {
+        setIsOpen(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleToggle = (id: string) => {
@@ -105,11 +107,10 @@ export function OnboardingChecklist() {
               className="h-4 w-4 rounded border-[var(--border-subtle)] text-[var(--primary-strong)] focus:ring-[var(--primary-strong)]"
             />
             <span
-              className={`text-sm flex-1 ${
-                item.completed
-                  ? "text-[var(--text-tertiary)] line-through"
-                  : "text-[var(--text-primary)]"
-              }`}
+              className={`text-sm flex-1 ${item.completed
+                ? "text-[var(--text-tertiary)] line-through"
+                : "text-[var(--text-primary)]"
+                }`}
             >
               {item.label}
             </span>

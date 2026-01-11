@@ -37,11 +37,14 @@ export function DensitySettings({
   const [density, setDensity] = useState<Density>(currentDensity);
 
   useEffect(() => {
-    const saved = localStorage.getItem("density-setting");
-    if (saved && ["compact", "normal", "comfortable"].includes(saved)) {
-      setDensity(saved as Density);
-      onDensityChange(saved as Density);
-    }
+    const timer = setTimeout(() => {
+      const saved = localStorage.getItem("density-setting");
+      if (saved && ["compact", "normal", "comfortable"].includes(saved)) {
+        setDensity(saved as Density);
+        onDensityChange(saved as Density);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [onDensityChange]);
 
   const handleDensityChange = (newDensity: Density) => {
@@ -59,11 +62,10 @@ export function DensitySettings({
         <button
           key={option}
           onClick={() => handleDensityChange(option)}
-          className={`rounded px-3 py-1.5 text-xs font-semibold transition ${
-            density === option
+          className={`rounded px-3 py-1.5 text-xs font-semibold transition ${density === option
               ? "bg-[var(--primary-strong)] text-white shadow-sm"
               : "text-[var(--text-secondary)] hover:bg-[var(--card-muted)] hover:text-[var(--text-primary)]"
-          }`}
+            }`}
           aria-label={`Switch to ${densityConfig[option].label} density`}
           aria-pressed={density === option}
         >
