@@ -17,6 +17,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       if (account?.provider === "google" && user.email) {
         try {
+          if (!process.env.DATABASE_URL) {
+            throw new Error("DATABASE_URL is missing");
+          }
+
           // 1. Check if user exists
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
