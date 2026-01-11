@@ -28,5 +28,6 @@ export const authConfig = {
             return session;
         },
     },
+    session: { strategy: "jwt" },
     providers: [], // Providers configured in auth.ts
 } satisfies NextAuthConfig;
