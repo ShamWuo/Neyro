@@ -26,7 +26,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (e) => {
+      mediaRecorder.ondataavailable = (e: BlobEvent) => {
         audioChunksRef.current.push(e.data);
       };
 
@@ -65,7 +65,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
       const mockTranscription = "Buy groceries, schedule dentist appointment, review Q1 budget";
       console.log("[VOICE] Transcription complete:", mockTranscription);
       setTranscript(mockTranscription);
-      onCapture(mockTranscription, null as any);
+      onCapture(mockTranscription, null);
     } catch (error) {
       console.error("[VOICE] Transcription error:", error);
       alert("Failed to transcribe audio.");
@@ -80,7 +80,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
           {recording && <span className="text-xs text-[var(--danger)] font-semibold animate-pulse">Recording...</span>}
         </div>
         <p className="text-xs text-[var(--text-secondary)]">
-          Speak your thought. We'll transcribe and classify it into Projects, Areas, Resources, or Archives.
+          Speak your thought. We&apos;ll transcribe and classify it into Projects, Areas, Resources, or Archives.
         </p>
         <div className="flex gap-2">
           {!recording ? (

@@ -20,6 +20,13 @@ type InAppNotificationsProps = {
   onMarkAllRead?: () => void;
 };
 
+const typeIcons: Record<string, string> = {
+  info: "ℹ️",
+  success: "✅",
+  warning: "⚠️",
+  error: "❌",
+};
+
 export function InAppNotifications({
   initialNotifications = [],
   onMarkRead,

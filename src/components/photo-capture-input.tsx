@@ -26,7 +26,7 @@ export function PhotoCaptureInput({ onCapture }: { onCapture: (text: string, cla
 
     // Show preview
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = (evt: ProgressEvent<FileReader>) => {
       setPreview(evt.target?.result as string);
     };
     reader.readAsDataURL(file);
@@ -38,7 +38,7 @@ export function PhotoCaptureInput({ onCapture }: { onCapture: (text: string, cla
       const mockExtraction = "Meeting notes: Review Q1 KPIs, Discuss team expansion, Plan H2 budget allocations";
       console.log("[PHOTO] OCR extraction complete:", mockExtraction);
       setExtractedText(mockExtraction);
-      onCapture(mockExtraction, null as any);
+      onCapture(mockExtraction, null);
       setIsProcessing(false);
     }, 1500);
   };
@@ -66,6 +66,7 @@ export function PhotoCaptureInput({ onCapture }: { onCapture: (text: string, cla
         </div>
         {preview && (
           <div className="space-y-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="preview" className="max-h-48 rounded-md border border-[var(--border-subtle)]" />
             {isProcessing && <p className="text-xs text-[var(--text-secondary)]">Extracting text...</p>}
             {extractedText && (
