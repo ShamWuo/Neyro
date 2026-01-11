@@ -58,14 +58,14 @@ export async function POST(request: Request) {
       // Deepgram API
       const deepgramKey = process.env.DEEPGRAM_API_KEY;
       if (!deepgramKey) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: "Deepgram API key not configured. Set DEEPGRAM_API_KEY environment variable or use Whisper provider.",
           provider: "deepgram",
         }, { status: 500 });
       }
 
       const audioBuffer = await audioFile.arrayBuffer();
-      
+
       // Deepgram v1 API with better model and language settings
       const model = "nova-2"; // Best accuracy model
       const language = "en";
@@ -73,8 +73,8 @@ export async function POST(request: Request) {
       const utterances = "true";
       const diarize = "false";
       const smart_format = "true";
-      
-      const url = `https://api.deepgram.com/v1/listen?model=${model}&language=${language}&punctuate=${punctuate}&utterances=${utterances}&smart_format=${smart_format}`;
+
+      const url = `https://api.deepgram.com/v1/listen?model=${model}&language=${language}&punctuate=${punctuate}&utterances=${utterances}&diarize=${diarize}&smart_format=${smart_format}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -101,21 +101,21 @@ export async function POST(request: Request) {
       // Deepgram returns results in this structure
       transcription = data.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
     } else {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: `Unsupported provider: ${provider}. Use "whisper" or "deepgram"`,
         supported: ["whisper", "deepgram"],
       }, { status: 400 });
     }
 
     if (!transcription || transcription.trim().length === 0) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Transcription returned empty result",
         text: "",
       }, { status: 200 }); // Still return success but with empty text
     }
 
-    logger.info("Audio transcribed successfully", { 
-      provider, 
+    logger.info("Audio transcribed successfully", {
+      provider,
       length: transcription.length,
       userId: session.user.id,
     });
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error("Error transcribing audio", error instanceof Error ? error : new Error(String(error)));
     const message = error instanceof Error ? error.message : "Transcription failed";
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: message,
       provider,
       hint: "Check that your API key is valid and has sufficient credits/quota",

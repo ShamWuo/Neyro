@@ -438,7 +438,9 @@ async function runAllTests() {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     log(`\n❌ Fatal error during testing: ${message}`, "error");
-    log(error.stack || "", "error");
+    if (error instanceof Error && error.stack) {
+      log(error.stack, "error");
+    }
     process.exit(1);
   }
 }

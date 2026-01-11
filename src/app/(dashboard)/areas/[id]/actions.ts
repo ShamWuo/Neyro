@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/auth";
+// import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { touchArea } from "@/lib/para";
 import { ItemClassification, ItemType } from "@prisma/client";
@@ -16,7 +16,7 @@ export async function addShare(areaId: string, formData: FormData) {
   try {
     // Validate area ID
     validateId(areaId);
-    
+
     // Verify ownership
     const ownsArea = await verifyOwnership("area", areaId, userId);
     if (!ownsArea) {
@@ -28,7 +28,7 @@ export async function addShare(areaId: string, formData: FormData) {
     const emailRaw = formData.get("email");
     if (!emailRaw) return;
     const email = validateEmail(emailRaw);
-    
+
     await prisma.shareAccess.create({ data: { ownerId: userId, areaId, email, permission: "VIEW" } });
     redirect(`/areas/${areaId}`);
   } catch (error) {
@@ -44,7 +44,7 @@ export async function updateArea(areaId: string, formData: FormData) {
   try {
     // Validate area ID
     validateId(areaId);
-    
+
     // Verify ownership
     const ownsArea = await verifyOwnership("area", areaId, userId);
     if (!ownsArea) {
@@ -56,10 +56,10 @@ export async function updateArea(areaId: string, formData: FormData) {
     const nameRaw = formData.get("name");
     const standardRaw = formData.get("standard");
     if (!nameRaw || !standardRaw) return;
-    
+
     const name = validateAndSanitizeString(nameRaw, 500, "Name");
     const standard = validateAndSanitizeString(standardRaw, 2000, "Standard");
-    
+
     await prisma.area.update({ where: { id: areaId, userId }, data: { name, standard } });
     await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
@@ -76,7 +76,7 @@ export async function updateReview(areaId: string, formData: FormData) {
   try {
     // Validate area ID
     validateId(areaId);
-    
+
     // Verify ownership
     const ownsArea = await verifyOwnership("area", areaId, userId);
     if (!ownsArea) {
@@ -88,12 +88,12 @@ export async function updateReview(areaId: string, formData: FormData) {
     const scoreRaw = formData.get("score");
     if (!scoreRaw) return;
     const score = Number(scoreRaw);
-    
+
     // Validate score is within valid range (1-5)
     if (isNaN(score) || score < 1 || score > 5) {
       redirect(`/areas/${areaId}?error=invalid_score`);
     }
-    
+
     // Validate date
     const dateRaw = formData.get("date");
     let reviewDate: Date;
@@ -109,7 +109,7 @@ export async function updateReview(areaId: string, formData: FormData) {
     } else {
       reviewDate = new Date();
     }
-    
+
     await prisma.area.update({
       where: { id: areaId, userId },
       data: { lastHealthScore: score, lastReviewDate: reviewDate },
@@ -129,7 +129,7 @@ export async function addItem(areaId: string, formData: FormData) {
   try {
     // Validate area ID
     validateId(areaId);
-    
+
     // Verify ownership
     const ownsArea = await verifyOwnership("area", areaId, userId);
     if (!ownsArea) {
@@ -141,22 +141,22 @@ export async function addItem(areaId: string, formData: FormData) {
     const titleRaw = formData.get("title");
     if (!titleRaw) return;
     const title = validateAndSanitizeString(titleRaw, 500, "Title");
-    
+
     // Sanitize details
     const detailsRaw = formData.get("details");
     const details = detailsRaw ? sanitizeString(String(detailsRaw), 10000) : null;
-    
+
     // Validate URL
     const urlRaw = formData.get("url");
     const url = urlRaw ? validateUrl(urlRaw) : null;
-    
+
     // Validate type
     const typeRaw = formData.get("type");
     let type: ItemType = ItemType.NOTE;
     if (typeRaw && Object.values(ItemType).includes(typeRaw as ItemType)) {
       type = typeRaw as ItemType;
     }
-    
+
     await prisma.item.create({
       data: {
         userId,
@@ -183,7 +183,7 @@ export async function updateItem(areaId: string, formData: FormData) {
   try {
     // Validate area ID
     validateId(areaId);
-    
+
     // Verify ownership of area
     const ownsArea = await verifyOwnership("area", areaId, userId);
     if (!ownsArea) {
@@ -196,7 +196,7 @@ export async function updateItem(areaId: string, formData: FormData) {
     if (!itemIdRaw) return;
     const itemId = String(itemIdRaw).trim();
     validateId(itemId);
-    
+
     // Verify ownership of item
     const ownsItem = await verifyOwnership("item", itemId, userId);
     if (!ownsItem) {
@@ -208,22 +208,22 @@ export async function updateItem(areaId: string, formData: FormData) {
     const titleRaw = formData.get("title");
     if (!titleRaw) return;
     const title = validateAndSanitizeString(titleRaw, 500, "Title");
-    
+
     // Sanitize details
     const detailsRaw = formData.get("details");
     const details = detailsRaw ? sanitizeString(String(detailsRaw), 10000) : null;
-    
+
     // Validate URL
     const urlRaw = formData.get("url");
     const url = urlRaw ? validateUrl(urlRaw) : null;
-    
+
     // Validate type
     const typeRaw = formData.get("type");
     let type: ItemType = ItemType.NOTE;
     if (typeRaw && Object.values(ItemType).includes(typeRaw as ItemType)) {
       type = typeRaw as ItemType;
     }
-    
+
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
     await touchArea(userId, areaId);
     redirect(`/areas/${areaId}`);
@@ -240,7 +240,7 @@ export async function moveItem(areaId: string, formData: FormData) {
   try {
     // Validate area ID
     validateId(areaId);
-    
+
     // Verify ownership of area
     const ownsArea = await verifyOwnership("area", areaId, userId);
     if (!ownsArea) {
@@ -253,7 +253,7 @@ export async function moveItem(areaId: string, formData: FormData) {
     if (!itemIdRaw) return;
     const itemId = String(itemIdRaw).trim();
     validateId(itemId);
-    
+
     // Verify ownership of item
     const ownsItem = await verifyOwnership("item", itemId, userId);
     if (!ownsItem) {
@@ -262,19 +262,19 @@ export async function moveItem(areaId: string, formData: FormData) {
     }
 
     const target = String(formData.get("target") ?? "");
-    
+
     // Validate target is a valid classification
     const validTargets = ["inbox", "project", "resource", "archive"];
     if (!validTargets.includes(target)) {
       redirect(`/areas/${areaId}?error=invalid_target`);
     }
-    
+
     const projectIdRaw = formData.get("projectId");
     const collectionIdRaw = formData.get("collectionId");
-    
+
     let projectId: string | null = null;
     let collectionId: string | null = null;
-    
+
     if (projectIdRaw && target === "project") {
       projectId = String(projectIdRaw).trim();
       if (projectId) {
@@ -285,7 +285,7 @@ export async function moveItem(areaId: string, formData: FormData) {
         }
       }
     }
-    
+
     if (collectionIdRaw && target === "resource") {
       collectionId = String(collectionIdRaw).trim();
       if (collectionId) {

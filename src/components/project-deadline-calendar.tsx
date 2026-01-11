@@ -20,19 +20,7 @@ export function ProjectDeadlineCalendar({
   deadlines,
   currentDate = new Date(),
 }: ProjectDeadlineCalendarProps) {
-  const groupedDeadlines = useMemo(() => {
-    const groups: Record<string, ProjectDeadline[]> = {};
-
-    deadlines.forEach((deadline) => {
-      const dateStr = deadline.deadline.toISOString().split("T")[0];
-      if (!groups[dateStr]) {
-        groups[dateStr] = [];
-      }
-      groups[dateStr].push(deadline);
-    });
-
-    return groups;
-  }, [deadlines]);
+  // groupedDeadlines logic removed as it was unused
 
   const upcomingDeadlines = useMemo(() => {
     const sorted = [...deadlines]
@@ -72,13 +60,12 @@ export function ProjectDeadlineCalendar({
             <Link
               key={deadline.id}
               href={`/projects/${deadline.id}`}
-              className={`flex items-center justify-between rounded-md border p-3 transition hover:shadow-[var(--elev-1)] ${
-                deadline.isOverdue
+              className={`flex items-center justify-between rounded-md border p-3 transition hover:shadow-[var(--elev-1)] ${deadline.isOverdue
                   ? "border-[var(--danger)] bg-[var(--danger-weak)]"
                   : daysUntil <= 3
-                  ? "border-[var(--warning)] bg-[var(--warning-weak)]"
-                  : "border-[var(--border-subtle)] bg-[var(--card)]"
-              }`}
+                    ? "border-[var(--warning)] bg-[var(--warning-weak)]"
+                    : "border-[var(--border-subtle)] bg-[var(--card)]"
+                }`}
             >
               <div className="flex-1">
                 <div className="text-sm font-semibold text-[var(--text-primary)]">
@@ -93,21 +80,20 @@ export function ProjectDeadlineCalendar({
                 </div>
               </div>
               <div
-                className={`text-xs font-semibold ${
-                  deadline.isOverdue
+                className={`text-xs font-semibold ${deadline.isOverdue
                     ? "text-[var(--danger)]"
                     : daysUntil <= 3
-                    ? "text-[var(--warning)]"
-                    : "text-[var(--text-tertiary)]"
-                }`}
+                      ? "text-[var(--warning)]"
+                      : "text-[var(--text-tertiary)]"
+                  }`}
               >
                 {deadline.isOverdue
                   ? `${Math.abs(daysUntil)} days overdue`
                   : daysUntil === 0
-                  ? "Today"
-                  : daysUntil === 1
-                  ? "Tomorrow"
-                  : `${daysUntil} days`}
+                    ? "Today"
+                    : daysUntil === 1
+                      ? "Tomorrow"
+                      : `${daysUntil} days`}
               </div>
             </Link>
           );

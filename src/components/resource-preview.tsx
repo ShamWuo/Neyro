@@ -16,7 +16,7 @@ type PreviewData = {
   siteName?: string;
 };
 
-export function ResourcePreview({ url, title, onClose }: ResourcePreviewProps) {
+export function ResourcePreview({ url, title }: ResourcePreviewProps) {
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
