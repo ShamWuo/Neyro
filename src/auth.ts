@@ -7,6 +7,34 @@ import { logger } from "@/lib/logger";
 import bcrypt from "bcryptjs";
 import { authConfig } from "./auth.config";
 
+// Fail fast in production when auth env is misconfigured to avoid silent OAuth callback failures.
+function assertAuthEnv() {
+  if (process.env.NODE_ENV !== "production") return;
+
+  const missing: string[] = [];
+
+  if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
+    missing.push("AUTH_SECRET or NEXTAUTH_SECRET");
+  }
+  if (!process.env.NEXTAUTH_URL) {
+    missing.push("NEXTAUTH_URL (set to your deployed domain, e.g. https://neyro.vercel.app)");
+  }
+  if (!process.env.GOOGLE_CLIENT_ID) missing.push("GOOGLE_CLIENT_ID");
+  if (!process.env.GOOGLE_CLIENT_SECRET) missing.push("GOOGLE_CLIENT_SECRET");
+
+  if (missing.length) {
+    throw new Error(`Auth configuration missing required env vars: ${missing.join(", ")}`);
+  }
+
+  if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.startsWith("https://")) {
+    logger.warn("NEXTAUTH_URL should be HTTPS and match your deployed domain", {
+      nextauthUrl: process.env.NEXTAUTH_URL,
+    });
+  }
+}
+
+assertAuthEnv();
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   debug: process.env.NODE_ENV === "development",

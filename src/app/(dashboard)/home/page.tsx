@@ -95,20 +95,41 @@ export default async function Home() {
     <div className="space-y-8">
       <div className="rounded-3xl border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_10%_10%,rgba(87,114,255,0.16),transparent_35%),radial-gradient(circle_at_85%_0%,rgba(255,155,108,0.15),transparent_35%),linear-gradient(135deg,var(--card),var(--card-muted))] p-6 shadow-[var(--elev-2)]">
         <div className="grid gap-6 md:grid-cols-[1.2fr_0.9fr] md:items-center">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-tertiary)]">Welcome back, {name}</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Your PARA cockpit for today</h1>
-            <p className="text-sm text-[var(--text-secondary)]">Capture fast, keep projects under seven, review weekly. Stay in motion with focused time blocks.</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Capture everything first. Sort it into PARA later.</h1>
+            <p className="text-sm text-[var(--text-secondary)]">This cockpit is for fast capture. Drop tasks, links, and notes in seconds, then classify them into Projects, Areas, Resources, or Archive when you review.</p>
             <div className="flex flex-wrap gap-2 text-sm font-semibold">
-              <Link href="/inbox" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-3)]">Capture now</Link>
-              <Link href="/projects" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Add a project</Link>
-              <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Start weekly review</Link>
-              <Link href="/focus" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Enter focus mode</Link>
+              <Link href="/inbox" className="rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-4 py-2 text-[var(--text-inverse)] shadow-sm transition hover:shadow-[var(--elev-3)]">Capture to inbox</Link>
+              <Link href="/focus" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Start a focus block</Link>
+              <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-[var(--text-primary)] transition hover:border-[var(--border-strong)]">Run weekly review</Link>
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-[var(--text-tertiary)]">
-              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">Cmd/Ctrl + K: Command palette</span>
-              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1"> ?: Shortcuts</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">Capture → classify once daily</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">Cmd/Ctrl + K jumps to capture</span>
               <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1">Keep {projectsRemaining} project slots free</span>
+            </div>
+
+            <div id="quick-capture" className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--elev-1)]">
+              <div className="flex items-center justify-between text-sm font-semibold text-[var(--text-primary)]">
+                <span>Quick capture</span>
+                <span className="text-xs text-[var(--text-secondary)]">Inbox now, classify later</span>
+              </div>
+              <form action={quickCapture} className="mt-3 grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+                <input
+                  name="title"
+                  placeholder="Task, note, or link"
+                  className="border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 md:col-span-1"
+                  required
+                />
+                <input
+                  name="url"
+                  placeholder="URL (optional)"
+                  className="border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 md:col-span-1"
+                />
+                <button type="submit" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--border-strong)] md:col-span-1">Capture to inbox</button>
+              </form>
+              <p className="mt-2 text-xs text-[var(--text-secondary)]">Tip: capture first, then batch classify to Projects/Areas/Resources/Archive during your daily sweep.</p>
             </div>
           </div>
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--elev-1)]">
@@ -143,6 +164,59 @@ export default async function Home() {
                 <li>{lastReview ? "Log your weekly review." : "Run your first review."}</li>
               </ul>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="panel space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Sort captures into PARA</h2>
+          <Link href="/plan" className="text-xs font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Open PARA overview</Link>
+        </div>
+        <p className="text-sm text-[var(--text-secondary)]">Every capture should land in one of the four PARA buckets. Use this grid to decide where it goes.</p>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-[var(--elev-1)]">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
+              <span>Projects</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2 py-1 text-[11px] text-[var(--text-secondary)]">{activeProjects} active</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">Short-term outcomes with deadlines.</p>
+            <p className="text-xs text-[var(--text-secondary)]">Examples: Finalize Q4 budget, Write a blog post, Fix the kitchen sink, Plan a summer vacation.</p>
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]">If it has a deadline, it belongs here.</p>
+            <Link href="/projects" className="mt-3 inline-flex rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-strong)]">Go to Projects</Link>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-[var(--elev-1)]">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
+              <span>Areas</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2 py-1 text-[11px] text-[var(--text-secondary)]">{areasCount} active</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">Ongoing responsibilities with standards.</p>
+            <p className="text-xs text-[var(--text-secondary)]">Examples: Health, Finances, Professional Development, Parenting, Car Maintenance.</p>
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]">No end date—just upkeep.</p>
+            <Link href="/areas" className="mt-3 inline-flex rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-strong)]">Go to Areas</Link>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-[var(--elev-1)]">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
+              <span>Resources</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2 py-1 text-[11px] text-[var(--text-secondary)]">{resourcesCount} collections</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">References and interests to reuse.</p>
+            <p className="text-xs text-[var(--text-secondary)]">Examples: Interior design, Web development, Cooking recipes, SEO strategy, Yoga.</p>
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]">Your library—no immediate action.</p>
+            <Link href="/resources" className="mt-3 inline-flex rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-strong)]">Go to Resources</Link>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card)] p-4 shadow-[var(--elev-1)]">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">
+              <span>Archives</span>
+              <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2 py-1 text-[11px] text-[var(--text-secondary)]">{archiveCount} stored</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">Completed or inactive items.</p>
+            <p className="text-xs text-[var(--text-secondary)]">Examples: finished projects, closed areas, old references you no longer need in view.</p>
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]">Hide distractions; keep history.</p>
+            <Link href="/archive" className="mt-3 inline-flex rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-strong)]">Go to Archives</Link>
           </div>
         </div>
       </div>
@@ -412,24 +486,21 @@ export default async function Home() {
         <div className="space-y-4">
           <div className="panel space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Quick capture</h2>
-              <span className="text-xs text-[var(--text-secondary)]">Inbox to classify later</span>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Capture pipeline</h2>
+              <span className="text-xs text-[var(--text-secondary)]">The PARA flow</span>
             </div>
-            <form action={quickCapture} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-              <input
-                name="title"
-                placeholder="Task, note, or link"
-                className="border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 md:col-span-1"
-                required
-              />
-              <input
-                name="url"
-                placeholder="URL (optional)"
-                className="border border-[var(--border-subtle)] bg-[var(--surface)] px-3 py-2 md:col-span-1"
-              />
-              <button type="submit" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-4 py-2 text-sm font-semibold transition hover:border-[var(--border-strong)] md:col-span-1">Capture to inbox</button>
-            </form>
-            <p className="text-xs text-[var(--text-secondary)]">Tip: Capture first, classify once per day. Keyboard hint: press Ctrl/Cmd+K to jump to the command palette.</p>
+            <ol className="space-y-2 text-sm text-[var(--text-primary)] list-decimal list-inside">
+              <li>Capture everything into your <Link href="/inbox" className="font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Inbox</Link>.</li>
+              <li>Classify daily into <Link href="/projects" className="font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Projects</Link>, <Link href="/areas" className="font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Areas</Link>, <Link href="/resources" className="font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Resources</Link>, or <Link href="/archive" className="font-semibold text-[var(--primary-strong)] underline hover:text-[var(--primary)]">Archive</Link>.</li>
+              <li>Work from Projects and Focus blocks; keep Projects under seven to stay sharp.</li>
+              <li>Run a weekly review to close loops and set next captures.</li>
+            </ol>
+            <div className="flex flex-wrap gap-2 text-xs font-semibold">
+              <Link href="/inbox" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Open inbox</Link>
+              <Link href="/review" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Run weekly review</Link>
+              <Link href="/focus" className="rounded-md border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-[var(--text-primary)] hover:border-[var(--border-strong)]">Start focus block</Link>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)]">Need a shortcut? Press Cmd/Ctrl + K then type "capture" to jump straight into the inbox form.</p>
           </div>
 
           <div className="panel space-y-3">

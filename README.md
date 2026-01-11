@@ -74,6 +74,7 @@ Notes:
 - `npm run start` – prod start
 - `npm run prisma:generate` – Prisma client
 - `npm run prisma:migrate` – create migration
+- `npm run prisma:deploy` – apply pending migrations to the target DB (use in prod/staging)
 - `npm run prisma:studio` – Prisma Studio
 - `npm run setup:hooks` – point git to use `.githooks`
 
