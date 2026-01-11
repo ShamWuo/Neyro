@@ -40,7 +40,7 @@ export default async function BillingPage({
         </div>
       )}
 
-      <BillingSettings subscription={subscription} userId={session.user.id} />
+      <BillingSettings subscription={subscription} />
     </div>
   );
 }

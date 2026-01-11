@@ -41,7 +41,7 @@ export default async function OnboardingPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
       <div className="w-full max-w-2xl">
-        <OnboardingWizard userId={userId} />
+        <OnboardingWizard />
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ describe("BillingSettings", () => {
   });
 
   it("renders current plan for free tier", () => {
-    render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={mockSubscription} />);
 
     expect(screen.getByText("Current Plan")).toBeInTheDocument();
     expect(screen.getByText("Free tier - Upgrade to unlock more features")).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe("BillingSettings", () => {
   });
 
   it("renders upgrade options for free tier", () => {
-    render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={mockSubscription} />);
 
     expect(screen.getByText("Upgrade Your Plan")).toBeInTheDocument();
     expect(screen.getAllByText("Focus").length).toBeGreaterThan(0);
@@ -65,7 +65,7 @@ describe("BillingSettings", () => {
       },
     };
 
-    render(<BillingSettings subscription={focusSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={focusSubscription} />);
 
     expect(screen.getByText("Focus - Full PARA enforcement")).toBeInTheDocument();
     expect(screen.getByText("$18")).toBeInTheDocument();
@@ -85,7 +85,7 @@ describe("BillingSettings", () => {
       trialEndsAt,
     };
 
-    render(<BillingSettings subscription={trialSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={trialSubscription} />);
 
     expect(screen.getByText(/Trial ends/)).toBeInTheDocument();
   });
@@ -115,7 +115,7 @@ describe("BillingSettings", () => {
       configurable: true,
     });
 
-    render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={mockSubscription} />);
 
     const upgradeButton = screen.getByText("Upgrade to Focus");
 
@@ -158,7 +158,7 @@ describe("BillingSettings", () => {
       configurable: true,
     });
 
-    render(<BillingSettings subscription={activeSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={activeSubscription} />);
 
     const manageButton = screen.getByText("Manage Subscription");
 
@@ -177,7 +177,7 @@ describe("BillingSettings", () => {
   });
 
   it("shows feature comparison table", () => {
-    render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={mockSubscription} />);
 
     expect(screen.getByText("Feature Comparison")).toBeInTheDocument();
     expect(screen.getByText("Active Projects")).toBeInTheDocument();
@@ -192,7 +192,7 @@ describe("BillingSettings", () => {
       () => new Promise((resolve) => setTimeout(() => resolve({ ok: true, json: async () => ({ url: "" }) }), 100))
     );
 
-    render(<BillingSettings subscription={mockSubscription} userId="user-123" />);
+    render(<BillingSettings subscription={mockSubscription} />);
 
     const upgradeButton = screen.getByText("Upgrade to Focus");
 

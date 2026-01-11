@@ -29,7 +29,7 @@ describe("OnboardingWizard", () => {
   });
 
   it("renders first step", () => {
-    render(<OnboardingWizard userId="user-123" />);
+    render(<OnboardingWizard />);
 
     expect(screen.getByText("Capture Your First Item")).toBeInTheDocument();
     expect(screen.getByText("Add something to your inbox to get started")).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe("OnboardingWizard", () => {
   });
 
   it("shows progress bar", () => {
-    render(<OnboardingWizard userId="user-123" />);
+    render(<OnboardingWizard />);
 
     const progressText = screen.getByText(/Step 1 of 4/);
     expect(progressText).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe("OnboardingWizard", () => {
 
   it("navigates to next step", async () => {
     const user = userEvent.setup();
-    render(<OnboardingWizard userId="user-123" />);
+    render(<OnboardingWizard />);
 
     const nextButton = screen.getByText("Next");
     await act(async () => {
@@ -61,7 +61,7 @@ describe("OnboardingWizard", () => {
   it("completes onboarding on last step", async () => {
     const user = userEvent.setup();
     const onComplete = jest.fn();
-    render(<OnboardingWizard userId="user-123" onComplete={onComplete} />);
+    render(<OnboardingWizard onComplete={onComplete} />);
 
     // Navigate to last step
     let nextButton = screen.getByText("Next");
@@ -97,7 +97,7 @@ describe("OnboardingWizard", () => {
   it("skips onboarding", async () => {
     const user = userEvent.setup();
     const onComplete = jest.fn();
-    render(<OnboardingWizard userId="user-123" onComplete={onComplete} />);
+    render(<OnboardingWizard onComplete={onComplete} />);
 
     const skipButton = screen.getByText("Skip onboarding");
     await act(async () => {
@@ -114,7 +114,7 @@ describe("OnboardingWizard", () => {
   });
 
   it("links to correct pages for each step", () => {
-    render(<OnboardingWizard userId="user-123" />);
+    render(<OnboardingWizard />);
 
     // First step should link to inbox
     const inboxLink = screen.getByText("Go to Inbox");

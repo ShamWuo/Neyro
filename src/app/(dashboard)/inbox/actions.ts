@@ -211,6 +211,97 @@ export async function moveToResource(formData: FormData) {
   }
 }
 
+export async function saveClassifiedItem(formData: FormData) {
+  const session = await requireAuth();
+  const userId = session.user.id;
+
+  try {
+    const title = validateAndSanitizeString(formData.get("title"), 500, "Title");
+    const details = sanitizeString(String(formData.get("details") ?? ""), 10000);
+    const category = String(formData.get("category") ?? "area").toLowerCase();
+    const sourceMode = String(formData.get("sourceMode") ?? "unknown");
+
+    console.log(`[CAPTURE] Processing: "${title}" → category=${category} from mode=${sourceMode}`);
+
+    // Create the item in inbox first
+    const item = await prisma.item.create({
+      data: {
+        userId,
+        title,
+        details,
+        classification: ItemClassification.INBOX,
+      },
+    });
+
+    console.log(`[CAPTURE] Created inbox item: ${item.id}`);
+
+    // Route to appropriate PARA bucket based on classification
+    if (category === "project") {
+      console.log(`[CAPTURE] Routing to PROJECT: "${title}"`);
+      await ensureProjectLimit(userId);
+      const project = await prisma.project.create({
+        data: {
+          userId,
+          name: title,
+          outcome: `From ${sourceMode} capture: ${details.substring(0, 100)}`,
+          status: ProjectStatus.ACTIVE,
+        },
+      });
+      await prisma.item.update({
+        where: { id: item.id },
+        data: {
+          classification: ItemClassification.PROJECT,
+          projectId: project.id,
+        },
+      });
+      await touchProject(userId, project.id);
+      console.log(`[CAPTURE] Project created: ${project.id}`);
+    } else if (category === "area") {
+      console.log(`[CAPTURE] Routing to AREA: "${title}"`);
+      const area = await prisma.area.create({
+        data: {
+          userId,
+          name: title,
+          standard: `From ${sourceMode} capture: ${details.substring(0, 100)}`,
+        },
+      });
+      await prisma.item.update({
+        where: { id: item.id },
+        data: {
+          classification: ItemClassification.AREA,
+          areaId: area.id,
+        },
+      });
+      await touchArea(userId, area.id);
+      console.log(`[CAPTURE] Area created: ${area.id}`);
+    } else if (category === "resource") {
+      console.log(`[CAPTURE] Routing to RESOURCE: "${title}"`);
+      const collection = await prisma.resourceCollection.create({
+        data: {
+          userId,
+          name: title,
+        },
+      });
+      await prisma.item.update({
+        where: { id: item.id },
+        data: {
+          classification: ItemClassification.RESOURCE,
+          resourceCollectionId: collection.id,
+        },
+      });
+      await touchCollection(userId, collection.id);
+      console.log(`[CAPTURE] Resource collection created: ${collection.id}`);
+    } else {
+      console.log(`[CAPTURE] Keeping in INBOX (unknown category: ${category})`);
+    }
+
+    console.log(`[CAPTURE] Complete: item=${item.id} title="${title}" category=${category}`);
+  } catch (error) {
+    console.error("[CAPTURE] Error:", error);
+    logger.error("Error saving classified item", error);
+  }
+}
+
 export async function bulkClassify(formData: FormData) {
   const session = await requireAuth();
   const userId = session.user.id;
