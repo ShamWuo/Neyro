@@ -1,6 +1,7 @@
+import { logger } from "./lib/logger";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isAllowed } from "./lib/rate-limiter";
+// import { isAllowed } from "./lib/rate-limiter";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-DNS-Prefetch-Control": "on",
@@ -17,12 +18,15 @@ const DEFAULT_CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsa
 
 export async function middleware(req: NextRequest) {
   // Rate limit certain write endpoints to reduce accidental abuse
+  // Rate limiting disabled in middleware due to Edge Runtime incompatibility with ioredis
+  // TODO: Implement Edge-compatible rate limiting (e.g. Upstash Redis)
+  /*
   try {
     const pathname = req.nextUrl.pathname;
     const method = req.method?.toUpperCase() || "GET";
     if (method === "POST" && pathname.startsWith("/api/projects")) {
       const xf = req.headers.get("x-forwarded-for");
-      const ip = xf ? xf.split(",")[0].trim() : (req.ip as string) || "unknown";
+      const ip = xf ? xf.split(",")[0].trim() : (req as any).ip || "unknown";
       const allowed = await isAllowed(ip, 6, 60_000); // 6 requests per minute
       if (!allowed) {
         return new NextResponse(JSON.stringify({ error: "Rate limit exceeded" }), {
@@ -31,11 +35,11 @@ export async function middleware(req: NextRequest) {
         });
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     // if rate limiter fails, allow through (fail-open) but log in development
-    // eslint-disable-next-line no-console
-    console.warn("Rate limiter error:", e?.message || e);
+    logger.warn("Rate limiter error:", e?.message || String(e));
   }
+  */
 
   const res = NextResponse.next();
   // Apply security headers on every response (idempotent)
@@ -50,14 +54,13 @@ export async function middleware(req: NextRequest) {
     } else {
       res.headers.set("Content-Security-Policy", csp);
     }
-  } catch (e) {
+  } catch {
     // ignore CSP header failures
   }
 
   if (process.env.NODE_ENV === "development") {
     // Log missing or unexpected headers for developer awareness
-    // eslint-disable-next-line no-console
-    console.debug("Security headers applied on:", req.nextUrl.pathname);
+    logger.log("Security headers applied on:", req.nextUrl.pathname);
   }
 
   return res;

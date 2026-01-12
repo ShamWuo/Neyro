@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
   } catch (err: unknown) {
     // On limiter failure, log and allow (do not block core capture flow)
-    // eslint-disable-next-line no-console
+     
     console.warn("Rate limiter check failed for assist/ingest, allowing request:", (err as Error)?.message ?? String(err));
   }
   const form = await request.formData();
@@ -51,10 +51,10 @@ export async function POST(request: Request) {
   try {
     // Check AI credits before using AI
     const creditCheck = await trackAICredit(session.user.id);
-    
+
     let decision;
     let aiEnabled = true;
-    
+
     // Only use AI if credits available or unlimited
     if (creditCheck.allowed || creditCheck.remaining === -1) {
       try {
@@ -91,20 +91,22 @@ export async function POST(request: Request) {
         title: decision.title || text || "Captured note",
         details: decision.details || (text ? text : null),
         classification,
+        classification,
         type: decision.type ?? ItemType.NOTE,
+        dueDate: decision.dueDate ? new Date(decision.dueDate) : null,
       },
     });
 
     return new NextResponse(
-      JSON.stringify({ 
-        ok: true, 
-        item: created, 
+      JSON.stringify({
+        ok: true,
+        item: created,
         decision,
         aiEnabled, // Indicate if AI was used
         message: aiEnabled ? "Item classified with AI" : (creditCheck.remaining === 0 ? "AI credits exhausted. Upgrade for unlimited AI." : "Item captured (AI unavailable, using default classification)"),
         creditsRemaining: creditCheck.remaining,
         creditsLimit: creditCheck.limit,
-      }), 
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {

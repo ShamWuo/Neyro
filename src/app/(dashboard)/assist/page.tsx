@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { ensureProjectLimit, touchArea, touchCollection, touchProject, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AICaptureCard } from "./ai-capture";
@@ -64,7 +65,7 @@ export default async function AssistPage() {
     await ensureProjectLimit(userId);
     const collection = await prisma.resourceCollection.findUnique({ where: { id: collectionId, userId }, include: { items: true } });
     if (!collection) return;
-    const project = await createProjectWithLimit(userId, { userId, name: collection.name, outcome: collection.description ?? "Outcome TBD", status: ProjectStatus.ACTIVE } as any);
+    const project = await createProjectWithLimit(userId, { userId, name: collection.name, outcome: collection.description ?? "Outcome TBD", status: ProjectStatus.ACTIVE } as Prisma.ProjectUncheckedCreateInput);
     if (collection.items.length) {
       await prisma.item.updateMany({ where: { id: { in: collection.items.map((i) => i.id) }, userId }, data: { classification: ItemClassification.PROJECT, projectId: project.id, resourceCollectionId: null } });
     }
@@ -114,7 +115,7 @@ export default async function AssistPage() {
                 <div className="text-xs text-[var(--text-secondary)]">{g.ids.length} inbox items</div>
               </div>
               <form action={() => mergeDuplicates(g.title)}>
-                <button 
+                <button
                   type="submit"
                   aria-label={`Archive ${g.ids.length} duplicate items titled "${g.title}"`}
                   className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold hover:border-[var(--border-strong)] transition"
@@ -135,10 +136,10 @@ export default async function AssistPage() {
             <div key={p.id} className="flex items-center justify-between rounded border border-[var(--border-subtle)] bg-[var(--card)] px-3 py-2 text-sm">
               <div>
                 <div className="font-semibold text-[var(--text-primary)]">{p.name}</div>
-                <div className="text-xs text-[var(--text-secondary)]">No movement since {p.lastActivityAt.toISOString().slice(0,10)}</div>
+                <div className="text-xs text-[var(--text-secondary)]">No movement since {p.lastActivityAt.toISOString().slice(0, 10)}</div>
               </div>
               <form action={() => pauseProject(p.id)}>
-                <button 
+                <button
                   type="submit"
                   aria-label={`Pause project "${p.name}"`}
                   className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold hover:border-[var(--border-strong)] transition"
@@ -160,7 +161,7 @@ export default async function AssistPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold text-[var(--text-primary)]">{a.name}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">No new activity since {a.lastActivityAt.toISOString().slice(0,10)}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">No new activity since {a.lastActivityAt.toISOString().slice(0, 10)}</div>
                 </div>
               </div>
               <form action={addAreaAction} className="flex flex-wrap gap-2">
@@ -185,7 +186,7 @@ export default async function AssistPage() {
               </div>
               <form action={convertCollection} className="flex gap-2 items-center">
                 <input type="hidden" name="collectionId" value={c.id} />
-                <button 
+                <button
                   type="submit"
                   aria-label={`Convert collection "${c.name}" with ${c._count.items} items to a project`}
                   className="rounded-md border border-[var(--border-default)] px-3 py-1 text-xs font-semibold hover:border-[var(--border-strong)] transition"

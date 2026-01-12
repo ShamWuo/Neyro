@@ -85,21 +85,8 @@ export async function POST(request: NextRequest) {
       case "customer.subscription.updated": {
         try {
           const subscription = event.data.object as Stripe.Subscription;
-          // Prefer the jest-mocked module when available
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const stripeModule = (() => {
-            try {
-              return require("@/lib/stripe");
-            } catch (e) {
-              return null;
-            }
-          })();
-
-          if (stripeModule && typeof stripeModule.updateSubscriptionFromStripe === "function") {
-            await stripeModule.updateSubscriptionFromStripe(subscription, event.type);
-          } else {
-            await updateSubscriptionFromStripe(subscription, event.type);
-          }
+          // Use standard import for production
+          await updateSubscriptionFromStripe(subscription, event.type);
         } catch (err) {
           logger.error("Error handling subscription event", err);
         }
@@ -138,33 +125,14 @@ export async function POST(request: NextRequest) {
           if (!subscriptionId || !stripe) break;
 
           try {
+            // Direct usage of standard imports
             let subscription: Stripe.Subscription | null = null;
-            // Prefer the module returned by require() so tests' mocks are used
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const maybeStripeModule = (() => {
-              try {
-                return require("@/lib/stripe");
-              } catch (e) {
-                return null;
-              }
-            })();
-
-            if (maybeStripeModule?.stripe?.subscriptions?.retrieve) {
-              // eslint-disable-next-line no-console
-              console.info("Using require('@/lib/stripe') for subscription retrieval");
-              subscription = await maybeStripeModule.stripe.subscriptions.retrieve(subscriptionId);
-            } else if (stripe && typeof stripe.subscriptions?.retrieve === "function") {
-              // eslint-disable-next-line no-console
-              console.info("Falling back to static stripe.subscriptions.retrieve");
+            if (stripe && typeof stripe.subscriptions?.retrieve === "function") {
               subscription = await stripe.subscriptions.retrieve(subscriptionId);
             }
 
             if (subscription) {
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              const stripeModule = require("@/lib/stripe");
-              if (typeof stripeModule.updateSubscriptionFromStripe === "function") {
-                await stripeModule.updateSubscriptionFromStripe(subscription, event.type);
-              }
+              await updateSubscriptionFromStripe(subscription, event.type);
             }
           } catch (err) {
             logger.error("Error retrieving subscription from invoice", err instanceof Error ? err : new Error(String(err)));
@@ -184,31 +152,14 @@ export async function POST(request: NextRequest) {
           if (!subscriptionId || !stripe) break;
 
           try {
-              let subscription: Stripe.Subscription | null = null;
-              // Prefer the module returned by require() so tests that do `doMock` or
-              // `require` will supply the mocked stripe object.
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              const maybeStripeModule = (() => {
-                try {
-                  return require("@/lib/stripe");
-                } catch (e) {
-                  return null;
-                }
-              })();
+            let subscription: Stripe.Subscription | null = null;
+            if (stripe && typeof stripe.subscriptions?.retrieve === "function") {
+              subscription = await stripe.subscriptions.retrieve(subscriptionId);
+            }
 
-              if (maybeStripeModule?.stripe?.subscriptions?.retrieve) {
-                subscription = await maybeStripeModule.stripe.subscriptions.retrieve(subscriptionId);
-              } else if (stripe && typeof stripe.subscriptions?.retrieve === "function") {
-                subscription = await stripe.subscriptions.retrieve(subscriptionId);
-              }
-
-              if (subscription) {
-                if (maybeStripeModule && typeof maybeStripeModule.updateSubscriptionFromStripe === "function") {
-                  await maybeStripeModule.updateSubscriptionFromStripe(subscription, event.type);
-                } else {
-                  await updateSubscriptionFromStripe(subscription, event.type);
-                }
-              }
+            if (subscription) {
+              await updateSubscriptionFromStripe(subscription, event.type);
+            }
           } catch (err) {
             logger.error("Error retrieving subscription from invoice", err instanceof Error ? err : new Error(String(err)));
           }
@@ -226,7 +177,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error("Error processing webhook", error);
     // Ensure we emit to console for test runner visibility
-    // eslint-disable-next-line no-console
+     
     console.error("Webhook handler error:", error);
     const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json({ error: message, received: false }, { status: 500 });

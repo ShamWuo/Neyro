@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { logger } from "./logger";
 import sanitizePrompt from "./ai";
 
 const LOG_DIR = path.join(process.cwd(), "logs");
@@ -27,10 +28,9 @@ function rotateIfNeeded() {
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
     const rotated = path.join(LOG_DIR, `prompts-${ts}.log`);
     fs.renameSync(LOG_FILE, rotated);
-  } catch (e) {
+  } catch {
     // non-fatal
-    // eslint-disable-next-line no-console
-    console.warn("Prompt logger rotation failed:", (e as Error)?.message || e);
+    logger.warn("Prompt logger rotation failed");
   }
 }
 
@@ -49,8 +49,7 @@ function bumpDailySummary() {
     data[today] = { count: (data[today]?.count || 0) + 1 };
     fs.writeFileSync(SUMMARY_FILE, JSON.stringify(data, null, 2), { encoding: "utf8" });
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.warn("Prompt summary update failed:", (e as Error)?.message || e);
+    logger.warn("Prompt summary update failed:", (e as Error)?.message || e);
   }
 }
 
@@ -68,8 +67,7 @@ export function logPrompt(raw: string, opts: LogOptions = { redact: true }): str
     }
   } catch (e) {
     // If we can't write to disk, fallback to console but still return sanitized content
-    // eslint-disable-next-line no-console
-    console.warn("Prompt logger failed to write to disk:", (e as Error)?.message || e);
+    logger.warn("Prompt logger failed to write to disk:", (e as Error)?.message || e);
   }
   return out;
 }

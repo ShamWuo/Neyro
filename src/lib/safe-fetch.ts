@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 export type SafeFetchInit = RequestInit & { timeoutMs?: number };
 
 export async function safeFetch(input: RequestInfo, init?: SafeFetchInit, attempts = 3) {
@@ -21,9 +23,8 @@ export async function safeFetch(input: RequestInfo, init?: SafeFetchInit, attemp
       if (i === attempts - 1) {
         // When failing finally, mask Authorization-like headers in any attached init for logging
         try {
-          // eslint-disable-next-line no-console
-          console.error("safeFetch: final error for", String(input));
-        } catch (e) {}
+          logger.error("safeFetch: final error for", String(input));
+        } catch { }
         throw err;
       }
       await new Promise((r) => setTimeout(r, delays[i]));

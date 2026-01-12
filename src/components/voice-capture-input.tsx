@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ClassificationPreview } from "./classification-preview";
+import { logger } from "@/lib/logger";
 
 type PARACategory = "project" | "area" | "resource" | "archive";
 
@@ -20,7 +21,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
 
   const startRecording = async () => {
     try {
-      console.log("[VOICE] Starting recording...");
+      logger.log("[VOICE] Starting recording...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -31,7 +32,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
       };
 
       mediaRecorder.onstop = async () => {
-        console.log("[VOICE] Recording stopped, transcribing...");
+        logger.log("[VOICE] Recording stopped, transcribing...");
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         await transcribeAudio(audioBlob);
         stream.getTracks().forEach((t) => t.stop());
@@ -40,14 +41,14 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
       mediaRecorder.start();
       setRecording(true);
     } catch (error) {
-      console.error("[VOICE] Microphone access denied:", error);
+      logger.error("[VOICE] Microphone access denied:", error);
       alert("Microphone access is required for voice capture.");
     }
   };
 
   const stopRecording = () => {
     if (mediaRecorderRef.current) {
-      console.log("[VOICE] Stopping recording...");
+      logger.log("[VOICE] Stopping recording...");
       mediaRecorderRef.current.stop();
       setRecording(false);
     }
@@ -55,7 +56,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
 
   const transcribeAudio = async (audioBlob: Blob) => {
     try {
-      console.log("[VOICE] Audio blob size:", audioBlob.size);
+      logger.log("[VOICE] Audio blob size:", audioBlob.size);
       // In a real app, this would send to OpenAI Whisper or similar
       // For now, we'll simulate with a placeholder
       const formData = new FormData();
@@ -63,11 +64,11 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
 
       // Simulate transcription (replace with real API call)
       const mockTranscription = "Buy groceries, schedule dentist appointment, review Q1 budget";
-      console.log("[VOICE] Transcription complete:", mockTranscription);
+      logger.log("[VOICE] Transcription complete:", mockTranscription);
       setTranscript(mockTranscription);
       onCapture(mockTranscription, null);
     } catch (error) {
-      console.error("[VOICE] Transcription error:", error);
+      logger.error("[VOICE] Transcription error:", error);
       alert("Failed to transcribe audio.");
     }
   };
@@ -135,7 +136,7 @@ function PreviewAndSave({
   };
 
   const handleSave = async () => {
-    console.log(`[${sourceMode.toUpperCase()}] Saving: "${classification.title}" → ${classification.category}`);
+    logger.log(`[${sourceMode.toUpperCase()}] Saving: "${classification.title}" → ${classification.category}`);
     const formData = new FormData();
     formData.set("title", classification.title);
     formData.set("details", text);
@@ -146,7 +147,7 @@ function PreviewAndSave({
       const { saveClassifiedItem } = await import("@/app/(dashboard)/inbox/actions");
       await saveClassifiedItem(formData);
     } catch (error) {
-      console.error(`[${sourceMode.toUpperCase()}] Save error:`, error);
+      logger.error(`[${sourceMode.toUpperCase()}] Save error:`, error);
     }
   };
 

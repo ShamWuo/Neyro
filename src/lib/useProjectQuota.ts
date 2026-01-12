@@ -21,8 +21,8 @@ export function useProjectQuota(pollIntervalMs = 0) {
       if (!res.ok) throw new Error(`status:${res.status}`);
       const json = await res.json();
       setData({ active: json.active || 0, limit: json.limit || 0, remaining: json.remaining || 0, allowed: !!json.allowed });
-    } catch (err: any) {
-      setError(err?.message || String(err));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ export function useProjectQuota(pollIntervalMs = 0) {
       const id = setInterval(fetchQuota, pollIntervalMs);
       return () => clearInterval(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [fetchQuota, pollIntervalMs]);
 
   return { data, loading, error, refresh: fetchQuota };

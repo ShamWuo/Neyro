@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       const allowed = await isAllowed(`user:${session.user.id}`, 8, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
+       
       console.warn("Rate limiter check failed, allowing resource-preview request:", e?.message || e);
     }
 
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     }
 
     // Fetch the page HTML with security limits using URL-checked safeFetch (centralized timeouts/retries)
-    let response: any;
+    let response: Response;
     try {
       response = await safeFetchUrlChecked(targetUrl.toString(), {
         headers: {
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
         },
         redirect: "follow",
         timeoutMs: 5000,
-      } as any);
+      } as RequestInit & { timeoutMs: number });
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         return NextResponse.json({ error: "Request timeout" }, { status: 408 });

@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { ensureProjectLimit, MAX_ACTIVE_PROJECTS, projectHealth, createProjectWithLimit } from "@/lib/para";
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { checkSubscriptionLimit } from "@/lib/subscription";
 import { UpgradePromptMobile } from "@/components/upgrade-prompt-mobile";
@@ -22,7 +23,7 @@ export default async function ProjectsPage() {
     const outcome = String(formData.get("outcome") ?? "").trim();
     const deadlineRaw = String(formData.get("deadline") ?? "").trim();
     const status = (String(formData.get("status") ?? ProjectStatus.ACTIVE) as ProjectStatus) || ProjectStatus.ACTIVE;
-    
+
     if (!name || !outcome) {
       redirect("/projects?error=missing_fields");
       return;
@@ -43,7 +44,7 @@ export default async function ProjectsPage() {
       outcome,
       status,
       deadline: deadlineRaw ? new Date(deadlineRaw) : null,
-    } as any);
+    } as Prisma.ProjectUncheckedCreateInput);
 
     redirect("/projects");
   }
@@ -84,27 +85,27 @@ export default async function ProjectsPage() {
 
       <form action={createProject} className="panel space-y-4 p-4 md:p-6">
         <div className="grid gap-4 md:grid-cols-2">
-          <input 
-            name="name" 
-            placeholder="Project name" 
-            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation" 
-            required 
+          <input
+            name="name"
+            placeholder="Project name"
+            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation"
+            required
           />
-          <input 
-            name="outcome" 
-            placeholder="Outcome sentence" 
-            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] md:col-span-2 focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation" 
-            required 
+          <input
+            name="outcome"
+            placeholder="Outcome sentence"
+            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] md:col-span-2 focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation"
+            required
           />
-          <input 
-            name="deadline" 
-            type="date" 
-            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation" 
+          <input
+            name="deadline"
+            type="date"
+            className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation"
           />
           <label className="flex flex-col gap-2 text-sm text-[var(--text-secondary)]">
             Status
-            <select 
-              name="status" 
+            <select
+              name="status"
               className="w-full rounded-lg border-2 border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-3.5 text-base text-[var(--text-primary)] focus:border-[var(--primary-strong)] focus:outline-none transition-colors touch-manipulation"
             >
               {Object.values(ProjectStatus).map((s) => (
@@ -113,8 +114,8 @@ export default async function ProjectsPage() {
             </select>
           </label>
         </div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={activeCount >= (projectLimit.limit || 3) && !projectLimit.allowed}
           className="w-full rounded-lg border-2 border-[var(--primary-strong)] bg-[var(--primary-strong)] px-6 py-4 text-base font-semibold text-white shadow-sm transition-all active:scale-95 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >

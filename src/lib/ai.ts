@@ -32,7 +32,7 @@ import { ItemClassification, ItemType } from "@prisma/client";
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 const GEMINI_MODEL = "gemini-1.5-flash";
 
-type GeminiPart = 
+type GeminiPart =
   | { text: string }
   | { inlineData: { mimeType: string; data: string } }
   | { fileData: { mimeType: string; fileUri: string } };
@@ -42,6 +42,7 @@ export type ParaDecision = {
   title: string;
   details?: string | null;
   type?: ItemType;
+  dueDate?: string | null;
 };
 
 function coerceClassification(value: string | undefined): ItemClassification {
@@ -130,7 +131,7 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
       systemInstruction: {
         parts: [
           {
-            text: "You classify inputs into the PARA method. Output strict JSON with keys classification (INBOX|PROJECT|AREA|RESOURCE|ARCHIVE), title, details, and optional type (NOTE|TASK|LINK). Keep it concise.",
+            text: "You classify inputs into the PARA method. Output strict JSON with keys: classification (INBOX|PROJECT|AREA|RESOURCE|ARCHIVE), title, details, type (NOTE|TASK|LINK), and dueDate (ISO string or null). Extract deadlines from text if present.",
           },
         ],
       },
@@ -141,6 +142,7 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
       },
     }),
     timeoutMs: 30000,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   if (!resp.ok) {
@@ -174,12 +176,12 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
         throw new Error("No JSON found in response");
       }
     }
-    
+
     // Type guard for obj
     if (!obj || typeof obj !== "object") {
       throw new Error("Invalid response format");
     }
-    
+
     const objTyped = obj as Record<string, unknown>;
     const maybeType = "type" in objTyped && typeof objTyped.type === "string" && Object.values(ItemType).includes(objTyped.type as ItemType) ? objTyped.type as ItemType : ItemType.NOTE;
     parsed = {
@@ -187,22 +189,23 @@ export async function analyzeParaCapture(params: { text?: string; imageDataUrl?:
       title: String(objTyped.title || params.text || "Captured note"),
       details: objTyped.details ? String(objTyped.details) : params.text || null,
       type: maybeType,
+      dueDate: typeof objTyped.dueDate === "string" ? objTyped.dueDate : null,
     };
   } catch {
     // Fallback: use the raw response text as details if parsing fails
     if (content.trim()) {
-      parsed = { 
-        classification: ItemClassification.INBOX, 
-        title: params.text?.slice(0, 80) || "Captured note", 
-        details: String(content).slice(0, 200) || params.text || null, 
-        type: ItemType.NOTE 
+      parsed = {
+        classification: ItemClassification.INBOX,
+        title: params.text?.slice(0, 80) || "Captured note",
+        details: String(content).slice(0, 200) || params.text || null,
+        type: ItemType.NOTE
       };
     } else {
-      parsed = { 
-        classification: ItemClassification.INBOX, 
-        title: params.text?.slice(0, 80) || "Captured note", 
-        details: params.text || null, 
-        type: ItemType.NOTE 
+      parsed = {
+        classification: ItemClassification.INBOX,
+        title: params.text?.slice(0, 80) || "Captured note",
+        details: params.text || null,
+        type: ItemType.NOTE
       };
     }
   }

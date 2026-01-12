@@ -21,7 +21,7 @@ export function UpgradePromptMobile({
   className = "",
   onDismiss,
 }: UpgradePromptMobileProps) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const router = useRouter();
 
   const handleDismiss = () => {
@@ -35,8 +35,12 @@ export function UpgradePromptMobile({
   useEffect(() => {
     // Check if dismissed recently
     const dismissedUntil = localStorage.getItem(`upgrade-prompt-dismissed-${trigger}`);
-    if (dismissedUntil && parseInt(dismissedUntil, 10) > Date.now()) {
-      setTimeout(() => setIsVisible(false), 0);
+    if (!dismissedUntil || parseInt(dismissedUntil, 10) <= Date.now()) {
+      // Use setTimeout to avoid synchronous setState warning
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [trigger]);
 

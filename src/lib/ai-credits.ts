@@ -1,4 +1,5 @@
 import { getUserSubscription } from "./subscription";
+import { logger } from "./logger";
 
 /**
  * Track AI credit usage and check limits
@@ -61,7 +62,7 @@ export async function recordAICreditUsage(userId: string): Promise<void> {
   // });
 
   // For now, just log - schema update needed for full tracking
-  console.log(`AI credit used by user ${userId} at ${new Date().toISOString()}`);
+  logger.info(`AI credit used by user ${userId} at ${new Date().toISOString()}`);
 }
 
 /**

@@ -24,22 +24,46 @@ interface EmailOptions {
 
 // Placeholder email sending function
 // Replace with your email provider's SDK
+import { Resend } from "resend";
+
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  // TODO: Integrate with email provider (Resend, Postmark, SendGrid)
-  // Example with Resend:
-  // import { Resend } from 'resend';
-  // const resend = new Resend(process.env.RESEND_API_KEY);
-  // await resend.emails.send({ ...options });
+  // If no API key, log to console (Dev/Test mode)
+  if (!resend) {
+    if (process.env.NODE_ENV !== "test") {
+      logger.info("Email Mock Send", {
+        to: options.to,
+        subject: options.subject,
+        note: "Set RESEND_API_KEY to send real emails"
+      });
+      if (process.env.NODE_ENV === "development") {
+        console.log("📧 Email Mock:\n", `To: ${options.to}\n`, `Subject: ${options.subject}\n`, "----------------\n");
+      }
+    }
+    return;
+  }
 
-  logger.info("Email would be sent", {
-    to: options.to,
-    subject: options.subject,
-    // Don't log full HTML in production
-  });
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || "Neyro <onboarding@resend.dev>",
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
 
-  // In development, just log
-  if (process.env.NODE_ENV === "development") {
-    console.log("📧 Email:", options.subject, "→", options.to);
+    if (error) {
+      logger.error("Failed to send email", new Error(error.message));
+      throw new Error(error.message);
+    }
+
+    logger.info("Email sent successfully", { id: data?.id, to: options.to });
+  } catch (error) {
+    logger.error("Error sending email", error instanceof Error ? error : new Error(String(error)));
+    // Don't crash the app for email failures, just log
   }
 }
 

@@ -2,6 +2,7 @@ import { analyzeParaCapture, sanitizePrompt } from "./ai";
 import { logPrompt } from "./prompt-logger";
 import { isUrlSafeForExternalFetch } from "./url-safety";
 import { validateAndFetchImage } from "./image-validator";
+import { logger } from "./logger";
 
 export async function analyzeParaCaptureSafe(params: { text?: string; imageDataUrl?: string; imageUrl?: string }) {
   // Build a short sanitized preview for logging (do not store raw prompts)
@@ -16,20 +17,20 @@ export async function analyzeParaCaptureSafe(params: { text?: string; imageDataU
       if (!isUrlSafeForExternalFetch(params.imageUrl)) {
         parts.push(`imageUrl: [REMOVED_UNSAFE]`);
         logPrompt(parts.join(" | "), { redact: true });
-        // eslint-disable-next-line no-param-reassign
+         
         params.imageUrl = undefined;
       } else {
         // Try to fetch and validate the image, then convert to base64 data URL
         const validated = await validateAndFetchImage(params.imageUrl);
         if (validated) {
-          // eslint-disable-next-line no-param-reassign
+           
           params.imageDataUrl = `data:${validated.mimeType};base64,${validated.base64}`;
-          // eslint-disable-next-line no-param-reassign
+           
           params.imageUrl = undefined; // Remove original URL, use inline data instead
           parts.push(`imageDataUrl: [FETCHED_AND_INLINED]`);
         } else {
           parts.push(`imageUrl: [VALIDATION_FAILED]`);
-          // eslint-disable-next-line no-param-reassign
+           
           params.imageUrl = undefined;
         }
         logPrompt(parts.join(" | "), { redact: true });
@@ -39,8 +40,7 @@ export async function analyzeParaCaptureSafe(params: { text?: string; imageDataU
     }
   } catch (e) {
     // best-effort logging
-    // eslint-disable-next-line no-console
-    console.warn("ai-safe: prompt logging failed", e?.message || e);
+    logger.warn("ai-safe: prompt logging failed", (e instanceof Error) ? e.message : String(e));
   }
 
   return analyzeParaCapture(params);

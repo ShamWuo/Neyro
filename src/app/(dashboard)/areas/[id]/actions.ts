@@ -30,11 +30,11 @@ export async function addShare(areaId: string, formData: FormData) {
     const email = validateEmail(emailRaw);
 
     await prisma.shareAccess.create({ data: { ownerId: userId, areaId, email, permission: "VIEW" } });
-    redirect(`/areas/${areaId}`);
   } catch (error) {
     logger.error("Error adding share", error);
     redirect(`/areas/${areaId}?error=share_failed`);
   }
+  redirect(`/areas/${areaId}`);
 }
 
 export async function updateArea(areaId: string, formData: FormData) {
@@ -62,11 +62,11 @@ export async function updateArea(areaId: string, formData: FormData) {
 
     await prisma.area.update({ where: { id: areaId, userId }, data: { name, standard } });
     await touchArea(userId, areaId);
-    redirect(`/areas/${areaId}`);
   } catch (error) {
     logger.error("Error updating area", error);
     redirect(`/areas/${areaId}?error=update_failed`);
   }
+  redirect(`/areas/${areaId}`);
 }
 
 export async function updateReview(areaId: string, formData: FormData) {
@@ -115,11 +115,11 @@ export async function updateReview(areaId: string, formData: FormData) {
       data: { lastHealthScore: score, lastReviewDate: reviewDate },
     });
     await touchArea(userId, areaId);
-    redirect(`/areas/${areaId}`);
   } catch (error) {
     logger.error("Error updating review", error);
     redirect(`/areas/${areaId}?error=review_failed`);
   }
+  redirect(`/areas/${areaId}`);
 }
 
 export async function addItem(areaId: string, formData: FormData) {
@@ -169,11 +169,11 @@ export async function addItem(areaId: string, formData: FormData) {
       },
     });
     await touchArea(userId, areaId);
-    redirect(`/areas/${areaId}`);
   } catch (error) {
     logger.error("Error adding item", error);
     redirect(`/areas/${areaId}?error=add_item_failed`);
   }
+  redirect(`/areas/${areaId}`);
 }
 
 export async function updateItem(areaId: string, formData: FormData) {
@@ -226,11 +226,11 @@ export async function updateItem(areaId: string, formData: FormData) {
 
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type } });
     await touchArea(userId, areaId);
-    redirect(`/areas/${areaId}`);
   } catch (error) {
     logger.error("Error updating item", error);
     redirect(`/areas/${areaId}?error=update_item_failed`);
   }
+  redirect(`/areas/${areaId}`);
 }
 
 export async function moveItem(areaId: string, formData: FormData) {
@@ -307,9 +307,9 @@ export async function moveItem(areaId: string, formData: FormData) {
       await prisma.item.update({ where: { id: itemId, userId }, data: { classification: ItemClassification.ARCHIVE, archivedAt: new Date(), areaId: null, projectId: null, resourceCollectionId: null } });
     }
     await touchArea(userId, areaId);
-    redirect(`/areas/${areaId}`);
   } catch (error) {
     logger.error("Error moving item", error);
     redirect(`/areas/${areaId}?error=move_failed`);
   }
+  redirect(`/areas/${areaId}`);
 }

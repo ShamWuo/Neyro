@@ -18,8 +18,11 @@ function LoginForm() {
   useEffect(() => {
     const errorParam = searchParams?.get("error");
     if (errorParam) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError(errorParam);
+      // Use setTimeout to avoid synchronous setState warning
+      const timer = setTimeout(() => {
+        setError(errorParam);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [searchParams]);
 

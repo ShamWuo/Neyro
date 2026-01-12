@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const contentType = request.headers.get("content-type") || "";
-    let body: any;
+    let body: unknown;
     try {
       if (contentType.includes("application/json")) {
         body = await request.json();
@@ -23,9 +23,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    const title = typeof body.title === "string" ? sanitizeString(body.title, 500) : "";
-    const details = typeof body.details === "string" ? sanitizeString(body.details, 5000) : null;
-    const url = typeof body.url === "string" && body.url.trim() ? validateUrl(body.url) : null;
+    const bodyObj = body as Record<string, unknown>;
+    const title = typeof bodyObj.title === "string" ? sanitizeString(bodyObj.title, 500) : "";
+    const details = typeof bodyObj.details === "string" ? sanitizeString(bodyObj.details, 5000) : null;
+    const url = typeof bodyObj.url === "string" && bodyObj.url.trim() ? validateUrl(bodyObj.url) : null;
 
     if (!title || title.trim().length === 0) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -39,8 +40,8 @@ export async function POST(request: Request) {
       }
     } catch (e) {
       // If rate limiter fails, log and continue to allow request (best-effort)
-      // eslint-disable-next-line no-console
-      console.warn("quick-capture: rate limiter error", e?.message || e);
+       
+      console.warn("quick-capture: rate limiter error", (e as Error)?.message || String(e));
     }
 
     const item = await prisma.item.create({
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
           type: "quick_capture",
           meta: {
             itemId: item.id,
-            source: body.source || "quick_capture",
+            source: typeof bodyObj.source === "string" ? bodyObj.source : "quick_capture",
             userAgent,
             ip,
           },
@@ -77,8 +78,8 @@ export async function POST(request: Request) {
       });
     } catch (e) {
       // Telemetry failures should not block the capture
-      // eslint-disable-next-line no-console
-      console.warn("quick-capture: failed to persist telemetry", e?.message || e);
+       
+      console.warn("quick-capture: failed to persist telemetry", (e as Error)?.message || String(e));
     }
 
     return NextResponse.json(item, { status: 201 });

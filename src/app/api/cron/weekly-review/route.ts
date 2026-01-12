@@ -12,8 +12,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json().catch(() => ({} as any));
-    const targetUserId = typeof body.userId === 'string' && body.userId.trim() ? body.userId.trim() : null;
+    const body = await request.json().catch(() => ({})) as unknown;
+    let targetUserId: string | null = null;
+    if (body && typeof body === 'object' && 'userId' in body) {
+      const u = (body as Record<string, unknown>).userId;
+      if (typeof u === 'string') targetUserId = u.trim();
+    }
 
     const users = targetUserId ? [{ id: targetUserId }] : await prisma.user.findMany({ select: { id: true } });
 
@@ -28,13 +32,13 @@ export async function POST(request: Request) {
         // Compute area health average using latest area.lastHealthScore (nullable)
         const areas = await prisma.area.findMany({ where: { userId }, select: { lastHealthScore: true } });
         const scores = areas.map((a) => a.lastHealthScore).filter((s) => typeof s === 'number') as number[];
-        const areaHealthAverage = scores.length ? scores.reduce((a,b) => a+b, 0) / scores.length : null;
+        const areaHealthAverage = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
 
         await prisma.weeklyReview.create({ data: { userId, inboxCount, activeProjectsCount, areaHealthAverage: areaHealthAverage ?? undefined } });
         results.push({ userId, created: true });
       } catch (e) {
         logger.error("weekly-review: failed for user", e);
-        results.push({ userId: (u as any).id, created: false, error: (e as Error).message || String(e) });
+        results.push({ userId: u.id, created: false, error: (e as Error).message || String(e) });
       }
     }
 

@@ -5,6 +5,7 @@ import { ensureProjectLimit, touchArea, touchCollection, touchProject, createPro
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { ItemClassification, ItemType, ProjectStatus } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { requireAuth, verifyOwnership, validateAndSanitizeString, validateIdArray } from "@/lib/security";
 import { sanitizeString, validateUrl } from "@/lib/validation";
@@ -18,22 +19,22 @@ export async function createItem(formData: FormData) {
     const titleRaw = formData.get("title");
     if (!titleRaw) return;
     const title = validateAndSanitizeString(titleRaw, 500, "Title");
-    
+
     // Sanitize details
     const detailsRaw = formData.get("details");
     const details = detailsRaw ? sanitizeString(String(detailsRaw), 10000) : null;
-    
+
     // Validate URL
     const urlRaw = formData.get("url");
     const url = urlRaw ? validateUrl(urlRaw) : null;
-    
+
     // Validate type
     const typeRaw = formData.get("type");
     let type: ItemType = ItemType.NOTE;
     if (typeRaw && Object.values(ItemType).includes(typeRaw as ItemType)) {
       type = typeRaw as ItemType;
     }
-    
+
     // Validate due date
     const dueDateRaw = formData.get("dueDate");
     let dueDate: Date | null = null;
@@ -45,7 +46,7 @@ export async function createItem(formData: FormData) {
         dueDate = null;
       }
     }
-    
+
     await prisma.item.create({ data: { userId, title, details, url, type, classification: ItemClassification.INBOX, dueDate } });
     redirect("/inbox");
   } catch (error) {
@@ -62,34 +63,34 @@ export async function updateItem(formData: FormData) {
     const itemIdRaw = formData.get("itemId");
     if (!itemIdRaw) return;
     const itemId = String(itemIdRaw).trim();
-    
+
     // Verify ownership before updating
     const ownsItem = await verifyOwnership("item", itemId, userId);
     if (!ownsItem) {
       logger.warn(`User ${userId} attempted to update item ${itemId} without ownership`);
       redirect("/inbox?error=unauthorized");
     }
-    
+
     // Validate and sanitize title
     const titleRaw = formData.get("title");
     if (!titleRaw) return;
     const title = validateAndSanitizeString(titleRaw, 500, "Title");
-    
+
     // Sanitize details
     const detailsRaw = formData.get("details");
     const details = detailsRaw ? sanitizeString(String(detailsRaw), 10000) : null;
-    
+
     // Validate URL
     const urlRaw = formData.get("url");
     const url = urlRaw ? validateUrl(urlRaw) : null;
-    
+
     // Validate type
     const typeRaw = formData.get("type");
     let type: ItemType = ItemType.NOTE;
     if (typeRaw && Object.values(ItemType).includes(typeRaw as ItemType)) {
       type = typeRaw as ItemType;
     }
-    
+
     // Validate due date
     const dueDateRaw = formData.get("dueDate");
     let dueDate: Date | null = null;
@@ -101,7 +102,7 @@ export async function updateItem(formData: FormData) {
         dueDate = null;
       }
     }
-    
+
     const isDone = String(formData.get("isDone") ?? "") === "on";
     await prisma.item.update({ where: { id: itemId, userId }, data: { title, details, url, type, dueDate, isDone } });
     redirect("/inbox");
@@ -135,6 +136,7 @@ export async function moveToProject(formData: FormData) {
           deadline = null;
         }
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const created = await createProjectWithLimit(userId, { userId, name: newName, outcome: newOutcome, deadline, status: ProjectStatus.ACTIVE } as any);
       projectId = created.id;
     }
@@ -242,6 +244,7 @@ export async function saveClassifiedItem(formData: FormData) {
         name: title,
         outcome: `From ${sourceMode} capture: ${details.substring(0, 100)}`,
         status: ProjectStatus.ACTIVE,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       await prisma.item.update({
         where: { id: item.id },
@@ -305,10 +308,10 @@ export async function bulkClassify(formData: FormData) {
   try {
     const selectedRaw = formData.getAll("selected");
     if (!selectedRaw.length) return;
-    
+
     // Validate IDs
     const selected = validateIdArray(selectedRaw, 100);
-    
+
     // Verify ownership of all items
     const count = await prisma.item.count({ where: { id: { in: selected }, userId } });
     if (count !== selected.length) {

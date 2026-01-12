@@ -47,7 +47,7 @@ export async function POST(request: Request) {
           return fd;
         })(),
         timeoutMs: 20000,
-      } as any);
+      } as RequestInit & { timeoutMs: number });
 
       if (!response.ok) {
         const error = await response.text();
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
         },
         body: audioBuffer,
         timeoutMs: 20000,
-      } as any);
+      } as RequestInit & { timeoutMs: number });
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "");

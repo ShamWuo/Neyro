@@ -1,6 +1,7 @@
 /**
  * Lazy loading utilities for images and content
  */
+import { logger } from "./logger";
 
 /**
  * Intersection Observer wrapper for lazy loading
@@ -16,9 +17,9 @@ export function createLazyLoader(
   if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
     // Fallback for browsers without IntersectionObserver
     return {
-      observe: () => {},
-      unobserve: () => {},
-      disconnect: () => {},
+      observe: () => { },
+      unobserve: () => { },
+      disconnect: () => { },
     };
   }
 
@@ -91,7 +92,7 @@ export function lazyLoadWithPlaceholder(
         await loader();
         observer.unobserve(element);
       } catch (error) {
-        console.error("Failed to lazy load:", error);
+        logger.error("Failed to lazy load:", error);
       }
     }
   });

@@ -139,3 +139,11 @@ scripts/run_http_e2e.ps1 -HostUrl http://localhost:3000
 - Run `npm run lint` and fix any warnings flagged as errors by your CI.
 - Run `npm run build` locally and test the main flows: capture, classify, review, projects.
 - Optionally run `npm audit` and address vulnerabilities before public release.
+
+## Documentation
+
+- [DEVELOPMENT.md](docs/DEVELOPMENT.md): Setup, architecture, deployment, and integration guides.
+- [TESTING.md](docs/TESTING.md): Testing strategies, checklists, coverage, and reports.
+- [HISTORY.md](docs/HISTORY.md): Changelog, fix logs, and audit reports.
+- [ROADMAP.md](docs/ROADMAP.md): Future plans, features, and action items.
+- [SECURITY.md](docs/SECURITY.md): Security hardening, auth details, and best practices.

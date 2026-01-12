@@ -23,7 +23,6 @@ describe("PARA utilities", () => {
     it("returns count of active projects", async () => {
       (prisma.project.count as jest.Mock).mockResolvedValue(5);
 
-      const { getActiveProjectCount } = await import("../para");
       const count = await getActiveProjectCount("user-123");
 
       expect(count).toBe(5);

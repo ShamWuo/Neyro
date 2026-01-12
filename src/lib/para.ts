@@ -28,7 +28,7 @@ export async function ensureProjectLimit(userId: string) {
   }
 }
 
-export async function createProjectWithLimit(userId: string, data: Prisma.ProjectCreateInput) {
+export async function createProjectWithLimit(userId: string, data: Prisma.ProjectUncheckedCreateInput) {
   const limitCheck = await checkSubscriptionLimit(userId, "maxProjects");
 
   if (!limitCheck.allowed) {
@@ -46,7 +46,7 @@ export async function createProjectWithLimit(userId: string, data: Prisma.Projec
       throw new Error(`You have reached the ${limitCheck.limit} active projects limit. Pause or complete one first.`);
     }
     // Ensure the provided data contains userId; preserve caller-supplied fields
-    const payload = { ...(data as any), userId } as Prisma.ProjectCreateInput;
+    const payload = { ...(data as Record<string, unknown>), userId } as Prisma.ProjectUncheckedCreateInput;
     return tx.project.create({ data: payload });
   });
 
