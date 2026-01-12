@@ -1,448 +1,62 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  color-scheme: light;
-  --hue-primary: 228;
-  --hue-accent: 18;
-
-  /* Background Colors */
-  --bg: #f6f7fb;
-  --bg-strong: #eef0f8;
-  --surface: #ffffff;
-  --surface-muted: #f3f5fb;
+  /* Modern Palette - Light Mode */
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --surface-muted: #f4f4f5;
   --card: #ffffff;
-  --card-muted: #f7f8fc;
-  
-  /* Text Colors */
-  --text-primary: #0c1222;
-  --text-secondary: #4a5265;
-  --text-tertiary: #6c7486;
+  --card-muted: #f9fafb;
+
+  --border-subtle: #e4e4e7;
+  --border-strong: #d4d4d8;
+
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-tertiary: #71717a;
   --text-inverse: #ffffff;
-  --text-muted: #6c7486;
 
-  /* Primary Colors */
-  --primary: hsl(var(--hue-primary) 80% 50%);
-  --primary-strong: hsl(var(--hue-primary) 85% 42%);
-  --primary-weak: hsl(var(--hue-primary) 72% 92%);
-  
-  /* Accent Colors */
-  --accent: hsl(var(--hue-accent) 82% 54%);
-  --accent-weak: hsl(var(--hue-accent) 90% 90%);
-  
-  /* Semantic Colors */
-  --success: #12b981;
-  --success-weak: rgba(18, 185, 129, 0.1);
-  --warning: #f4a11e;
-  --warning-weak: rgba(244, 161, 30, 0.1);
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
+  --primary-weak: #dbeafe;
+
+  --accent: #f59e0b;
+  --success: #10b981;
   --danger: #ef4444;
-  --danger-weak: rgba(239, 68, 68, 0.1);
-  --info: hsl(var(--hue-primary) 80% 50%);
-  --info-weak: hsl(var(--hue-primary) 72% 92%);
 
-  /* Border Colors */
-  --border-subtle: rgba(12, 18, 34, 0.08);
-  --border-strong: rgba(12, 18, 34, 0.16);
-  --border-default: rgba(12, 18, 34, 0.12);
-  
-  /* Shadow Colors */
-  --shadow-soft: 0 18px 55px rgba(12, 18, 34, 0.08);
-  --shadow-strong: 0 28px 70px rgba(12, 18, 34, 0.14);
-  --shadow-color: rgba(12, 18, 34, 0.08);
-
-  /* Elevation Shadows */
-  --elev-0: 0 0 0 rgba(0, 0, 0, 0);
-  --elev-1: 0 10px 30px rgba(12, 18, 34, 0.06);
-  --elev-2: 0 18px 55px rgba(12, 18, 34, 0.1);
-  --elev-3: 0 28px 70px rgba(12, 18, 34, 0.14);
-
-  /* Border Radius */
-  --radius: 10px;
-  --radius-pill: 999px;
-  
-  /* Overlay Colors */
-  --overlay: rgba(0, 0, 0, 0.35);
-  --overlay-light: rgba(0, 0, 0, 0.1);
-  
-  /* Brand Colors (for social sharing - these stay consistent) */
-  --brand-twitter: #1DA1F2;
-  --brand-linkedin: #0077B5;
-  --brand-reddit: #FF4500;
-  --brand-success: #12b981;
+  /* Elevation */
+  --elev-1: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --elev-2: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-/* Mobile-first optimizations */
-@media (max-width: 768px) {
-  /* Larger touch targets - minimum 44x44px */
-  button:not(.icon-only),
-  a:not(.icon-only),
-  input[type="button"],
-  input[type="submit"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Modern Palette - Dark Mode */
+    --bg: #09090b;
+    --surface: #18181b;
+    --surface-muted: #27272a;
+    --card: #18181b;
+    --card-muted: #27272a;
 
-  /* Better spacing for mobile */
-  .space-y-10 > * + * {
-    margin-top: 2rem;
-  }
+    --border-subtle: #27272a;
+    --border-strong: #3f3f46;
 
-  /* Prevent text size adjustment on iOS */
-  input, textarea, select {
-    font-size: 16px !important;
-  }
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --text-inverse: #000000;
 
-  /* Smooth scrolling */
-  html {
-    -webkit-overflow-scrolling: touch;
+    --primary: #3b82f6;
+    --primary-strong: #60a5fa;
+    --primary-weak: #1e3a8a;
   }
-
-  /* Better focus states for touch */
-  button:focus-visible,
-  a:focus-visible {
-    outline: 2px solid var(--primary-strong);
-    outline-offset: 2px;
-  }
-}
-
-/* Safe area insets for mobile devices with notches */
-@supports (padding: max(0px)) {
-  .mobile-safe-bottom {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-  
-  .mobile-safe-top {
-    padding-top: max(1rem, env(safe-area-inset-top));
-  }
-  
-  .mobile-safe-left {
-    padding-left: max(1rem, env(safe-area-inset-left));
-  }
-  
-  .mobile-safe-right {
-    padding-right: max(1rem, env(safe-area-inset-right));
-  }
-}
-
-/* Dark mode styles removed - app now uses light mode only */
-/* [data-theme="dark"] { ... } */
-
-/* Tailwind CSS v4 theme configuration */
-/* stylelint-disable-next-line at-rule-no-unknown */
-/* @ts-ignore - @theme is a Tailwind CSS v4 feature, not recognized by CSS language server */
-@theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--text-primary);
-  --font-sans: var(--font-inter, var(--font-geist-sans));
-  --font-mono: var(--font-geist-mono);
-}
-
-* {
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-html {
-  color-scheme: light;
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--text-primary);
-  font-family: var(--font-sans), "Inter", "Geist", "SF Pro Display", system-ui, -apple-system, sans-serif;
-  letter-spacing: -0.01em;
-  line-height: 1.5;
-}
-
-/* Dark mode body styles removed - app now uses light mode only */
-
-:where(a) {
-  text-decoration: none;
-}
-
-:where(a:hover) {
-  text-decoration: none;
-}
-
-::selection {
-  background: var(--primary-weak);
-  color: var(--text-primary);
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  color: var(--text-primary) !important;
-}
-
-h1 { font-size: clamp(2.1rem, 2vw + 1.4rem, 2.8rem); }
-h2 { font-size: clamp(1.6rem, 1.4vw + 1.1rem, 2rem); }
-h3 { font-size: 1.35rem; }
-h4 { font-size: 1.15rem; }
-h5 { font-size: 1rem; }
-h6 { font-size: 0.9rem; }
-
-p {
-  color: var(--text-primary);
-  line-height: 1.6;
-  margin-bottom: 1em;
-}
-
-:where(button) {
-  border-radius: var(--radius);
-  border: 1px solid var(--border-subtle);
-  font-weight: 600;
-  padding: 0.55rem 0.9rem;
-  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background-color 140ms ease;
-  background: var(--card);
-}
-
-:where(button:hover) {
-  transform: translateY(-1px);
-  border-color: var(--border-strong);
-  box-shadow: var(--elev-1);
-}
-
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.focus\:not-sr-only:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: inherit;
-  margin: inherit;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-
-input,
-select,
-textarea {
-  border-radius: var(--radius);
-  border: 1px solid var(--border-subtle);
-  background: var(--surface);
-  padding: 0.6rem 0.75rem;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-}
-
-textarea {
-  resize: vertical;
-}
-
-.panel {
-  background: var(--card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  box-shadow: var(--elev-1);
-  padding: 1.5rem;
-}
-
-.muted {
-  color: var(--text-secondary);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-subtle);
-  padding: 0.25rem 0.65rem;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  background: var(--card-muted);
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.4rem 0.7rem;
-  border-radius: var(--radius-pill);
-  background: var(--primary-weak);
-  color: var(--text-primary);
-  font-size: 0.8rem;
-  border: 1px solid var(--border-subtle);
-}
-
-.shimmer {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(90deg, var(--surface-muted) 0%, var(--card) 50%, var(--surface-muted) 100%);
-}
-
-.shimmer::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: shimmer 1.4s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes slide-in-from-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-in {
-  animation: fade-in 0.2s ease-out;
-}
-
-.slide-in-from-right-full {
-  animation: slide-in-from-right 0.3s ease-out;
-}
-
-/* Radial orbital timeline utility extensions */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes ping {
-  75%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.duration-300 {
-  transition-duration: 300ms;
-}
-
-.duration-700 {
-  transition-duration: 700ms;
-}
-
-.duration-1000 {
-  transition-duration: 1000ms;
-}
-
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-}
-
-.bg-gradient-orbital {
-  background: linear-gradient(to bottom right, var(--primary-strong), var(--primary), var(--accent));
-}
-
-.z-10 {
-  z-index: 10;
-}
-
-.z-50 {
-  z-index: 50;
-}
-
-.shadow-orbital {
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-}
-
-.scale-125 {
-  transform: scale(1.25);
-}
-
-.scale-150 {
-  transform: scale(1.5);
-}
-
-.opacity-70 {
-  opacity: 0.7;
-}
-
-.opacity-50 {
-  opacity: 0.5;
-}
-
-.border-white\/10 {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.border-white\/20 {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.border-white\/30 {
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.border-white\/40 {
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.bg-black\/90 {
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.bg-white\/50 {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-.bg-white\/80 {
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-.text-white\/70 {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.text-white\/80 {
-  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
