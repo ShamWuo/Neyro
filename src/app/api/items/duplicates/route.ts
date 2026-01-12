@@ -17,8 +17,7 @@ export async function GET(request: Request) {
       const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing items/duplicates request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing items/duplicates request:", (e as Error)?.message || String(e));
     }
 
     const { searchParams } = new URL(request.url);
@@ -47,8 +46,8 @@ export async function GET(request: Request) {
           // Also match if any significant word appears
           ...(titleWords.length > 0
             ? titleWords.map((word) => ({
-                title: { contains: word, mode: "insensitive" as const },
-              }))
+              title: { contains: word, mode: "insensitive" as const },
+            }))
             : []),
           ...(details && details.length > 3
             ? [{ details: { contains: details.slice(0, 100), mode: "insensitive" as const } }]

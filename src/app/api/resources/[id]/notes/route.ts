@@ -27,9 +27,10 @@ export async function PUT(
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing resource notes request:", e?.message || e);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+       
+      console.warn("Rate limiter check failed, allowing resource notes request:", msg);
     }
 
     // Check request size
@@ -39,7 +40,7 @@ export async function PUT(
     }
 
     const { id } = await params;
-    
+
     try {
       validateId(id);
     } catch {
@@ -101,11 +102,8 @@ export async function GET(
     }
 
     // Rate limiting (prevent abuse)
-    try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
+    const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
     const { id } = await params;
 

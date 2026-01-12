@@ -42,8 +42,7 @@ export async function POST(request: Request) {
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
       // Allow on limiter failure but log
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing tag create request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing tag creation request:", (e as Error)?.message || String(e));
     }
 
     // Check request size

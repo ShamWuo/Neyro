@@ -26,8 +26,7 @@ export async function POST(request: Request) {
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
       // Allow request on limiter failure but log
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing weekly-review request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing weekly review list:", (e as Error)?.message || String(e));
     }
 
     // Check request size
@@ -55,30 +54,30 @@ export async function POST(request: Request) {
     if (parsed.data.areaScores && parsed.data.areaScores.length > 0) {
       // Validate all area IDs
       const areaIds = parsed.data.areaScores.map((a) => a.areaId);
-      
+
       // Validate ID formats
       try {
         areaIds.forEach((id) => validateId(id));
       } catch {
         return NextResponse.json({ error: "Invalid area ID format" }, { status: 400 });
       }
-      
+
       // Verify ownership of all areas
       const ownsAllAreas = await verifyBulkOwnership("area", areaIds, session.user.id);
       if (!ownsAllAreas) {
         logger.warn(`User ${session.user.id} attempted to review areas without full ownership`);
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
       }
-      
+
       // Validate all scores are in range
       const allScoresValid = parsed.data.areaScores.every((a) => Number.isFinite(a.score) && a.score >= 1 && a.score <= 5);
       if (!allScoresValid) {
         return NextResponse.json({ error: "Invalid score values" }, { status: 400 });
       }
-      
+
       const scores = parsed.data.areaScores.map((a) => a.score);
       areaHealthAverage = scores.reduce((a, b) => a + b, 0) / scores.length;
-      
+
       await Promise.all(
         parsed.data.areaScores.map(({ areaId, score }) =>
           prisma.area.update({ where: { id: areaId, userId: session.user.id }, data: { lastReviewDate: new Date(), lastHealthScore: score } })

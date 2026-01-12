@@ -17,43 +17,43 @@ export async function PATCH(
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    
+
     // Rate limiting
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 20, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing item detail request:", e?.message || e);
+      const msg = e instanceof Error ? e.message : String(e);
+      logger.warn("Rate limiter check failed, allowing item read request", { error: msg });
     }
-    
+
     // Check request size
     const contentLength = request.headers.get("content-length");
     if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
       return NextResponse.json({ error: "Request too large" }, { status: 413 });
     }
-    
+
     const { id } = await params;
     try {
       validateId(id);
     } catch {
       return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
     }
-    
+
     // Verify ownership before updating
     const ownsItem = await verifyOwnership("item", id, session.user.id);
     if (!ownsItem) {
       logger.warn(`User ${session.user.id} attempted to update item ${id} without ownership`);
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
-    
+
     let body: Record<string, unknown>;
     try {
       body = await request.json() as Record<string, unknown>;
     } catch {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
-    
+
     const updateData: Record<string, unknown> = {};
     if (body.classification) {
       // Validate classification is a valid enum value
@@ -83,12 +83,12 @@ export async function PATCH(
         }
       })() : null;
     }
-    
+
     const item = await prisma.item.update({
       where: { id, userId: session.user.id },
       data: updateData,
     });
-    
+
     return NextResponse.json(item);
   } catch (error) {
     if (error instanceof Error && error.message.includes("Record to update not found")) {
@@ -106,30 +106,27 @@ export async function DELETE(
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    
+
     // Rate limiting
-    try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
-    
+    const allowed = await isAllowed(`user:${session.user.id}`, 20, 60_000);
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
     const { id } = await params;
     try {
       validateId(id);
     } catch {
       return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
     }
-    
+
     // Verify ownership before deleting
     const ownsItem = await verifyOwnership("item", id, session.user.id);
     if (!ownsItem) {
       logger.warn(`User ${session.user.id} attempted to delete item ${id} without ownership`);
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
-    
+
     await prisma.item.delete({ where: { id, userId: session.user.id } });
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && error.message.includes("Record to delete does not exist")) {

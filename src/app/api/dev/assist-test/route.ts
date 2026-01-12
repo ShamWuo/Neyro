@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   try {
     const ip = request.headers.get("x-forwarded-for") ?? "dev:anonymous";
     const allowed = await isAllowed(`ip:${ip}`, 10, 60_000);
-    if (!allowed) return new NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   } catch (err: unknown) {
     const status = (err && typeof err === "object" && (err as unknown as WithStatus).status) || 429;
     const message = err instanceof Error ? err.message : String(err);
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   let decision;
   let aiEnabled = false;
-  
+
   if (process.env.GEMINI_API_KEY) {
     try {
       decision = await analyzeParaCaptureSafe({ text, imageUrl: imageUrlRaw });

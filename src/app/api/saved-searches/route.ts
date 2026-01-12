@@ -44,8 +44,7 @@ export async function POST(request: Request) {
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
       // Allow on limiter failure but log
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing saved-searches request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing saved-searches request:", (e as Error)?.message || String(e));
     }
 
     // Check request size
@@ -70,7 +69,7 @@ export async function POST(request: Request) {
     // Sanitize inputs
     const name = sanitizeString(parsed.data.name, 100);
     const query = parsed.data.query ? sanitizeString(parsed.data.query, 500) : null;
-    
+
     // Limit filters size (prevent JSON DoS)
     let filters = parsed.data.filters || {};
     if (typeof filters === "object" && filters !== null) {

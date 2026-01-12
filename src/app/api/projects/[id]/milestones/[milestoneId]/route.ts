@@ -29,9 +29,10 @@ export async function PUT(
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing milestone request:", e?.message || e);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+       
+      console.warn("Rate limiter check failed, allowing milestone request:", msg);
     }
 
     // Check request size
@@ -41,7 +42,7 @@ export async function PUT(
     }
 
     const { id, milestoneId } = await params;
-    
+
     try {
       validateId(id);
       validateId(milestoneId);
@@ -80,7 +81,7 @@ export async function PUT(
     const updatedMilestone = {
       id: milestoneId,
       name: name || "Milestone",
-      targetDate: parsed.data.targetDate !== undefined 
+      targetDate: parsed.data.targetDate !== undefined
         ? (parsed.data.targetDate ? new Date(parsed.data.targetDate) : null)
         : null,
       completed: parsed.data.completed ?? false,
@@ -110,11 +111,8 @@ export async function DELETE(
     }
 
     // Rate limiting
-    try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
+    const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
     const { id, milestoneId } = await params;
 

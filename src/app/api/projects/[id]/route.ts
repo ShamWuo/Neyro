@@ -25,14 +25,14 @@ export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ i
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    
+
     // Rate limiting
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing project detail request:", e?.message || e);
+       
+      console.warn("Rate limiter check failed, allowing project detail request:", (e as Error)?.message || String(e));
     }
 
     // Check request size
@@ -40,19 +40,19 @@ export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ i
     if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
       return NextResponse.json({ error: "Request too large" }, { status: 413 });
     }
-    
+
     let body: unknown;
     try {
       body = await _req.json();
     } catch {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
-    
+
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
     const { id } = await params;
-    
+
     try {
       validateId(id);
     } catch {
@@ -65,7 +65,7 @@ export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ i
       logger.warn(`User ${session.user.id} attempted to update project ${id} without ownership`);
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    
+
     const project = await prisma.project.findFirst({ where: { id, userId: session.user.id } });
     if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

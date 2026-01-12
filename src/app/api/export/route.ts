@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemClassification } from "@prisma/client";
-import { isAllowed } from "@/lib/rate-limiter";
-import { logger } from "@/lib/logger";
+
 import { canAccessFeature } from "@/lib/subscription";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -19,22 +19,13 @@ export async function GET(request: Request) {
   const hasExportAccess = await canAccessFeature(session.user.id, "exports");
   if (!hasExportAccess) {
     return NextResponse.json(
-      { 
+      {
         error: "Exports require Focus plan. Upgrade to unlock advanced exports (PDF, CSV, JSON).",
         upgradeRequired: true,
         feature: "exports",
-      }, 
+      },
       { status: 403 }
     );
-  }
-
-  // Rate limiting for export (prevent abuse)
-    try {
-      const allowed = await isAllowed(`user:${session.user.id}`, 4, 60_000);
-      if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing export request:", e?.message || e);
   }
 
   const userId = session.user.id;
@@ -76,7 +67,7 @@ export async function GET(request: Request) {
     if (format === "csv") {
       // Convert to CSV format
       const csvRows: string[] = [];
-      
+
       // Items CSV
       csvRows.push("Type,Title,Classification,Status,Created,Updated");
       items.forEach((item) => {

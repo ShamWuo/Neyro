@@ -6,6 +6,8 @@ import { validateText } from "@/lib/validateAssist";
 import { analyzeParaCaptureSafe } from "@/lib/ai-safe";
 import { trackAICredit, recordAICreditUsage } from "@/lib/ai-credits";
 import { ItemClassification, ItemType } from "@prisma/client";
+import { ParaDecision } from "@/lib/ai";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -22,8 +24,7 @@ export async function POST(request: Request) {
       if (!allowed) return new NextResponse(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json" } });
     } catch (err: unknown) {
       // On limiter failure, allow the request but log
-      // eslint-disable-next-line no-console
-      console.warn("quick-capture rate limiter failed, allowing request:", (err as Error)?.message ?? String(err));
+      logger.warn("Rate limiter check failed, allowing quick-capture request", { error: (err as Error)?.message || String(err) });
     }
 
     const form = await request.formData();
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     try {
       text = validateText(textRaw);
     } catch (err: unknown) {
-      const status = (err && typeof err === "object" && (err as any).status) || 400;
+      const status = (err && typeof err === "object" && (err as Record<string, unknown>).status) || 400;
       const message = err instanceof Error ? err.message : String(err);
       return new NextResponse(JSON.stringify({ error: message }), { status: Number(status), headers: { "Content-Type": "application/json" } });
     }
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     // Attempt AI classification if credits available
-    let decision: any = null;
+    let decision: ParaDecision | null = null;
     let aiEnabled = false;
     try {
       const creditCheck = await trackAICredit(session.user.id);
@@ -53,15 +54,13 @@ export async function POST(request: Request) {
           aiEnabled = true;
         } catch (aiErr) {
           // Non-fatal - fall back to defaults
-          // eslint-disable-next-line no-console
-          console.warn("quick-capture AI failed, using fallback:", aiErr);
+          logger.warn("quick-capture AI failed, using fallback", { error: aiErr });
           aiEnabled = false;
         }
       }
     } catch (err) {
       // If credit-check fails, proceed without AI
-      // eslint-disable-next-line no-console
-      console.warn("quick-capture credit check failed:", (err as Error)?.message ?? String(err));
+      logger.warn("quick-capture credit check failed", { error: (err as Error)?.message ?? String(err) });
     }
 
     const classification = (decision && decision.classification) || ItemClassification.INBOX;
@@ -82,8 +81,7 @@ export async function POST(request: Request) {
     return new NextResponse(JSON.stringify({ ok: true, item: created, aiEnabled, decision }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    // eslint-disable-next-line no-console
-    console.error("Error in quick-capture endpoint:", error);
+    logger.error("Error in quick-capture endpoint", { error });
     return new NextResponse(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

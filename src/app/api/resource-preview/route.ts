@@ -22,8 +22,8 @@ export async function GET(request: Request) {
       const allowed = await isAllowed(`user:${session.user.id}`, 8, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-       
-      console.warn("Rate limiter check failed, allowing resource-preview request:", e?.message || e);
+
+      console.warn("Rate limiter check failed, allowing resource-preview request:", (e as Error)?.message || String(e));
     }
 
     const { searchParams } = new URL(request.url);

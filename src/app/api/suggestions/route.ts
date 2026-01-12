@@ -17,8 +17,7 @@ export async function GET() {
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
       // Gracefully allow on limiter failure but log
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing suggestions request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing suggestions request:", (e as Error)?.message || String(e));
     }
 
     const userId = session.user.id;

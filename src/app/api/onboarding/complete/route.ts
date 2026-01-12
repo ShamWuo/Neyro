@@ -19,8 +19,7 @@ export async function POST(request: NextRequest) {
       const allowed = await isAllowed(`user:${session.user.id}`, 6, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing onboarding complete request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing onboarding complete request:", (e as Error)?.message || String(e));
     }
 
     // Check request size

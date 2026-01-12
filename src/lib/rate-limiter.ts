@@ -87,4 +87,5 @@ export async function getLimiterStatus() {
   return { redisAvailable: false, inMemoryKeys };
 }
 
+export const takeToken = isAllowed;
 export default isAllowed;

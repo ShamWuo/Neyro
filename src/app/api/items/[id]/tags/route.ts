@@ -28,8 +28,9 @@ export async function GET(
       const allowed = await isAllowed(`user:${session.user.id}`, 20, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing item tags request:", e?.message || e);
+      const msg = e instanceof Error ? e.message : String(e);
+       
+      console.warn("Rate limiter check failed, allowing item tags request:", msg);
     }
 
     const { id } = await params;
@@ -78,11 +79,8 @@ export async function PATCH(
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Rate limiting
-    try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
+    const allowed = await isAllowed(`user:${session.user.id}`, 20, 60_000);
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
     // Check request size
     const contentLength = request.headers.get("content-length");

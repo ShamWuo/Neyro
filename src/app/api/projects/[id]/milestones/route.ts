@@ -29,9 +29,10 @@ export async function GET(
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing milestones request:", e?.message || e);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+       
+      console.warn("Rate limiter check failed, allowing milestones request:", msg);
     }
 
     const { id } = await params;
@@ -83,11 +84,8 @@ export async function POST(
     }
 
     // Rate limiting
-    try {
-      takeToken(`user:${session.user.id}`);
-    } catch {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
+    const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
     // Check request size
     const contentLength = request.headers.get("content-length");

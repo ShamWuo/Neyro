@@ -15,13 +15,12 @@ export async function PUT() {
       const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing notifications read-all request:", e?.message || e);
+      console.warn("Rate limiter check failed, allowing notifications read-all request:", (e as Error)?.message || String(e));
     }
 
     // TODO: Implement when Notification model is added to schema
     // For now, just log and return success
-    
+
     logger.info("All notifications marked as read", { userId: session.user.id });
 
     return NextResponse.json({ success: true });
