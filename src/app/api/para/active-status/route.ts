@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getActiveProjectCount } from "@/lib/para";
-import { checkSubscriptionLimit } from "@/lib/subscription";
+import { getActiveProjectCount, MAX_ACTIVE_PROJECTS } from "@/lib/para";
 
 export async function GET(request: Request) {
   try {
@@ -13,12 +12,11 @@ export async function GET(request: Request) {
     }
 
     const active = await getActiveProjectCount(userId);
-    const limitInfo = await checkSubscriptionLimit(userId, "maxProjects");
+    const limit = MAX_ACTIVE_PROJECTS;
+    const remaining = Math.max(0, limit - active);
+    const allowed = active < limit;
 
-    const limit = limitInfo.limit ?? 0;
-    const remaining = Math.max(0, limit - (limitInfo.current ?? active));
-
-    return NextResponse.json({ active, limit, remaining, allowed: limitInfo.allowed });
+    return NextResponse.json({ active, limit, remaining, allowed });
   } catch (error) {
     return NextResponse.json({ error: (error as Error).message || "unknown" }, { status: 500 });
   }

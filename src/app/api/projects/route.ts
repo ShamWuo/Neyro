@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureProjectLimit, createProjectWithLimit } from "@/lib/para";
-import { ProjectStatus } from "@prisma/client";
+import { ProjectStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { sanitizeString } from "@/lib/validation";
@@ -47,30 +47,31 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    
+
     // Rate limiting (Redis-backed if available, otherwise in-memory)
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
+    } catch (e: unknown) {
       // If rate-limiter fails, gracefully allow the request but log
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing request:", e?.message || e);
+      const msg = e instanceof Error ? e.message : String(e);
+       
+      console.warn("Rate limiter check failed, allowing request:", msg);
     }
-    
+
     // Check request size
     const contentLength = request.headers.get("content-length");
     if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
       return NextResponse.json({ error: "Request too large" }, { status: 413 });
     }
-    
+
     let body: unknown;
     try {
       body = await request.json();
     } catch {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
-    
+
     const parsed = projectSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
       outcome,
       status: desiredStatus,
       deadline: parsed.data.deadline ? new Date(parsed.data.deadline) : null,
-    } as any);
+    } as Prisma.ProjectUncheckedCreateInput);
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     logger.error("Error creating project", error);

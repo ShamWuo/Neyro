@@ -33,8 +33,8 @@ export async function PUT(
       const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing area goal PUT request:", e?.message || e);
+       
+      console.warn("Rate limiter check failed, allowing goal details request:", (e as Error)?.message || String(e));
     }
 
     // Check request size
@@ -118,8 +118,8 @@ export async function DELETE(
       const allowed = await isAllowed(`user:${session.user.id}`, 12, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing area goal DELETE request:", e?.message || e);
+       
+      console.warn("Rate limiter check failed, allowing area goal DELETE request:", (e as Error)?.message || String(e));
     }
 
     const { id, goalId } = await params;

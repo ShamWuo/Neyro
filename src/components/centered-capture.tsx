@@ -31,7 +31,7 @@ export function CenteredCapture() {
   const handleTextCapture = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
-    
+
     console.log("[CENTERED_CAPTURE] Text captured:", text);
     setCapturedText(text);
   };
@@ -271,7 +271,7 @@ function PreviewAndSave({
   const handleSave = async () => {
     console.log(`[${sourceMode.toUpperCase()}] Saving: "${classification.title}" → ${classification.category}`);
     setSaving(true);
-    
+
     const formData = new FormData();
     formData.set("title", classification.title);
     formData.set("details", text);
@@ -279,10 +279,10 @@ function PreviewAndSave({
     formData.set("sourceMode", sourceMode);
 
     try {
-      const { saveClassifiedItem } = await import("@/app/(dashboard)/inbox/actions");
+      const { saveClassifiedItem } = await import("@/components/home-actions");
       await saveClassifiedItem(formData);
       console.log(`[${sourceMode.toUpperCase()}] Save complete!`);
-      
+
       // Reload the page to show the new item
       window.location.reload();
     } catch (error) {
@@ -299,7 +299,7 @@ function PreviewAndSave({
         <div className="text-sm font-semibold text-[var(--text-primary)]">{categoryLabel[classification.category]}</div>
         <span className="text-xs text-[var(--text-tertiary)]">{classification.explanation}</span>
       </div>
-      
+
       <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--surface)] p-3">
         <p className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Title</p>
         <p className="text-sm font-semibold text-[var(--text-primary)]">{classification.title}</p>

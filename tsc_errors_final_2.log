@@ -1,0 +1,53 @@
+src/app/api/classify/route.ts(44,8): error TS2304: Cannot find name 'genAI'.
+src/app/api/classify/route.ts(46,17): error TS2304: Cannot find name 'genAI'.
+src/app/api/dev/assist-test/route.ts(15,26): error TS7009: 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
+src/app/api/export/route.ts(37,78): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/items/[id]/route.ts(27,83): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/items/[id]/route.ts(112,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/items/[id]/tags/route.ts(32,81): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/items/[id]/tags/route.ts(82,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/items/classify/route.ts(33,86): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/items/duplicates/route.ts(21,88): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/items/route.ts(45,77): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/notification-preferences/route.ts(50,96): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/notifications/[id]/read/route.ts(23,89): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/notifications/read-all/route.ts(19,94): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/onboarding/complete/route.ts(23,91): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/projects/[id]/milestones/[milestoneId]/route.ts(34,81): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/projects/[id]/milestones/[milestoneId]/route.ts(114,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/projects/[id]/milestones/route.ts(34,82): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/projects/[id]/milestones/route.ts(87,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/projects/[id]/notes/route.ts(28,85): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/projects/[id]/notes/route.ts(123,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/projects/[id]/route.ts(35,86): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/resource-preview/route.ts(26,88): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/resources/[id]/notes/route.ts(32,86): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/resources/[id]/notes/route.ts(105,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/resources/[id]/tags/route.ts(65,85): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/resources/route.ts(40,81): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/reviews/[id]/share/route.ts(4,53): error TS2307: Cannot find module '@/lib/review-share' or its corresponding type declarations.
+src/app/api/reviews/[id]/share/route.ts(23,84): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/reviews/[id]/share/route.ts(65,7): error TS2304: Cannot find name 'takeToken'.
+src/app/api/saved-searches/[id]/route.ts(67,99): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/saved-searches/[id]/route.ts(153,99): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/saved-searches/route.ts(48,86): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/suggestions/route.ts(21,83): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/tags/route.ts(46,82): error TS2339: Property 'message' does not exist on type '{}'.
+src/app/api/weekly-review/route.ts(30,85): error TS2339: Property 'message' does not exist on type '{}'.
+src/components/__tests__/billing-settings.test.tsx(3,33): error TS2307: Cannot find module '../billing-settings' or its corresponding type declarations.
+src/components/__tests__/newsletter-signup.test.tsx(3,34): error TS2307: Cannot find module '../newsletter-signup' or its corresponding type declarations.
+src/components/__tests__/referral-dashboard.test.tsx(3,35): error TS2307: Cannot find module '../referral-dashboard' or its corresponding type declarations.
+src/components/__tests__/social-proof.test.tsx(2,29): error TS2307: Cannot find module '../social-proof' or its corresponding type declarations.
+src/components/__tests__/social-share.test.tsx(3,29): error TS2307: Cannot find module '../social-share' or its corresponding type declarations.
+src/components/__tests__/upgrade-prompt.test.tsx(3,31): error TS2307: Cannot find module '../upgrade-prompt' or its corresponding type declarations.
+src/components/centered-capture.tsx(282,51): error TS2307: Cannot find module '@/app/(dashboard)/inbox/actions' or its corresponding type declarations.
+src/components/more-capture-input.tsx(94,51): error TS2307: Cannot find module '@/app/(dashboard)/inbox/actions' or its corresponding type declarations.
+src/components/photo-capture-input.tsx(116,51): error TS2307: Cannot find module '@/app/(dashboard)/inbox/actions' or its corresponding type declarations.
+src/components/voice-capture-input.tsx(147,51): error TS2307: Cannot find module '@/app/(dashboard)/inbox/actions' or its corresponding type declarations.
+src/lib/__tests__/referral.test.ts(1,76): error TS2307: Cannot find module '../referral' or its corresponding type declarations.
+src/lib/__tests__/stripe.test.ts(13,96): error TS2307: Cannot find module '../stripe' or its corresponding type declarations.
+src/lib/__tests__/subscription.test.ts(1,10): error TS2305: Module '"../subscription"' has no exported member 'getUserSubscription'.
+src/lib/__tests__/subscription.test.ts(1,73): error TS2305: Module '"../subscription"' has no exported member 'startTrial'.
+src/lib/__tests__/subscription.test.ts(117,21): error TS2339: Property 'current' does not exist on type '{ allowed: boolean; limit: number; isPro: boolean; count: number; }'.
+src/lib/__tests__/subscription.test.ts(136,21): error TS2339: Property 'current' does not exist on type '{ allowed: boolean; limit: number; isPro: boolean; count: number; }'.
+src/lib/__tests__/subscription.test.ts(150,63): error TS2345: Argument of type '"maxAiCredits"' is not assignable to parameter of type '"maxProjects" | "maxAreas" | "maxResources"'.

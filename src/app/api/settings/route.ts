@@ -51,10 +51,11 @@ export async function PATCH(request: Request) {
     try {
       const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
+    } catch (e: unknown) {
       // Allow on limiter failure but log
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing settings request:", e?.message || e);
+      const msg = e instanceof Error ? e.message : String(e);
+       
+      console.warn("Rate limiter check failed, allowing settings request:", msg);
     }
 
     // Check request size

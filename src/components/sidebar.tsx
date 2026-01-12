@@ -55,18 +55,7 @@ export async function Sidebar() {
               <p className="font-semibold text-[var(--text-primary)]">Try this</p>
               <p>Run the weekly wizard, log streaks, and archive anything done.</p>
             </div>
-            <div className="rounded-lg border border-[color-mix(in_srgb,var(--primary-strong)_65%,transparent)] bg-[color-mix(in_srgb,var(--primary-strong)_10%,var(--surface))] px-3 py-3 text-xs shadow-[var(--elev-1)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-primary)]">Upgrade</p>
-              <p className="text-sm font-semibold text-[var(--text-primary)]">Unlock the Focus plan</p>
-              <ul className="mt-2 space-y-1 text-[11px] text-[var(--text-secondary)]">
-                <li>• Unlimited Smart Assist credits</li>
-                <li>• Advanced templates and exports</li>
-                <li>• Activity trail and timeline</li>
-              </ul>
-              <Link href="/pricing" className="mt-3 inline-flex w-full items-center justify-center rounded-md border border-[var(--primary-strong)] bg-[var(--primary-strong)] px-3 py-2 text-center text-[11px] font-semibold text-[var(--text-inverse)] transition hover:shadow-[var(--elev-2)]">
-                See plans
-              </Link>
-            </div>
+            {/* Upgrade section removed for V1 simplification */}
           </div>
         </div>
 

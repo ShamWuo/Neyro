@@ -15,8 +15,9 @@ export async function POST(request: Request) {
     try {
       const allowed = await isAllowed(`user:${session.user.id}:suggest-projects`, 5, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    } catch (e) {
-      console.warn("Rate limiter check failed", e?.message || e);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn("Rate limiter check failed", msg);
     }
 
     const { itemIds } = await request.json();
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
         projectId: null,
         userId: session.user.id,
       },
-      select: { id: true, title: true, content: true, classification: true },
+      select: { id: true, title: true, details: true, classification: true },
     });
 
     if (items.length < 2) {
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
 
     let suggestions: Array<{ title: string; itemIndices: number[]; description?: string }> = [];
     try {
-      const aiResult = await analyzeParaCaptureSafe({ text: prompt });
+      await analyzeParaCaptureSafe({ text: prompt });
       // Note: This uses AI for grouping logic; in production you'd parse more carefully
       // For now, return a simple fallback
       suggestions = [];

@@ -16,8 +16,8 @@ export async function GET() {
       const allowed = await isAllowed(`user:${session.user.id}`, 10, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Rate limiter check failed, allowing ai-credits request:", e?.message || e);
+       
+      console.warn("Rate limiter check failed, allowing ai-credits request:", (e as Error)?.message || String(e));
     }
 
     const usage = await getAICreditUsage(session.user.id);

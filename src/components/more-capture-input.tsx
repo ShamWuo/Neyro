@@ -91,7 +91,7 @@ function PreviewAndSave({
     formData.set("sourceMode", sourceMode);
 
     try {
-      const { saveClassifiedItem } = await import("@/app/(dashboard)/inbox/actions");
+      const { saveClassifiedItem } = await import("@/components/home-actions");
       await saveClassifiedItem(formData);
     } catch (error) {
       console.error(`[${sourceMode.toUpperCase()}] Save error:`, error);

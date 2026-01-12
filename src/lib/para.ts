@@ -1,49 +1,28 @@
 import { prisma } from "@/lib/prisma";
 import { ItemClassification, ProjectStatus } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
-import { checkSubscriptionLimit } from "@/lib/subscription";
 
 export const MAX_ACTIVE_PROJECTS = 7;
-export const MAX_ACTIVE_PROJECTS_FREE = 3;
 
 export async function getActiveProjectCount(userId: string) {
   return prisma.project.count({ where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null } });
 }
 
 export async function ensureProjectLimit(userId: string) {
-  const limitCheck = await checkSubscriptionLimit(userId, "maxProjects");
-
-  if (!limitCheck.allowed) {
-    const limit = limitCheck.limit;
-
-    if (limit === MAX_ACTIVE_PROJECTS_FREE) {
-      throw new Error(
-        `You've reached the free tier limit of ${limit} active projects. Upgrade to Focus to unlock 7 active projects.`
-      );
-    } else {
-      throw new Error(
-        `You have reached the ${limit} active projects limit. Pause or complete one first.`
-      );
-    }
+  const current = await getActiveProjectCount(userId);
+  if (current >= MAX_ACTIVE_PROJECTS) {
+    throw new Error(
+      `You have reached the ${MAX_ACTIVE_PROJECTS} active projects limit. Pause or complete one first.`
+    );
   }
 }
 
 export async function createProjectWithLimit(userId: string, data: Prisma.ProjectUncheckedCreateInput) {
-  const limitCheck = await checkSubscriptionLimit(userId, "maxProjects");
-
-  if (!limitCheck.allowed) {
-    const limit = limitCheck.limit;
-    if (limit === MAX_ACTIVE_PROJECTS_FREE) {
-      throw new Error(`You've reached the free tier limit of ${limit} active projects. Upgrade to Focus to unlock ${MAX_ACTIVE_PROJECTS} active projects.`);
-    }
-    throw new Error(`You have reached the ${limit} active projects limit. Pause or complete one first.`);
-  }
-
   // Use a transaction to perform a count + create to reduce race window.
   const created = await prisma.$transaction(async (tx) => {
     const current = await tx.project.count({ where: { userId, status: ProjectStatus.ACTIVE, archivedAt: null } });
-    if (current >= limitCheck.limit) {
-      throw new Error(`You have reached the ${limitCheck.limit} active projects limit. Pause or complete one first.`);
+    if (current >= MAX_ACTIVE_PROJECTS) {
+      throw new Error(`You have reached the ${MAX_ACTIVE_PROJECTS} active projects limit. Pause or complete one first.`);
     }
     // Ensure the provided data contains userId; preserve caller-supplied fields
     const payload = { ...(data as Record<string, unknown>), userId } as Prisma.ProjectUncheckedCreateInput;

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
   } catch (err: unknown) {
     // On limiter failure, log and allow (do not block core capture flow)
-     
+
     console.warn("Rate limiter check failed for assist/ingest, allowing request:", (err as Error)?.message ?? String(err));
   }
   const form = await request.formData();
@@ -90,7 +90,6 @@ export async function POST(request: Request) {
         userId: session.user.id,
         title: decision.title || text || "Captured note",
         details: decision.details || (text ? text : null),
-        classification,
         classification,
         type: decision.type ?? ItemType.NOTE,
         dueDate: decision.dueDate ? new Date(decision.dueDate) : null,

@@ -36,51 +36,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function classifyWithAI(text: string): Promise<{
-  category: "project" | "area" | "resource" | "archive";
-  title: string;
-  explanation: string;
-}> {
-  if (!genAI) throw new Error("AI not configured");
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-  const prompt = `Classify the following text into the PARA system:
-- PROJECT: Tasks with deadlines or specific completion goals
-- AREA: Ongoing responsibilities without deadlines (health, finances, career, etc.)
-- RESOURCE: Reference material, learning resources, ideas to explore
-- ARCHIVE: Completed or inactive items
-
-Text: "${text}"
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "category": "project|area|resource|archive",
-  "title": "short descriptive title (max 50 chars)",
-  "explanation": "brief reason for classification (max 100 chars)"
-}`;
-
-  const result = await model.generateContent(prompt);
-  const response = result.response;
-  const responseText = response.text();
-
-  // Extract JSON from response
-  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Invalid AI response format");
-
-  const parsed = JSON.parse(jsonMatch[0]);
-  
-  // Validate category
-  if (!["project", "area", "resource", "archive"].includes(parsed.category)) {
-    throw new Error("Invalid category from AI");
-  }
-
-  return {
-    category: parsed.category,
-    title: parsed.title || extractTitle(text),
-    explanation: parsed.explanation || "AI classified item",
-  };
-}
 
 function classifyIntoPARA(text: string): {
   category: "project" | "area" | "resource" | "archive";
