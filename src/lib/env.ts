@@ -20,7 +20,6 @@ export function validateEnv(): Env {
   const result = EnvSchema.safeParse(process.env);
   if (!result.success) {
     // Print helpful diagnostics and fail fast
-    // eslint-disable-next-line no-console
     console.error("Environment validation failed:\n", result.error.format());
     throw new Error("Invalid environment configuration. See logs for details.");
   }

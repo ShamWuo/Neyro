@@ -22,7 +22,7 @@ export function CenteredCapture() {
   const [classification, setClassification] = useState<ClassificationResult | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleCapture = (text: string, _classification: ClassificationResult | null) => {
+  const handleCapture = (text: string) => {
     console.log("[CENTERED_CAPTURE] Text captured:", text);
     setCapturedText(text);
     // Classification will be handled by ClassificationPreview

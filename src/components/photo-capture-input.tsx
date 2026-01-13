@@ -11,7 +11,7 @@ interface ClassificationResult {
   explanation: string;
 }
 
-export function PhotoCaptureInput({ onCapture }: { onCapture: (text: string, classification: ClassificationResult | null) => void }) {
+export function PhotoCaptureInput({ onCapture }: { onCapture: (text: string) => void }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState("");
   const [classification, setClassification] = useState<ClassificationResult | null>(null);
@@ -38,7 +38,7 @@ export function PhotoCaptureInput({ onCapture }: { onCapture: (text: string, cla
       const mockExtraction = "Meeting notes: Review Q1 KPIs, Discuss team expansion, Plan H2 budget allocations";
       console.log("[PHOTO] OCR extraction complete:", mockExtraction);
       setExtractedText(mockExtraction);
-      onCapture(mockExtraction, null);
+      onCapture(mockExtraction);
       setIsProcessing(false);
     }, 1500);
   };

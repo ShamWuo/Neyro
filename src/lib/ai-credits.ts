@@ -3,7 +3,7 @@ import { logger } from "./logger";
 /**
  * Track AI credit usage and check limits
  */
-export async function trackAICredit(userId: string): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+export async function trackAICredit(_userId: string): Promise<{ allowed: boolean; remaining: number; limit: number }> {
   // Simplified for V1: Hardcoded limit for everyone
   const limit = 50;
 
@@ -28,7 +28,7 @@ export async function recordAICreditUsage(userId: string): Promise<void> {
 /**
  * Get AI credit usage for current month
  */
-export async function getAICreditUsage(userId: string): Promise<{ used: number; limit: number; remaining: number }> {
+export async function getAICreditUsage(_userId: string): Promise<{ used: number; limit: number; remaining: number }> {
   const limit = 50;
   const used = 0; // Placeholder
 

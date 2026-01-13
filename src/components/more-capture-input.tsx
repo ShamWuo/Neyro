@@ -11,7 +11,7 @@ interface ClassificationResult {
   explanation: string;
 }
 
-export function MoreCaptureInput({ onCapture }: { onCapture: (text: string, classification: ClassificationResult | null) => void }) {
+export function MoreCaptureInput({ onCapture }: { onCapture: (text: string) => void }) {
   const [url, setUrl] = useState("");
   const [extractedContent, setExtractedContent] = useState("");
   const [classification, setClassification] = useState<ClassificationResult | null>(null);
@@ -28,7 +28,7 @@ export function MoreCaptureInput({ onCapture }: { onCapture: (text: string, clas
       const mockContent = `Page from ${url}: Key article on industry trends, market analysis, and competitive landscape insights. Great resource for Q2 planning and strategy review.`;
       console.log("[MORE] Content extraction complete, length:", mockContent.length);
       setExtractedContent(mockContent);
-      onCapture(mockContent, null);
+      onCapture(mockContent);
       setIsProcessing(false);
     }, 1500);
   };

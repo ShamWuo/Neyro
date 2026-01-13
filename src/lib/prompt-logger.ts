@@ -15,7 +15,7 @@ export type LogOptions = {
 export function ensureLogDir() {
   try {
     if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
-  } catch (e) {
+  } catch {
     // ignore; best-effort logging
   }
 }

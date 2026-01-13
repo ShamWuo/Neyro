@@ -131,9 +131,8 @@ global.fetch = jest.fn(() =>
 try {
   try {
     // Some jsdom builds allow deletion; try to remove existing non-configurable descriptor
-    // eslint-disable-next-line no-delete
     delete window.location;
-  } catch (e) {
+  } catch (_e) {
     // ignore
   }
 
@@ -155,7 +154,7 @@ try {
     writable: true,
     configurable: true,
   });
-} catch (e) {
+} catch (_e) {
   // jsdom may freeze location; ignore if cannot redefine
 }
 

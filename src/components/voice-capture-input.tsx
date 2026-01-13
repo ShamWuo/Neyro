@@ -12,7 +12,7 @@ interface ClassificationResult {
   explanation: string;
 }
 
-export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, classification: ClassificationResult | null) => void }) {
+export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string) => void }) {
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [classification, setClassification] = useState<ClassificationResult | null>(null);
@@ -66,7 +66,7 @@ export function VoiceCaptureInput({ onCapture }: { onCapture: (text: string, cla
       const mockTranscription = "Buy groceries, schedule dentist appointment, review Q1 budget";
       logger.log("[VOICE] Transcription complete:", mockTranscription);
       setTranscript(mockTranscription);
-      onCapture(mockTranscription, null);
+      onCapture(mockTranscription);
     } catch (error) {
       logger.error("[VOICE] Transcription error:", error);
       alert("Failed to transcribe audio.");
