@@ -19,8 +19,7 @@ export async function PUT(
       const allowed = await isAllowed(`user:${session.user.id}`, 30, 60_000);
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
-       
-      console.warn("Rate limiter check failed, allowing notification read request:", (e as Error)?.message || String(e));
+      logger.warn("Rate limiter check failed, allowing notification read request", { error: (e as Error)?.message || String(e) });
     }
 
     const { id } = await params;

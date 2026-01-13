@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getActiveProjectCount, MAX_ACTIVE_PROJECTS } from "@/lib/para";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await auth();
     const userId = session?.user?.id;

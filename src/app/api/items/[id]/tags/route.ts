@@ -29,8 +29,7 @@ export async function GET(
       if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-       
-      console.warn("Rate limiter check failed, allowing item tags request:", msg);
+      logger.warn("Rate limiter check failed, allowing item tags request", { error: msg });
     }
 
     const { id } = await params;

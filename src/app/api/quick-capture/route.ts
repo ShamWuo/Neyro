@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       } else {
         return NextResponse.json({ error: "Unsupported content type" }, { status: 415 });
       }
-    } catch (e) {
+    } catch (_e) {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
@@ -40,8 +40,7 @@ export async function POST(request: Request) {
       }
     } catch (e) {
       // If rate limiter fails, log and continue to allow request (best-effort)
-       
-      console.warn("quick-capture: rate limiter error", (e as Error)?.message || String(e));
+      logger.warn("quick-capture: rate limiter error", { error: (e as Error)?.message || String(e) });
     }
 
     const item = await prisma.item.create({
@@ -56,7 +55,7 @@ export async function POST(request: Request) {
 
     try {
       logger.info("Quick capture created", { userId: session.user.id, itemId: item.id, title: item.title });
-    } catch (e) {
+    } catch (_e) {
       // ignore logging failures
     }
 
@@ -78,8 +77,7 @@ export async function POST(request: Request) {
       });
     } catch (e) {
       // Telemetry failures should not block the capture
-       
-      console.warn("quick-capture: failed to persist telemetry", (e as Error)?.message || String(e));
+      logger.warn("quick-capture: failed to persist telemetry", { error: (e as Error)?.message || String(e) });
     }
 
     return NextResponse.json(item, { status: 201 });
