@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prepare": "husky install",
     "dev": "next dev -p 3001",
     "build": "next build",
     "build:native": "BUILD_FOR_NATIVE=true next build",
@@ -81,19 +80,11 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
-    "husky": "^8.0.3",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
-    "lint-staged": "^14.0.0",
     "prisma": "^6.1.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"
-  },
-  "lint-staged": {
-    "*.+(js|jsx|ts|tsx)": [
-      "eslint --fix",
-      "git add"
-    ]
   }
 }
