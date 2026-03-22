@@ -1,9 +1,0 @@
-legacy_backup/
-build_final_*.log
-lint_output.txt
-tsc_errors_final.log
-api_lint.txt
-.next/
-node_modules/
-dist/
-coverage/

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neyro AI Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f96b06",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#23170f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'glass-gradient': 'linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+                        'glow-gradient': 'radial-gradient(circle at center, rgba(249, 107, 6, 0.15) 0%, transparent 70%)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-panel {
+            background: rgba(35, 23, 15, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(249, 107, 6, 0.3);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen overflow-hidden selection:bg-primary selection:text-white">
+<div class="flex h-screen w-full relative">
+<!-- Ambient Glow Effect -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[10%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px]"></div>
+</div>
+<!-- Sidebar -->
+<aside class="w-20 lg:w-64 flex-shrink-0 flex flex-col justify-between glass-panel z-20 border-r border-white/5 relative">
+<div class="flex flex-col h-full">
+<!-- Logo -->
+<div class="h-20 flex items-center px-6 gap-3 border-b border-white/5">
+<div class="size-8 rounded-lg bg-gradient-to-br from-primary to-orange-700 flex items-center justify-center shadow-lg shadow-orange-500/20">
+<span class="material-symbols-outlined text-white text-[20px]">auto_awesome</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-white hidden lg:block">Neyro</h1>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/10 text-white border border-white/5 shadow-sm group transition-all" href="#">
+<span class="material-symbols-outlined text-primary">inbox</span>
+<span class="text-sm font-medium hidden lg:block">Inbox</span>
+<span class="ml-auto text-xs font-bold bg-primary text-white px-2 py-0.5 rounded-full hidden lg:block">3</span>
+</a>
+<div class="pt-4 pb-2 px-3 hidden lg:block">
+<p class="text-xs font-semibold text-white/40 uppercase tracking-wider">PARA</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">folder_open</span>
+<span class="text-sm font-medium hidden lg:block">Projects</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">layers</span>
+<span class="text-sm font-medium hidden lg:block">Areas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">database</span>
+<span class="text-sm font-medium hidden lg:block">Resources</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">inventory_2</span>
+<span class="text-sm font-medium hidden lg:block">Archives</span>
+</a>
+<div class="w-full h-px bg-white/5 my-2 mx-1"></div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">center_focus_strong</span>
+<span class="text-sm font-medium hidden lg:block">Focus Mode</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">book_2</span>
+<span class="text-sm font-medium hidden lg:block">Journal</span>
+</a>
+</nav>
+<!-- Settings/User at Bottom -->
+<div class="p-4 border-t border-white/5">
+<button class="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-white/5 transition-colors text-left group">
+<div class="relative">
+<div class="size-8 rounded-full bg-cover bg-center border border-white/10" data-alt="User profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfF26lmSwPqI5b9T6PgxIH9i3_T3VP4vtDGKIdFo4Y2s6LcK7YWLlgbNmj8PjmMrT1H_gVliD8odIQ7l-oPJalJemfobvq5dB91cO3tY2E8jQ1Tzuh7tYz0pnYOhvsX-1nNFE0dH2UW4PEZA3M8KippeczMteVtTro5oBd63LRWqiNxAunxTnh370XKN18fbrOUdz16S2T8ELR7w5RWkzhn5YRk3U2WqY46zCMDXh2Eb4JdEk76OW6wg8_e2907Vkp9Yh1G7FX8zy1');"></div>
+<div class="absolute bottom-0 right-0 size-2.5 bg-green-500 border-2 border-[#23170f] rounded-full"></div>
+</div>
+<div class="hidden lg:flex flex-col">
+<span class="text-sm font-medium text-white group-hover:text-primary transition-colors">Alex Morgan</span>
+<span class="text-xs text-white/40">Pro Plan</span>
+</div>
+<span class="material-symbols-outlined ml-auto text-white/30 hidden lg:block group-hover:text-white transition-colors">settings</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex overflow-hidden z-10 relative">
+<!-- Central Dashboard -->
+<div class="flex-1 overflow-y-auto overflow-x-hidden p-6 lg:p-10 flex flex-col gap-8 scroll-smooth">
+<!-- Header -->
+<header class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 animate-fade-in-up">
+<div class="flex flex-col gap-1">
+<h2 class="text-white/60 text-lg font-medium">Monday, Oct 24</h2>
+<h1 class="text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                            Good Evening, <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">Alex</span>
+</h1>
+<p class="text-white/40 max-w-md mt-2">Your system is in high resonance today. You have cleared 12 tasks this week.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">bolt</span>
+<span>Start Focus</span>
+</button>
+<button class="flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-primary hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20 font-bold transition-all transform hover:-translate-y-0.5">
+<span class="material-symbols-outlined">add</span>
+<span>New Note</span>
+</button>
+</div>
+</header>
+<!-- Stats Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="glass-card rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-white">check_circle</span>
+</div>
+<div class="flex flex-col">
+<span class="text-4xl font-bold text-white tracking-tighter">3</span>
+<span class="text-sm font-medium text-white/50">Tasks Due</span>
+</div>
+<div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[70%]"></div>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-white">graphic_eq</span>
+</div>
+<div class="flex flex-col">
+<span class="text-4xl font-bold text-white tracking-tighter">98%</span>
+<span class="text-sm font-medium text-white/50">Resonance</span>
+</div>
+<div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+<div class="bg-green-500 h-full w-[98%]"></div>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden group col-span-2 md:col-span-2">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-lg font-bold text-white">AI Insight</span>
+<span class="text-sm text-white/50 mt-1">Based on your recent captures, you seem focused on <span class="text-primary">Design Systems</span>. Would you like to create a new Area?</span>
+</div>
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+</div>
+<div class="mt-auto flex gap-3">
+<button class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-white transition-colors">Create Area</button>
+<button class="text-xs font-semibold text-white/40 hover:text-white px-3 py-1.5 transition-colors">Dismiss</button>
+</div>
+</div>
+</div>
+<!-- Main Content Split -->
+<div class="flex flex-col xl:flex-row gap-8">
+<!-- Left Column: Projects & Inbox -->
+<div class="flex-1 flex flex-col gap-8">
+<!-- Active Projects -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">rocket_launch</span>
+                                    Active Projects
+                                </h3>
+<button class="text-white/40 hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Project Card 1 -->
+<div class="glass-card rounded-2xl p-5 flex flex-col gap-4 group cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="size-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 mb-2">
+<span class="material-symbols-outlined">web</span>
+</div>
+<span class="text-xs font-bold bg-white/5 border border-white/10 text-white/60 px-2 py-1 rounded-md">Q4</span>
+</div>
+<div>
+<h4 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Website Redesign</h4>
+<p class="text-sm text-white/40 mt-1">Design System Implementation</p>
+</div>
+<div class="mt-2">
+<div class="flex justify-between text-xs text-white/60 mb-2">
+<span>Progress</span>
+<span>75%</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full w-[75%]"></div>
+</div>
+</div>
+<div class="pt-4 mt-auto border-t border-white/5 flex items-center justify-between">
+<span class="text-xs text-white/40">Next Action:</span>
+<span class="text-xs font-medium text-white flex items-center gap-1">
+                                            Review Mockups
+                                            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</span>
+</div>
+</div>
+<!-- Project Card 2 -->
+<div class="glass-card rounded-2xl p-5 flex flex-col gap-4 group cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="size-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 mb-2">
+<span class="material-symbols-outlined">campaign</span>
+</div>
+<span class="text-xs font-bold bg-white/5 border border-white/10 text-white/60 px-2 py-1 rounded-md">Active</span>
+</div>
+<div>
+<h4 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Q3 Marketing</h4>
+<p class="text-sm text-white/40 mt-1">Social Media Strategy</p>
+</div>
+<div class="mt-2">
+<div class="flex justify-between text-xs text-white/60 mb-2">
+<span>Progress</span>
+<span>40%</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-purple-500 to-pink-400 h-full w-[40%]"></div>
+</div>
+</div>
+<div class="pt-4 mt-auto border-t border-white/5 flex items-center justify-between">
+<span class="text-xs text-white/40">Next Action:</span>
+<span class="text-xs font-medium text-white flex items-center gap-1">
+                                            Draft Copy
+                                            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Inbox / Capture -->
+<section class="flex-1">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">move_to_inbox</span>
+                                    Inbox Capture
+                                </h3>
+<button class="text-xs font-semibold text-primary hover:text-orange-400 transition-colors">Process All</button>
+</div>
+<div class="glass-panel rounded-2xl overflow-hidden">
+<div class="p-2">
+<div class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer group">
+<div class="size-5 rounded border border-white/20 group-hover:border-primary flex items-center justify-center transition-colors"></div>
+<span class="text-white/80 font-medium">Research competitive pricing models</span>
+<span class="ml-auto text-xs text-white/30 bg-white/5 px-2 py-1 rounded">Just now</span>
+</div>
+<div class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer group">
+<div class="size-5 rounded border border-white/20 group-hover:border-primary flex items-center justify-center transition-colors"></div>
+<span class="text-white/80 font-medium">Email Sarah about the prototypes</span>
+<span class="ml-auto text-xs text-white/30 bg-white/5 px-2 py-1 rounded">2h ago</span>
+</div>
+<div class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer group">
+<div class="size-5 rounded border border-white/20 group-hover:border-primary flex items-center justify-center transition-colors"></div>
+<span class="text-white/80 font-medium">Book flight for conference</span>
+<span class="ml-auto text-xs text-white/30 bg-white/5 px-2 py-1 rounded">5h ago</span>
+</div>
+</div>
+<div class="bg-white/5 p-3 flex items-center gap-3 border-t border-white/5">
+<span class="material-symbols-outlined text-white/40">add</span>
+<input class="bg-transparent border-none text-white placeholder-white/40 focus:ring-0 w-full text-sm" placeholder="Capture a thought..." type="text"/>
+<div class="flex gap-1">
+<div class="size-6 rounded bg-white/10 flex items-center justify-center border border-white/5">
+<span class="text-[10px] text-white/60">⌘</span>
+</div>
+<div class="size-6 rounded bg-white/10 flex items-center justify-center border border-white/5">
+<span class="text-[10px] text-white/60">K</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Daily Overview -->
+<aside class="w-full xl:w-80 flex-shrink-0">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">schedule</span>
+                                Daily Overview
+                            </h3>
+</div>
+<div class="glass-panel rounded-2xl p-5 h-full min-h-[400px]">
+<div class="relative pl-4 space-y-8">
+<!-- Vertical Line -->
+<div class="absolute left-[23px] top-2 bottom-2 w-px bg-gradient-to-b from-primary/50 via-white/10 to-transparent"></div>
+<!-- Timeline Item: Done -->
+<div class="relative flex items-start gap-4 opacity-50">
+<div class="flex flex-col items-end min-w-[40px] pt-0.5">
+<span class="text-xs font-medium text-white/60">09:00</span>
+<span class="text-[10px] text-white/30">AM</span>
+</div>
+<div class="relative z-10 size-3 mt-1.5 rounded-full bg-white/20 ring-4 ring-[#23170f]"></div>
+<div class="flex flex-col bg-white/5 p-3 rounded-lg w-full border border-white/5">
+<span class="text-sm font-medium text-white line-through decoration-white/30">Weekly Standup</span>
+<span class="text-xs text-white/40">Zoom Meeting</span>
+</div>
+</div>
+<!-- Timeline Item: Active -->
+<div class="relative flex items-start gap-4">
+<div class="flex flex-col items-end min-w-[40px] pt-0.5">
+<span class="text-xs font-bold text-primary">11:00</span>
+<span class="text-[10px] text-primary/60">AM</span>
+</div>
+<div class="relative z-10 size-3 mt-1.5 rounded-full bg-primary ring-4 ring-[#23170f] shadow-[0_0_10px_rgba(249,107,6,0.6)]"></div>
+<div class="flex flex-col bg-white/10 p-3 rounded-lg w-full border-l-2 border-primary">
+<span class="text-sm font-bold text-white">Focus Block: Design</span>
+<span class="text-xs text-white/60">Neyro Dashboard UI</span>
+<div class="flex items-center gap-1 mt-2 text-primary text-xs font-medium">
+<span class="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+                                            In Progress
+                                        </div>
+</div>
+</div>
+<!-- Timeline Item: Future -->
+<div class="relative flex items-start gap-4">
+<div class="flex flex-col items-end min-w-[40px] pt-0.5">
+<span class="text-xs font-medium text-white/60">02:00</span>
+<span class="text-[10px] text-white/30">PM</span>
+</div>
+<div class="relative z-10 size-3 mt-1.5 rounded-full bg-[#23170f] border border-white/20 ring-4 ring-[#23170f]"></div>
+<div class="flex flex-col bg-transparent p-3 rounded-lg w-full border border-dashed border-white/10 hover:border-white/20 transition-colors">
+<span class="text-sm font-medium text-white">Project Review</span>
+<span class="text-xs text-white/40">Conference Room B</span>
+</div>
+</div>
+<!-- Timeline Item: Future -->
+<div class="relative flex items-start gap-4">
+<div class="flex flex-col items-end min-w-[40px] pt-0.5">
+<span class="text-xs font-medium text-white/60">04:30</span>
+<span class="text-[10px] text-white/30">PM</span>
+</div>
+<div class="relative z-10 size-3 mt-1.5 rounded-full bg-[#23170f] border border-white/20 ring-4 ring-[#23170f]"></div>
+<div class="flex flex-col bg-transparent p-3 rounded-lg w-full border border-dashed border-white/10 hover:border-white/20 transition-colors">
+<span class="text-sm font-medium text-white">Inbox Zero Session</span>
+<span class="text-xs text-white/40">Weekly cleanup</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+</div>
+</body></html>

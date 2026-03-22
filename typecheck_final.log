@@ -1,7 +1,0 @@
-src/app/api/items/route.ts(45,77): error TS2339: Property 'message' does not exist on type '{}'.
-src/app/api/reviews/[id]/share/route.ts(4,53): error TS2307: Cannot find module '@/lib/review-share' or its corresponding type declarations.
-src/app/api/reviews/[id]/share/route.ts(23,84): error TS2339: Property 'message' does not exist on type '{}'.
-src/app/api/reviews/[id]/share/route.ts(65,7): error TS2304: Cannot find name 'takeToken'.
-src/app/api/saved-searches/[id]/route.ts(67,99): error TS2339: Property 'message' does not exist on type '{}'.
-src/app/api/saved-searches/[id]/route.ts(153,99): error TS2339: Property 'message' does not exist on type '{}'.
-src/app/api/saved-searches/route.ts(48,86): error TS2339: Property 'message' does not exist on type '{}'.

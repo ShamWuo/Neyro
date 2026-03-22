@@ -1,0 +1,390 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useDemoStore } from '@/store/demo-store';
+import { Folder, Search, Filter, Plus, Calendar, CheckSquare, X, Hash, Target, Circle, Bookmark, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Progress } from '@/components/ui/Progress';
+import { Button } from '@/components/ui/Button';
+
+export default function ProjectsPage() {
+    const { projects, toggleTask, addProject, addProjectTask } = useDemoStore();
+    const searchParams = useSearchParams();
+    const [search, setSearch] = useState('');
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+    const [newProjectTitle, setNewProjectTitle] = useState('');
+    const [newProjectStatus, setNewProjectStatus] = useState<'Active' | 'Paused'>('Active');
+    const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+    const [newTaskTitle, setNewTaskTitle] = useState('');
+
+    const selectedProject = useMemo(() => {
+        const id = selectedProjectId || searchParams.get('id');
+        return projects.find(p => p.id === id) || null;
+    }, [projects, selectedProjectId, searchParams]);
+
+    const filteredProjects = projects.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
+
+    return (
+        <div className="h-full flex flex-col md:flex-row relative animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-forwards">
+
+            {/* Main List */}
+            <div className={cn("flex-1 px-8 lg:px-12 py-8 space-y-8 transition-all duration-300", selectedProject ? "md:max-w-[calc(100%-400px)]" : "")}>
+
+                {/* Header & Controls */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-[32px] font-display text-primary tracking-normal mb-1">Projects</h1>
+                        <p className="text-[15px] text-secondary">Things with a finish line.</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-9 pr-4 h-9 bg-card border border-border rounded-input text-[13px] text-primary placeholder:text-text-placeholder w-48 focus:outline-none focus:border-border-strong transition-colors"
+                            />
+                        </div>
+                        <Button variant="secondary" size="icon">
+                            <Filter size={14} />
+                        </Button>
+                        <Button 
+                            className="gap-2 text-[13px]"
+                            onClick={() => setIsNewProjectModalOpen(true)}
+                        >
+                            <Plus size={14} /> New Project
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {filteredProjects.map((project, i) => (
+                        <motion.div
+                            key={project.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            onClick={() => setSelectedProjectId(project.id)}
+                        >
+                            <Card
+                                hoverEffect
+                                className={cn(
+                                    "cursor-pointer h-full flex flex-col",
+                                    selectedProject?.id === project.id ? "border-accent ring-1 ring-accent/20 bg-accent-light/5" : ""
+                                )}
+                            >
+                                <CardContent className="p-5 flex flex-col h-full">
+                                    <div className="flex justify-between items-start mb-5">
+                                        <div className="text-secondary">
+                                            <Folder size={18} />
+                                        </div>
+                                        <Badge category={
+                                            project.status === 'Active' ? 'projects' :
+                                                project.status === 'Stalled' ? 'resources' : 'default'
+                                        }>
+                                            {project.status}
+                                        </Badge>
+                                    </div>
+
+                                    <h3 className="text-[15px] font-medium text-primary mb-3 leading-tight pr-4">{project.title}</h3>
+
+                                    <div className="flex items-center gap-4 text-[12px] font-medium text-text-muted mb-6">
+                                        <span className="flex items-center gap-1.5"><Calendar size={12} /> {project.dueDate || 'No Date'}</span>
+                                        <span className="flex items-center gap-1.5"><CheckSquare size={12} /> {project.tasksCount} tasks</span>
+                                    </div>
+
+                                    <div className="space-y-2 mt-auto">
+                                        <div className="flex justify-between text-[11px] font-mono">
+                                            <span className="text-secondary">{project.progress}% completed</span>
+                                        </div>
+                                        <Progress value={project.progress} indicatorColor="bg-accent" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {filteredProjects.length === 0 && (
+                    <div className="text-center py-20">
+                        <Folder className="mx-auto text-border-strong mb-4" size={32} strokeWidth={1.5} />
+                        <h3 className="text-[15px] font-medium text-primary">No projects found</h3>
+                        <p className="text-[13px] text-secondary mt-1">Try adjusting your search criteria.</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Smart Detail Panel */}
+            <AnimatePresence>
+                {selectedProject && (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20, width: 0 }}
+                        animate={{ opacity: 1, x: 0, width: '400px' }}
+                        exit={{ opacity: 0, x: 20, width: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="hidden md:block shrink-0 bg-card border-l border-border overflow-y-auto h-[calc(100vh-3.5rem)] sticky top-0 custom-scrollbar"
+                    >
+                        <div className="p-8">
+                            <div className="flex justify-between items-start mb-8">
+                                <div className="text-accent">
+                                    <Folder size={20} />
+                                </div>
+                                <button
+                                    onClick={() => setSelectedProjectId(null)}
+                                    className="p-1 hover:bg-hover text-text-muted hover:text-primary rounded-button transition-colors"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="mb-8">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Badge category={
+                                        selectedProject.status === 'Active' ? 'projects' :
+                                            selectedProject.status === 'Stalled' ? 'resources' : 'default'
+                                    }>
+                                        {selectedProject.status}
+                                    </Badge>
+                                    <span className="text-[11px] text-text-muted font-mono flex items-center gap-1">
+                                        <Hash size={10} /> PRJ-{selectedProject.id}
+                                    </span>
+                                </div>
+                                <h2 className="text-[28px] font-display text-primary leading-tight tracking-normal">
+                                    {selectedProject.title}
+                                </h2>
+                            </div>
+
+                            {/* AI Summary / Context */}
+                            <div className="bg-subtle border border-border p-5 rounded-card mb-8 aspect-auto relative">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent to-accent-light rounded-t-card" />
+                                <div className="flex items-center gap-2 mb-2.5 text-[11px] font-semibold text-accent uppercase tracking-[0.06em]">
+                                    <Sparkles size={12} /> Neyro Intelligence
+                                </div>
+                                <p className="text-[13px] text-secondary leading-relaxed">This project&apos;s momentum is high. Focus on completing the remaining tasks to maintain flow.</p>
+                            </div>
+
+                            <div className="space-y-8">
+                                {/* Tasks Area */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-4 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
+                                        <span className="flex items-center gap-2">
+                                            <CheckSquare size={14} /> Up Next
+                                        </span>
+                                        <button 
+                                            onClick={() => setIsNewTaskModalOpen(true)}
+                                            className="text-text-muted hover:text-primary transition-colors"
+                                        >
+                                            <Plus size={14} />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {selectedProject.tasks && selectedProject.tasks.length > 0 ? (
+                                            selectedProject.tasks.map((task) => (
+                                                <div 
+                                                    key={task.id} 
+                                                    className="flex items-start gap-3 py-2 border-b border-border/50 group cursor-pointer last:border-0"
+                                                    onClick={() => toggleTask(selectedProject.id, task.id)}
+                                                >
+                                                    <button className={cn(
+                                                        "mt-0.5 transition-colors shrink-0",
+                                                        task.completed ? "text-accent" : "text-border-strong hover:text-accent"
+                                                    )}>
+                                                        {task.completed ? <CheckSquare size={14} /> : <Circle size={14} />}
+                                                    </button>
+                                                    <span className={cn(
+                                                        "text-[13px] transition-colors leading-relaxed",
+                                                        task.completed ? "text-text-muted line-through" : "text-primary group-hover:text-accent"
+                                                    )}>
+                                                        {task.title}
+                                                    </span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-[13px] text-text-muted italic">No tasks yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Resource Links */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-4 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
+                                        <span className="flex items-center gap-2">
+                                            <Bookmark size={14} /> Connected Resources
+                                        </span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="p-3 bg-card border border-border rounded-card flex gap-3 cursor-pointer hover:border-border-strong transition-colors">
+                                            <div className="text-text-muted shrink-0 mt-0.5">
+                                                <Target size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[13px] font-medium text-primary">Figma Design System setup requirements</p>
+                                                <p className="text-[11px] text-text-muted mt-1">Note • Added 2 days ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Mobile Panel version */}
+            <AnimatePresence>
+                {selectedProject && (
+                    <motion.div
+                        initial={{ opacity: 0, y: '100%' }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: '100%' }}
+                        className="fixed inset-0 z-50 bg-bg-card md:hidden p-6 overflow-y-auto"
+                    >
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-[24px] font-display text-primary">{selectedProject.title}</h2>
+                            <button onClick={() => setSelectedProjectId(null)} className="p-2 border border-border rounded-button"><X size={16} /></button>
+                        </div>
+                        <div className="text-secondary text-[13px]">Mobile view simplified.</div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* New Project Modal */}
+            <AnimatePresence>
+                {isNewProjectModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsNewProjectModalOpen(false)}
+                            className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm pointer-events-auto"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="relative w-full max-w-md bg-card border border-border rounded-modal shadow-modal overflow-hidden pointer-events-auto"
+                        >
+                            <div className="p-6 border-b border-border flex justify-between items-center">
+                                <h2 className="text-lg font-display text-primary">New Project</h2>
+                                <button onClick={() => setIsNewProjectModalOpen(false)} className="text-text-muted hover:text-primary transition-colors"><X size={20} /></button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Project Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={newProjectTitle}
+                                        onChange={(e) => setNewProjectTitle(e.target.value)}
+                                        placeholder="e.g. Website Redesign"
+                                        className="w-full h-10 px-3 bg-subtle border border-border rounded-input text-sm focus:outline-none focus:border-accent"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Initial Status</label>
+                                    <div className="flex gap-2">
+                                        {(['Active', 'Paused'] as const).map(status => (
+                                            <button
+                                                key={status}
+                                                onClick={() => setNewProjectStatus(status)}
+                                                className={cn(
+                                                    "flex-1 py-2 text-xs font-medium rounded-button border transition-all",
+                                                    newProjectStatus === status 
+                                                        ? "bg-accent/10 border-accent text-accent" 
+                                                        : "bg-transparent border-border text-text-muted hover:border-border-strong"
+                                                )}
+                                            >
+                                                {status}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 pt-0">
+                                <Button 
+                                    className="w-full" 
+                                    disabled={!newProjectTitle.trim()}
+                                    onClick={() => {
+                                        addProject({
+                                            title: newProjectTitle,
+                                            status: newProjectStatus,
+                                            progress: 0,
+                                            dueDate: null
+                                        });
+                                        setIsNewProjectModalOpen(false);
+                                        setNewProjectTitle('');
+                                    }}
+                                >
+                                    Create Project
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* New Task Modal */}
+            <AnimatePresence>
+                {isNewTaskModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsNewTaskModalOpen(false)}
+                            className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm pointer-events-auto"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="relative w-full max-w-md bg-card border border-border rounded-modal shadow-modal overflow-hidden pointer-events-auto"
+                        >
+                            <div className="p-6 border-b border-border flex justify-between items-center">
+                                <h2 className="text-lg font-display text-primary">New Task in {selectedProject?.title}</h2>
+                                <button onClick={() => setIsNewTaskModalOpen(false)} className="text-text-muted hover:text-primary transition-colors"><X size={20} /></button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Task Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={newTaskTitle}
+                                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                                        placeholder="e.g. Schedule meeting with stakeholders"
+                                        className="w-full h-10 px-3 bg-subtle border border-border rounded-input text-sm focus:outline-none focus:border-accent"
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-6 pt-0">
+                                <Button 
+                                    className="w-full" 
+                                    disabled={!newTaskTitle.trim()}
+                                    onClick={() => {
+                                        if (selectedProject) {
+                                            addProjectTask(selectedProject.id, newTaskTitle);
+                                            setIsNewTaskModalOpen(false);
+                                            setNewTaskTitle('');
+                                        }
+                                    }}
+                                >
+                                    Add Task
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
