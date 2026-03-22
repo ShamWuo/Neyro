@@ -51,6 +51,7 @@ export default function ResourcesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<'all' | 'link' | 'audio' | 'image' | 'pdf'>('all');
     const [showArchiveSuggestions, setShowArchiveSuggestions] = useState(true);
+    const [isCleanupMode, setIsCleanupMode] = useState(false);
 
     // Create Modal States
     const [isCreating, setIsCreating] = useState(false);
@@ -69,10 +70,15 @@ export default function ResourcesPage() {
             const matchesSearch = (r.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (r.summary && r.summary.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesType = activeTab === 'all' || r.type === activeTab || (activeTab === 'pdf' && r.type === 'note'); // simplified mapping
+            
+            if (isCleanupMode) {
+                const threshold = Date.now() - (30 * 24 * 60 * 60 * 1000);
+                return matchesSearch && matchesType && r.updatedAt < threshold;
+            }
 
             return matchesSearch && matchesType;
         });
-    }, [resources, searchQuery, activeTab]);
+    }, [resources, searchQuery, activeTab, isCleanupMode]);
 
     // 2. Group by Topic Cluster
     const clusters = useMemo(() => {
@@ -196,13 +202,30 @@ export default function ResourcesPage() {
                         </div>
                         <div className="flex gap-2">
                             <Button variant="ghost" size="sm" onClick={() => setShowArchiveSuggestions(false)}>Dismiss</Button>
-                            <Button size="sm" onClick={() => {
-                                setActiveTab('all');
-                                setSearchQuery('');
-                                alert('Filtering for old items (Verification Mock)');
-                            }} className="bg-white/10 hover:bg-white/20 text-white border border-white/5">
-                                Review Candidates
+                            <Button 
+                                size="sm" 
+                                onClick={() => {
+                                    setIsCleanupMode(true);
+                                    setActiveTab('all');
+                                    setSearchQuery('');
+                                }} 
+                                className={cn(
+                                    "text-white border border-white/5",
+                                    isCleanupMode ? "bg-purple-500/40" : "bg-white/10 hover:bg-white/20"
+                                )}
+                            >
+                                {isCleanupMode ? "Viewing Candidates" : "Review Candidates"}
                             </Button>
+                            {isCleanupMode && (
+                                <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={() => setIsCleanupMode(false)}
+                                    className="text-white/60 hover:text-white"
+                                >
+                                    Reset
+                                </Button>
+                            )}
                         </div>
                     </div>
                 )}

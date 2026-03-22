@@ -4,17 +4,32 @@ import { motion } from 'framer-motion';
 import { useDemoStore } from '@/store/demo-store';
 import { Activity, Clock, Folder, Circle, Bookmark, Archive } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/Progress';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
     const { projects, areas, captures } = useDemoStore();
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Calculate aggregated stats
     const activeProjects = projects.filter(p => p.status === 'Active').length;
     const completedProjects = projects.filter(p => p.status === 'Completed').length;
     const avgAreaScore = areas.length ? Math.round(areas.reduce((acc, a) => acc + a.score, 0) / areas.length) : 0;
+    
+    // Dynamic counts from captures/store
+    const resourceCount = captures.filter(c => c.category === 'Resources').length;
+    const archiveCount = captures.filter(c => c.category === 'Archive').length;
+
+    if (!mounted) {
+        return <div className="p-8 text-secondary animate-pulse">Loading dashboard...</div>;
+    }
 
     return (
         <div className="max-w-[1000px] mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-forwards pb-12">
@@ -47,6 +62,7 @@ export default function DashboardPage() {
                     sub={`${completedProjects} completed recently`}
                     delay={0.1}
                     paraTint="projects"
+                    onClick={() => router.push('/para/projects')}
                 />
 
                 <StatsCard
@@ -56,24 +72,27 @@ export default function DashboardPage() {
                     sub={`Avg Health: ${avgAreaScore}%`}
                     delay={0.15}
                     paraTint="areas"
+                    onClick={() => router.push('/para/areas')}
                 />
 
                 <StatsCard
                     title="Resources"
                     icon={<Bookmark size={18} />}
-                    value="42"
+                    value={resourceCount.toString()}
                     sub="+3 this week"
                     delay={0.2}
                     paraTint="resources"
+                    onClick={() => router.push('/para/resources')}
                 />
 
                 <StatsCard
                     title="Archive"
                     icon={<Archive size={18} />}
-                    value="128"
+                    value={archiveCount.toString()}
                     sub="Items safely stored"
                     delay={0.25}
                     paraTint="archive"
+                    onClick={() => router.push('/para/archive')}
                 />
             </div>
 
@@ -146,12 +165,13 @@ export default function DashboardPage() {
     );
 }
 
-function StatsCard({ title, icon, value, sub, delay, paraTint }: { title: string, icon: React.ReactNode, value: string, sub: string, delay: number, paraTint: "projects" | "areas" | "resources" | "archive" }) {
+function StatsCard({ title, icon, value, sub, delay, paraTint, onClick }: { title: string, icon: React.ReactNode, value: string, sub: string, delay: number, paraTint: "projects" | "areas" | "resources" | "archive", onClick?: () => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
+            onClick={onClick}
         >
             <Card hoverEffect paraTint={paraTint} className="h-full flex flex-col cursor-pointer bg-card/50 backdrop-blur-sm">
                 <CardContent className="p-6">

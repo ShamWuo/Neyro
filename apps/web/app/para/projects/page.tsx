@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemoStore, Project } from '@/store/demo-store';
 import { Folder, Search, Filter, Plus, Calendar, CheckSquare, X, Hash, Target, Circle, Bookmark, Sparkles } from 'lucide-react';
@@ -11,9 +12,29 @@ import { Progress } from '@/components/ui/Progress';
 import { Button } from '@/components/ui/Button';
 
 export default function ProjectsPage() {
-    const { projects } = useDemoStore();
+    const { projects, toggleTask, addProject } = useDemoStore();
+    const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+    const [newProjectTitle, setNewProjectTitle] = useState('');
+    const [newProjectStatus, setNewProjectStatus] = useState<'Active' | 'Paused'>('Active');
+
+    useEffect(() => {
+        const id = searchParams.get('id');
+        if (id) {
+            const project = projects.find(p => p.id === id);
+            if (project) setSelectedProject(project);
+        }
+    }, [searchParams, projects]);
+
+    // Update selectedProject reference when projects change (to reflect task state)
+    useEffect(() => {
+        if (selectedProject) {
+            const updated = projects.find(p => p.id === selectedProject.id);
+            if (updated) setSelectedProject(updated);
+        }
+    }, [projects]);
 
     const filteredProjects = projects.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
 
@@ -44,7 +65,10 @@ export default function ProjectsPage() {
                         <Button variant="secondary" size="icon">
                             <Filter size={14} />
                         </Button>
-                        <Button className="gap-2 text-[13px]">
+                        <Button 
+                            className="gap-2 text-[13px]"
+                            onClick={() => setIsNewProjectModalOpen(true)}
+                        >
                             <Plus size={14} /> New Project
                         </Button>
                     </div>
@@ -169,16 +193,30 @@ export default function ProjectsPage() {
                                         <button className="text-text-muted hover:text-primary transition-colors"><Plus size={14} /></button>
                                     </div>
                                     <div className="space-y-2">
-                                        {[1, 2, 3].map(task => (
-                                            <div key={task} className="flex items-start gap-3 py-2 border-b border-border/50 group cursor-pointer last:border-0">
-                                                <button className="mt-0.5 text-border-strong hover:text-accent transition-colors shrink-0">
-                                                    <Circle size={14} />
-                                                </button>
-                                                <span className="text-[13px] text-primary group-hover:text-accent transition-colors leading-relaxed">
-                                                    Draft section {task} for the {selectedProject.title} document and review with team
-                                                </span>
-                                            </div>
-                                        ))}
+                                        {selectedProject.tasks && selectedProject.tasks.length > 0 ? (
+                                            selectedProject.tasks.map(task => (
+                                                <div 
+                                                    key={task.id} 
+                                                    className="flex items-start gap-3 py-2 border-b border-border/50 group cursor-pointer last:border-0"
+                                                    onClick={() => toggleTask(selectedProject.id, task.id)}
+                                                >
+                                                    <button className={cn(
+                                                        "mt-0.5 transition-colors shrink-0",
+                                                        task.completed ? "text-accent" : "text-border-strong hover:text-accent"
+                                                    )}>
+                                                        {task.completed ? <CheckSquare size={14} /> : <Circle size={14} />}
+                                                    </button>
+                                                    <span className={cn(
+                                                        "text-[13px] transition-colors leading-relaxed",
+                                                        task.completed ? "text-text-muted line-through" : "text-primary group-hover:text-accent"
+                                                    )}>
+                                                        {task.title}
+                                                    </span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-[13px] text-text-muted italic">No tasks yet.</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -226,6 +264,80 @@ export default function ProjectsPage() {
                 )}
             </AnimatePresence>
 
+            {/* New Project Modal */}
+            <AnimatePresence>
+                {isNewProjectModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsNewProjectModalOpen(false)}
+                            className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm pointer-events-auto"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="relative w-full max-w-md bg-card border border-border rounded-modal shadow-modal overflow-hidden pointer-events-auto"
+                        >
+                            <div className="p-6 border-b border-border flex justify-between items-center">
+                                <h2 className="text-lg font-display text-primary">New Project</h2>
+                                <button onClick={() => setIsNewProjectModalOpen(false)} className="text-text-muted hover:text-primary transition-colors"><X size={20} /></button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Project Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={newProjectTitle}
+                                        onChange={(e) => setNewProjectTitle(e.target.value)}
+                                        placeholder="e.g. Website Redesign"
+                                        className="w-full h-10 px-3 bg-subtle border border-border rounded-input text-sm focus:outline-none focus:border-accent"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Initial Status</label>
+                                    <div className="flex gap-2">
+                                        {(['Active', 'Paused'] as const).map(status => (
+                                            <button
+                                                key={status}
+                                                onClick={() => setNewProjectStatus(status)}
+                                                className={cn(
+                                                    "flex-1 py-2 text-xs font-medium rounded-button border transition-all",
+                                                    newProjectStatus === status 
+                                                        ? "bg-accent/10 border-accent text-accent" 
+                                                        : "bg-transparent border-border text-text-muted hover:border-border-strong"
+                                                )}
+                                            >
+                                                {status}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 pt-0">
+                                <Button 
+                                    className="w-full" 
+                                    disabled={!newProjectTitle.trim()}
+                                    onClick={() => {
+                                        addProject({
+                                            title: newProjectTitle,
+                                            status: newProjectStatus,
+                                            progress: 0,
+                                            dueDate: null
+                                        });
+                                        setIsNewProjectModalOpen(false);
+                                        setNewProjectTitle('');
+                                    }}
+                                >
+                                    Create Project
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

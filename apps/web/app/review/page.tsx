@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Inbox, CalendarRange, FolderEdit, Activity, Target, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useDemoStore } from '@/store/demo-store';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { Button } from '@/components/ui/Button';
@@ -124,9 +125,24 @@ export default function ReviewPage() {
                                             <div key={capture.id} className="p-5 border border-border bg-transparent rounded-card group hover:border-accent/30 transition-colors">
                                                 <p className="text-primary text-[15px] mb-4 leading-relaxed">"{capture.content}"</p>
                                                 <div className="flex gap-3">
-                                                    <button className="text-[12px] font-semibold text-text-muted hover:text-accent transition-colors">Make Project</button>
+                                                    <button 
+                                                        onClick={() => {
+                                                            toast.info(`Converting "${capture.content}" to Project...`);
+                                                            // In a real app, this would open the New Project modal with the title pre-filled
+                                                        }}
+                                                        className="text-[12px] font-semibold text-text-muted hover:text-accent transition-colors"
+                                                    >
+                                                        Make Project
+                                                    </button>
                                                     <span className="text-border">•</span>
-                                                    <button className="text-[12px] font-semibold text-text-muted hover:text-accent transition-colors">Resource</button>
+                                                    <button 
+                                                        onClick={() => {
+                                                            toast.info(`Saving "${capture.content}" to Reference Library...`);
+                                                        }}
+                                                        className="text-[12px] font-semibold text-text-muted hover:text-accent transition-colors"
+                                                    >
+                                                        Resource
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))}
@@ -209,7 +225,11 @@ export default function ReviewPage() {
                                             ))}
                                         </ul>
                                     </div>
-                                    <Button variant="secondary" className="w-full h-12 text-[14px] border border-dashed border-border hover:border-solid bg-transparent text-primary">
+                                    <Button 
+                                        variant="secondary" 
+                                        className="w-full h-12 text-[14px] border border-dashed border-border hover:border-solid bg-transparent text-primary"
+                                        onClick={() => toast.info("Custom goal feature coming soon!")}
+                                    >
                                         Add Custom Goal
                                     </Button>
                                 </div>

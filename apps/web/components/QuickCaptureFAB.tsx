@@ -1,13 +1,12 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { useNeyroStore } from '@mobile/store/useNeyroStore';
+import { useDemoStore } from '@/store/demo-store';
 import { usePathname } from 'next/navigation';
 
 export function QuickCaptureFAB() {
     const pathname = usePathname();
-    // @ts-ignore
-    const setCaptureVisible = useNeyroStore((state: any) => state.setCaptureVisible);
+    const setCaptureOpen = useDemoStore(state => state.setCaptureOpen);
 
     // Hide on landing/auth pages
     const isAppPage = pathname?.startsWith('/') && !pathname?.startsWith('/auth') && !pathname?.startsWith('/landing');
@@ -15,7 +14,7 @@ export function QuickCaptureFAB() {
 
     return (
         <button
-            onClick={() => setCaptureVisible(true)}
+            onClick={() => setCaptureOpen(true)}
             className="hidden lg:flex fixed bottom-6 right-6 z-50 size-16 bg-[#ff6b00] hover:bg-[#ff840a] text-white rounded-full shadow-2xl shadow-[#ff6b00]/30 items-center justify-center transition-all group ring-4 ring-[#ff6b00]/20"
             title="Quick Capture (Cmd/Ctrl + K)"
         >

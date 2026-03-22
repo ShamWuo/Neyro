@@ -2,6 +2,13 @@ import { create } from 'zustand';
 
 export type PARACategory = 'projects' | 'areas' | 'resources' | 'archive';
 
+export interface Task {
+    id: string;
+    title: string;
+    completed: boolean;
+    dueDate?: string;
+}
+
 export interface Project {
     id: string;
     title: string;
@@ -9,6 +16,7 @@ export interface Project {
     progress: number;
     dueDate: string | null;
     tasksCount: number;
+    tasks?: Task[];
 }
 
 export interface Area {
@@ -44,7 +52,10 @@ interface DemoState {
 
     // Actions
     addCapture: (capture: Omit<Capture, 'id' | 'timestamp'>) => void;
+    addProject: (project: Omit<Project, 'id' | 'tasksCount'>) => void;
+    addArea: (area: Omit<Area, 'id'>) => void;
     markTaskDone: () => void;
+    toggleTask: (projectId: string, taskId: string) => void;
     setMomentumScore: (score: number) => void;
 }
 
@@ -53,13 +64,26 @@ export const useDemoStore = create<DemoState>((set) => ({
     setCaptureOpen: (open) => set({ isCaptureOpen: open }),
     momentumScore: 87,
     projects: [
-        { id: '1', title: 'Investor Pitch Deck', status: 'Active', progress: 65, dueDate: 'Mar 1', tasksCount: 3 },
-        { id: '2', title: 'Neyro Website Launch', status: 'Active', progress: 40, dueDate: 'Mar 15', tasksCount: 6 },
-        { id: '3', title: 'Health Routine Overhaul', status: 'Stalled', progress: 20, dueDate: null, tasksCount: 2 },
-        { id: '4', title: 'Book: Deep Work Summary', status: 'Active', progress: 80, dueDate: null, tasksCount: 1 },
-        { id: '5', title: 'Freelance Client Proposal', status: 'Stalled', progress: 10, dueDate: 'Feb 28', tasksCount: 4 },
-        { id: '6', title: 'Learn TypeScript', status: 'Active', progress: 55, dueDate: null, tasksCount: 5 },
-        { id: '7', title: 'Move to New Apartment', status: 'Active', progress: 30, dueDate: 'Apr 1', tasksCount: 8 },
+        { 
+            id: '1', title: 'Investor Pitch Deck', status: 'Active', progress: 65, dueDate: 'Mar 1', tasksCount: 3,
+            tasks: [
+                { id: 't1', title: 'Draft traction slides', completed: false },
+                { id: 't2', title: 'Review financials with Sarah', completed: true },
+                { id: 't3', title: 'Update market size data', completed: false },
+            ]
+        },
+        { 
+            id: '2', title: 'Neyro Website Launch', status: 'Active', progress: 40, dueDate: 'Mar 15', tasksCount: 6,
+            tasks: [
+                { id: 't4', title: 'Finalize copy for landing page', completed: false },
+                { id: 't5', title: 'Fix mobile responsiveness issues', completed: false },
+            ]
+        },
+        { id: '3', title: 'Health Routine Overhaul', status: 'Stalled', progress: 20, dueDate: null, tasksCount: 2, tasks: [] },
+        { id: '4', title: 'Book: Deep Work Summary', status: 'Active', progress: 80, dueDate: null, tasksCount: 1, tasks: [] },
+        { id: '5', title: 'Freelance Client Proposal', status: 'Stalled', progress: 10, dueDate: 'Feb 28', tasksCount: 4, tasks: [] },
+        { id: '6', title: 'Learn TypeScript', status: 'Active', progress: 55, dueDate: null, tasksCount: 5, tasks: [] },
+        { id: '7', title: 'Move to New Apartment', status: 'Active', progress: 30, dueDate: 'Apr 1', tasksCount: 8, tasks: [] },
     ],
     areas: [
         { id: 'a1', name: 'Health', score: 72, insight: 'Down slightly this week' },
@@ -93,8 +117,43 @@ export const useDemoStore = create<DemoState>((set) => ({
         captures: [{ id: Date.now().toString(), ...capture, timestamp: new Date() }, ...state.captures]
     })),
 
+    addProject: (project) => set((state) => ({
+        projects: [
+            { 
+                id: (state.projects.length + 1).toString(), 
+                ...project, 
+                tasksCount: 0,
+                tasks: [] 
+            }, 
+            ...state.projects
+        ]
+    })),
+
+    addArea: (area) => set((state) => ({
+        areas: [
+            { 
+                id: 'a' + (state.areas.length + 1).toString(), 
+                ...area 
+            }, 
+            ...state.areas
+        ]
+    })),
+
     markTaskDone: () => set((state) => ({
         momentumScore: state.momentumScore + 2,
+    })),
+
+    toggleTask: (projectId, taskId) => set((state) => ({
+        projects: state.projects.map(p => 
+            p.id === projectId 
+                ? { 
+                    ...p, 
+                    tasks: p.tasks?.map(t => 
+                        t.id === taskId ? { ...t, completed: !t.completed } : t
+                    ) 
+                } 
+                : p
+        )
     })),
 
     setMomentumScore: (score) => set({ momentumScore: score }),

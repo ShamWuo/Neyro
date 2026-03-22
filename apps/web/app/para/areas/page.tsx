@@ -10,9 +10,11 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 export default function AreasPage() {
-    const { areas } = useDemoStore();
+    const { areas, addArea } = useDemoStore();
     const [search, setSearch] = useState('');
     const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+    const [isNewAreaModalOpen, setIsNewAreaModalOpen] = useState(false);
+    const [newAreaName, setNewAreaName] = useState('');
 
     const filteredAreas = areas.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -43,7 +45,10 @@ export default function AreasPage() {
                         <Button variant="secondary" size="icon">
                             <Filter size={14} />
                         </Button>
-                        <Button className="gap-2 text-[13px]">
+                        <Button 
+                            className="gap-2 text-[13px]"
+                            onClick={() => setIsNewAreaModalOpen(true)}
+                        >
                             <Plus size={14} /> New Area
                         </Button>
                     </div>
@@ -225,6 +230,61 @@ export default function AreasPage() {
                         </div>
                         <div className="text-secondary text-[13px]">Mobile view simplified.</div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+            {/* New Area Modal */}
+            <AnimatePresence>
+                {isNewAreaModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsNewAreaModalOpen(false)}
+                            className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm pointer-events-auto"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="relative w-full max-w-md bg-card border border-border rounded-modal shadow-modal overflow-hidden pointer-events-auto"
+                        >
+                            <div className="p-6 border-b border-border flex justify-between items-center">
+                                <h2 className="text-lg font-display text-primary">New Area</h2>
+                                <button onClick={() => setIsNewAreaModalOpen(false)} className="text-text-muted hover:text-primary transition-colors"><X size={20} /></button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Area Name</label>
+                                    <input 
+                                        type="text" 
+                                        value={newAreaName}
+                                        onChange={(e) => setNewAreaName(e.target.value)}
+                                        placeholder="e.g. Physical Health"
+                                        className="w-full h-10 px-3 bg-subtle border border-border rounded-input text-sm focus:outline-none focus:border-accent"
+                                    />
+                                </div>
+                                <p className="text-[12px] text-text-muted italic">Areas represent ongoing responsibilities. New areas start with a base health score of 100%.</p>
+                            </div>
+                            <div className="p-6 pt-0">
+                                <Button 
+                                    className="w-full" 
+                                    disabled={!newAreaName.trim()}
+                                    onClick={() => {
+                                        addArea({
+                                            name: newAreaName,
+                                            score: 100,
+                                            insight: "New area established. Maintain consistency to keep health high."
+                                        });
+                                        setIsNewAreaModalOpen(false);
+                                        setNewAreaName('');
+                                    }}
+                                >
+                                    Create Area
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

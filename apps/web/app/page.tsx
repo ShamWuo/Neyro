@@ -8,9 +8,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function TodayPage() {
-    const { projects, habits, captures } = useDemoStore();
+    const { projects, habits, captures, toggleTask } = useDemoStore();
+    const router = useRouter();
     const [greeting, setGreeting] = useState('Good morning');
 
     useEffect(() => {
@@ -53,7 +56,10 @@ export default function TodayPage() {
                         <h2 className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
                             Top Priorities
                         </h2>
-                        <button className="text-[12px] text-secondary hover:text-primary transition-colors font-medium flex items-center gap-1 group">
+                        <button 
+                            onClick={() => router.push('/para/projects')}
+                            className="text-[12px] text-secondary hover:text-primary transition-colors font-medium flex items-center gap-1 group"
+                        >
                             View all <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                         </button>
                     </div>
@@ -65,6 +71,7 @@ export default function TodayPage() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.05 + 0.15 }}
+                                onClick={() => router.push(`/para/projects?id=${project.id}`)}
                             >
                                 <Card hoverEffect className="h-full flex flex-col border-border/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] cursor-pointer overflow-hidden group">
                                     <CardContent className="p-6 flex-1 flex flex-col">
@@ -105,26 +112,31 @@ export default function TodayPage() {
                     </h2>
 
                     <div className="space-y-1">
-                        {[
-                            { title: 'Review Q1 Analytics Report', project: 'Neyro Website Launch', time: '10:00 AM' },
-                            { title: 'Draft email to beta testers', project: 'Investor Pitch Deck', time: '1:30 PM' },
-                            { title: 'Call with design agency', project: 'Neyro Website Launch', time: '3:00 PM' }
-                        ].map((task, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 -mx-3 rounded-button hover:bg-hover transition-colors group cursor-pointer border border-transparent hover:border-border/50">
-                                <div className="flex items-center gap-4">
-                                    <button className="text-text-placeholder hover:text-accent transition-colors">
-                                        <Circle size={18} />
-                                    </button>
-                                    <div>
-                                        <p className="text-[14px] text-primary font-medium">{task.title}</p>
-                                        <p className="text-[12px] text-secondary">{task.project}</p>
+                        {projects.flatMap(p => (p.tasks || []).map(t => ({ ...t, projectId: p.id, projectName: p.title })))
+                            .filter(t => !t.completed)
+                            .slice(0, 4)
+                            .map((task, i) => (
+                                <div key={task.id} className="flex items-center justify-between p-3 -mx-3 rounded-button hover:bg-hover transition-colors group cursor-pointer border border-transparent hover:border-border/50">
+                                    <div className="flex items-center gap-4">
+                                        <button 
+                                            onClick={() => toggleTask(task.projectId, task.id)}
+                                            className="text-text-placeholder hover:text-accent transition-colors"
+                                        >
+                                            <Circle size={18} />
+                                        </button>
+                                        <div onClick={() => router.push(`/para/projects?id=${task.projectId}`)}>
+                                            <p className="text-[14px] text-primary font-medium group-hover:text-accent transition-colors">{task.title}</p>
+                                            <p className="text-[12px] text-secondary">{task.projectName}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-[11px] text-text-muted font-mono bg-subtle px-2 py-0.5 rounded-[4px] border border-border/50">
+                                        {task.dueDate || 'Today'}
                                     </div>
                                 </div>
-                                <div className="text-[11px] text-text-muted font-mono bg-subtle px-2 py-0.5 rounded-[4px] border border-border/50">
-                                    {task.time}
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        {projects.every(p => (p.tasks || []).every(t => t.completed)) && (
+                            <p className="text-sm text-text-muted italic py-2 px-3">No tasks left! You're crushing it. ✨</p>
+                        )}
                     </div>
                 </div>
 
@@ -149,7 +161,10 @@ export default function TodayPage() {
                         <p className="text-primary leading-relaxed text-[13px]">
                             You captured 3 notes about "Traction" yesterday. Want me to draft the Investor Deck slides?
                         </p>
-                        <button className="text-[12px] font-semibold text-accent hover:text-accent-dark transition-colors">
+                        <button 
+                            onClick={() => toast.info("Neyro AI is drafting your slides based on 'Traction' notes. Coming soon!")}
+                            className="text-[12px] font-semibold text-accent hover:text-accent-dark transition-colors"
+                        >
                             Draft Slides &rarr;
                         </button>
                     </div>
@@ -174,12 +189,15 @@ export default function TodayPage() {
                     <div className="grid grid-cols-5 gap-1.5">
                         {habits.slice(0, 5).map((habit, i) => (
                             <div key={habit.id} className="group relative">
-                                <div className={cn(
-                                    "w-full aspect-square rounded-[4px] border transition-colors flex items-center justify-center",
-                                    i === 0
-                                        ? "bg-accent border-accent text-white"
-                                        : "bg-transparent border-border hover:border-accent-light hover:bg-subtle text-transparent hover:text-accent-light"
-                                )}>
+                                <div 
+                                    onClick={() => toast.success(`Toggled habit: ${habit.name}`)}
+                                    className={cn(
+                                        "w-full aspect-square rounded-[4px] border transition-colors flex items-center justify-center cursor-pointer",
+                                        i < 3 // Show first 3 as completed for mock purposes
+                                            ? "bg-accent border-accent text-white"
+                                            : "bg-transparent border-border hover:border-accent-light hover:bg-subtle text-transparent hover:text-accent-light"
+                                    )}
+                                >
                                     <CheckCircle2 size={14} />
                                 </div>
                                 <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-zinc-900 text-white text-[10px] py-1 px-2 rounded-[4px] pointer-events-none transition-opacity z-10">

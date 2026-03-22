@@ -26,7 +26,7 @@ export default function RootLayout({
             <div className="flex min-h-screen relative">
               <AppSidebar />
               <main className="flex-1 flex flex-col lg:pl-[224px] min-h-screen w-full">
-                <AppTopbar title="Today" />
+                <AppTopbar />
                 <div className="flex-1 p-6 w-full">
                   {children}
                 </div>

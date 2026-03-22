@@ -114,7 +114,18 @@ export default function ArchivePage() {
                         <p className="text-xs text-neutral-500">AI suggests archiving 3 unused resources to reduce clutter.</p>
                     </div>
                 </div>
-                <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10">Review</Button>
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
+                    onClick={() => {
+                        setActiveTab('resources');
+                        setSearchQuery('suggested:archivable');
+                        toast.info("Showing resources suggested for archiving.");
+                    }}
+                >
+                    Review
+                </Button>
             </div>
 
             {/* Tabs */}
