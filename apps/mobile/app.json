@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Neyro",
+    "slug": "neyro",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon-neyro.png",
+    "scheme": "neyro",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-neyro.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.neyro.app",
+      "buildNumber": "2",
+      "jsEngine": "hermes"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon-neyro.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.neyro.app",
+      "versionCode": 2,
+      "jsEngine": "hermes",
+      "permissions": [
+        "READ_CALENDAR",
+        "WRITE_CALENDAR",
+        "CAMERA",
+        "NOTIFICATIONS"
+      ],
+      "blockedPermissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow Neyro to access your calendar to create practice schedules."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

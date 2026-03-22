@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1769101763542,
+      "tag": "0000_familiar_zarek",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769955439961,
+      "tag": "0001_short_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769955839471,
+      "tag": "0002_brief_shadow_king",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1769956138386,
+      "tag": "0003_warm_changeling",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1769958257707,
+      "tag": "0004_acoustic_tigra",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1769958282987,
+      "tag": "0005_steep_skreet",
+      "breakpoints": true
+    }
+  ]
+}
