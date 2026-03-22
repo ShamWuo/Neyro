@@ -111,4 +111,4 @@ Navigate to the `apps/web` directory to run these commands.
 -   **Web Transpilation:** `next.config.ts` handles transpilation of shared packages (like `neyro-mobile`) and Expo modules for web compatibility.
 
 ## Current Gemini Agent Context
-- When adding or updating a church, the church list needs to be updated in multiple files: `types/index.ts`, `components/forms/registration/contact-info-step.tsx`, `app/page.tsx`, `app/admin/users/page.tsx`, `app/admin/reports/page.tsx`, `app/admin/registrations/[id]/page.tsx`, `components/admin/edit-registration-modal.tsx`, and `lib/validations/registration.ts`.
+

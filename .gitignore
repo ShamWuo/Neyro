@@ -1,0 +1,10 @@
+node_modules
+.expo
+.next
+dist
+build
+.env
+.DS_Store
+coverage
+.agent
+.gemini
